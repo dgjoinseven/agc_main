@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Angel City</title> 
+    <meta name="viewport" content="width=device-width,user-scalable=no, initial-scale=1">
+    <link rel='icon' href='./img/logo_16.ico' type='image/x-ico' />
+    <script type="text/javascript" src="../vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../vendor/jquery/jquery.cookie.js"></script>
+</head>
+
+
+<body class="body_css">
+    <!--主页面容器-->
+    <div class="main_page" id="id_main_page" style="display:none;">
+        <div id="id_table_a_content" class="abs" style="left:50px; top:180px; width:650px; height:1100px;"></div>
+        
+        <!-- 给公共平台打款窗口 -->
+        <div id="id_change_detail" class="abs" style="position:fixed; z-index:2000; width:100%; height:100%; display:none;">
+            <div class="bg_mask" ></div>
+            <div class="abs bg_bottom">
+                <div class="abs txt_c txt_w2 txt_36 bg_base" style="width:750px; height:90px; line-height:90px;" data-lang="main.激活冻结用户"></div>
+                <div id="id_change_detail_btn_close" class="abs" style="right:30px; top:30px; cursor:pointer;"><img src="./img/btn_close_1.png"></div>
+                <input id="id_input_account" class="abs input_a" style="top:200px;" data-placeholder="ph.请输入您的邮箱">
+                <input id="id_input_pwd" type="password" class="abs input_a" style="top:340px;" data-placeholder="ph.请输入您的密码">
+                <div id="id_change_detail_btn_confirm" class="abs btn_a btn_a_yellow" style="left:50px; top:600px; width:650px !important;" data-lang="main.确认"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="id_end" class="abs" style="top:1000px; opacity:0;">.</div>
+
+    <div id="id_header"></div>
+    <div id="id_footer"></div>
+    <div id="id_popupwin"></div>
+    <div id="id_tips"></div>
+
+<script>
+/////////////////// 初始化基础配置相关 ///////////////////
+var zHead = document.getElementsByTagName('head')[0];
+var zScript = document.createElement('script');
+zScript.type = 'text/javascript';
+zScript.src = '../vendor/common.js?ver='+$.cookie('commonJsVer');
+zScript.onload = zScript.onreadystatechange = function() {
+    if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete" ){
+        common.init(['c_m_popUpWin', 'c_m_header', 'c_m_waiting']);
+    }
+}
+zHead.appendChild(zScript);
+var id_interval = 0;
+window.onload = function ready(){id_interval=setInterval(function(){if(common!=undefined && common.JS_IS_LOADED==true){clearInterval(id_interval); init();}}, 100);};
+/////////////////// 初始化基础配置相关 ///////////////////
+window.onresize = windowResize;
+
+var endHeight = 2200;
+var userInfo = {};
+var myInfoList = [];
+var selectId = 0;
+
+//初始化
+function init() {
+    c_m_header.init("id_header", "main.超时用户");
+
+    if(common.getCookie("userInfo")){
+        userInfo = JSON.parse(common.getCookie("userInfo"));
+    }else{
+        c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
+        windowResize();
+        return;
+    }
+
+    $('#id_change_detail_btn_close').click({myType:"id_change_detail_btn_close"}, btnClickHandler);
+    $('#id_change_detail_btn_confirm').click({myType:"id_change_detail_btn_confirm"}, btnClickHandler);
+
+    windowResize();
+    api_frozenUserList();
+
+    common.lang();
+    $('#id_main_page').show();
+}
+
+//按钮点击事件
+function btnClickHandler(p_obj_event){
+    switch(p_obj_event.data.myType){
+        case "id_change_detail_btn_close":
+            $('#id_change_detail').hide();
+            break;
+        case "id_change_detail_btn_confirm":
+            if(!$('#id_input_pwd').val()){
+                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1001", "tips.b_ok");
+                return;
+            }
+            if(!$('#id_input_account').val()){
+                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1002", "tips.b_ok");
+                return;
+            }
+            api_frozenUserEdit();
+            break;
+    }
+}
+
+//窗口尺寸重置
+function windowResize()
+{
+    var zScale = common.initScale(1);
+    zScale = (zScale<1) ? 1 : zScale;
+    
+    var zWinWidth = parseInt(window.screen.availWidth);
+    var zWineHeight = parseInt(window.screen.availHeight);
+    var zMyWidth = document.body.clientWidth;
+    var zObjWidth = parseInt($('#id_main_page').css("width"))*zScale;
+
+    var zMiddleWidth = (zMyWidth-zObjWidth)/2/zScale;
+    $('#id_main_page').css({"left":zMiddleWidth+"px"});
+
+    c_m_header.windowResize(zMiddleWidth);
+    // c_m_footer.windowResize(zMiddleWidth);
+    // c_m_footer.updateTop(endHeight);
+    c_m_popUpWin.setSizePos(zScale);
+}
+
+//更新列表
+function updateTable(){
+    var zHmlInfo = "";
+    var zTop = 0;
+    for(var i=0; i<myInfoList.length; i++){
+        zTop = i*200;
+        var zInfo = myInfoList[i];
+        var zRounds = zInfo.rounds;
+        var zStatus = zInfo.status;
+        var zAcount = zInfo.account;
+        var zBossAccount = zInfo.boss_account;
+        var zClickInfo = {};
+        zClickInfo.id = zInfo.id;
+        var zClickTxt = " onClick='onListClickHander("+JSON.stringify(zClickInfo)+")' ";
+        var zStr = '\
+            <div class="abs bg_white" style="top:'+zTop+'px; width:650px; height:200px; background-color:rgba(0,0,0,0); border:0px solid #eee; border-bottom:2px solid #eee;">\
+                <div class="abs" style="transform:scale(0.6,0.6); top:40px;"><img class="abs" style="-webkit-mask:url(./img/mask_r_200.png);" src="./img/ag_'+zRounds+'.jpg"></div>\
+                <label class="abs txt_28 cl_black" style="left:140px; top:60px; width:500px;">ACCOUNT : '+zAcount+'</label>\
+                <label class="abs txt_28 cl_black" style="left:140px; top:130px; width:500px;">BOSS ACCOUNT : '+zBossAccount+'</label>\
+                <div class="abs txt_28 txt_c btn_payment_01" style="right:0px; top:40px; width:140px !important;" data-lang="main.修改" '+zClickTxt+'></div>\
+            </div>\
+            ';
+        zHmlInfo += zStr;
+    }
+    $('#id_table_a_content').html(zHmlInfo);
+
+    endHeight = (myInfoList.length+1)*200+230;
+    $('#id_end').css("top", endHeight+"px");
+
+    common.lang();
+}
+
+//按钮被点击
+function onListClickHander(pInfo){
+    var zInfo = pInfo;
+    selectId = zInfo.id;
+    $('#id_change_detail').show();
+    common.lang();
+    // c_m_pwd2.init("id_confirmwin", zInfo.id, zInfo.moneyGetType, zUserId);
+}
+
+//////////////////////////////////// php相关 ////////////////////////////////////
+//获取冻结用户名单
+function api_frozenUserList(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("frozen_user_list"),
+        type: "get",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{recover_to_id:userInfo.id},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_frozenUserList success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    myInfoList = evt.data.list;
+                    updateTable();
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_frozenUserList error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+//提交激活修改
+function api_frozenUserEdit(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("frozen_user_edit"),
+        type: "post",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{user_id:selectId, account:$('#id_input_account').val(), pwd:$('#id_input_pwd').val()},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_frozenUserEdit success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok", function(){common.gotoWebSite('setTimeoutUser.html');});
+                    break;
+                case 10001:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_frozenUserEdit error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Angel City</title> 
+    <meta name="viewport" content="width=device-width,user-scalable=no, initial-scale=1">
+    <link rel='icon' href='./img/logo_16.ico' type='image/x-ico' />
+    <script type="text/javascript" src="../vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../vendor/jquery/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../vendor/RequestAnimationFrame.js"></script>
+</head>
+
+
+<body class="body_css">
+    <!--主页面容器-->
+    <div class="main_page" id="id_main_page" style="display:none; width:100%; height:1400px; background-color:#F5F5F5;">
+        <!-- 队伍UI布局 -->
+        <div id="id_group_0" class="abs" style="left:0px; top:0px; display:none; width:100%; height:100%; background-color:#FFF;">
+            <img class="abs" style="left:295px; top:520px;" src="./img/bg_invite.png">
+            <label class="abs txt_30 cl_grey txt_c" style="left:130px; top:700px; width:480px; line-height:40px;" data-lang="main.tips_content_0"></label>
+            <div id="id_btn_invite_friends_1" class="abs btn_a btn_a_yellow" style="left:50px; top:840px; width:650px !important;" data-lang="main.邀请朋友"></div>
+        </div>
+        <div id="id_group_1_3" class="abs" style="left:0px; top:0px; display:none; width:100%; height:100%; background-color:#FFF;">
+            <div id="id_btn_invite_friends_2" class="abs btn_a btn_a_yellow" style="left:50px; top:1040px; width:650px !important;" data-lang="main.邀请朋友"></div>
+        </div>
+        <div id="id_group_3" class="abs" style="left:0px; top:0px; display:none; width:100%; height:650px; background-color:#FFF;">
+        </div>
+
+        <!-- 队伍列表 -->
+        <!-- 一推 -->
+        <div id="id_group_tui_1" class="abs" style="left:0px; top:360px; display:none;">
+            <div id="id_group_tui_1_1" class="abs bg_tui_1" style="left:52px; top:0px; display:none;" data-id="0">
+                <img id="id_group_tui_1_1_img" class="abs" style="left:-10px; top:-10px; -webkit-mask:url(./img/mask_sqr_200.png); transform:scale(0.8, 0.8);" src="">
+                <img id="id_group_tui_1_1_mask" class="abs" style="left:-10px; top:-10px; transform:scale(0.8, 0.8); display:none;" src="./img/mask_sqr_200_black.png">
+                <label id="id_group_tui_1_1_txt" class="abs txt_20 txt_c" style="left:10px; top:185px; width:160px; height:40px; word-wrap:break-word; overflow-y:auto;"></label>
+            </div>
+            <div id="id_group_tui_1_2" class="abs bg_tui_1" style="left:284px; top:0px; display:none;" data-id="0">
+                <img id="id_group_tui_1_2_img" class="abs" style="left:-10px; top:-10px; -webkit-mask:url(./img/mask_sqr_200.png); transform:scale(0.8, 0.8);" src="">
+                <img id="id_group_tui_1_2_mask" class="abs" style="left:-10px; top:-10px; transform:scale(0.8, 0.8); display:none;" src="./img/mask_sqr_200_black.png">
+                <label id="id_group_tui_1_2_txt" class="abs txt_20 txt_c" style="left:10px; top:185px; width:160px; height:24px; word-wrap:break-word; overflow-y:auto;"></label>
+            </div>
+            <div id="id_group_tui_1_3" class="abs bg_tui_1" style="left:516px; top:0px; display:none;" data-id="0">
+                <img id="id_group_tui_1_3_img" class="abs" style="left:-10px; top:-10px; -webkit-mask:url(./img/mask_sqr_200.png); transform:scale(0.8, 0.8);" src="">
+                <img id="id_group_tui_1_3_mask" class="abs" style="left:-10px; top:-10px; transform:scale(0.8, 0.8); display:none;" src="./img/mask_sqr_200_black.png">
+                <label id="id_group_tui_1_3_txt" class="abs txt_20 txt_c" style="left:10px; top:185px; width:160px; height:24px; word-wrap:break-word; overflow-y:auto;"></label>
+            </div>
+        </div>
+        <!-- 二推 -->
+        <div id="id_group_tui_2" class="abs" style="left:0px; top:650px; display:none;">
+            <div id="id_group_tui_2_1" class="abs bg_tui_2 hd" style="left:0px; top:0px; display:none;" data-id="0" data-open="0">
+                <img id="id_group_tui_2_1_img" class="abs" style="left:10px; top:-25px; -webkit-mask:url(./img/mask_r_200.png); transform:scale(0.5, 0.5);" >
+                <label id="id_group_tui_2_1_txt" class="abs txt_32" style="left:180px; top:60px; width:300px; height:40px;">Name</label>
+                <label id="id_group_tui_2_1_active0" class="abs txt_26 txt_r txt_w2" style="left:460px; top:65px; width:200px; " data-lang="main.未激活"></label>
+                <label id="id_group_tui_2_1_active1" class="abs txt_26 txt_r txt_w2 cl_green" style="left:460px; top:65px; width:200px; display:none;" data-lang="main.已激活"></label>
+            </div>
+            <div id="id_group_tui_2_2" class="abs bg_tui_2 hd" style="left:0px; top:152px; display:none;" data-id="0" data-open="0">
+                <img id="id_group_tui_2_2_img" class="abs" style="left:10px; top:-25px; -webkit-mask:url(./img/mask_r_200.png); transform:scale(0.5, 0.5);" >
+                <label id="id_group_tui_2_2_txt" class="abs txt_32" style="left:180px; top:60px; width:300px; height:40px;">Name</label>
+                <label id="id_group_tui_2_2_active0" class="abs txt_26 txt_r txt_w2" style="left:460px; top:65px; width:200px; " data-lang="main.未激活"></label>
+                <label id="id_group_tui_2_2_active1" class="abs txt_26 txt_r txt_w2 cl_green" style="left:460px; top:65px; width:200px; display:none;" data-lang="main.已激活"></label>
+            </div>
+            <div id="id_group_tui_2_3" class="abs bg_tui_2 hd" style="left:0px; top:304px; display:none;" data-id="0" data-open="0">
+                <img id="id_group_tui_2_3_img" class="abs" style="left:10px; top:-25px; -webkit-mask:url(./img/mask_r_200.png); transform:scale(0.5, 0.5);" >
+                <label id="id_group_tui_2_3_txt" class="abs txt_32" style="left:180px; top:60px; width:300px; height:40px;">Name</label>
+                <label id="id_group_tui_2_3_active0" class="abs txt_26 txt_r txt_w2" style="left:460px; top:65px; width:200px; " data-lang="main.未激活"></label>
+                <label id="id_group_tui_2_3_active1" class="abs txt_26 txt_r txt_w2 cl_green" style="left:460px; top:65px; width:200px; display:none;" data-lang="main.已激活"></label>
+            </div>
+        </div>
+
+        <!-- 晋级窗口 -->
+        <div id="id_lv" class="abs bg_white" style="width:750px; height:1200px; display:none;">
+            <img id="id_lv_img_bg" class="abs" style="left:75px; top:200px;" src="./img/bg_ag_00.jpg">
+            <img id="id_lv_img" class="abs" style="left:75px; top:200px;">
+            <div class="abs txt_c txt_36 cl_grey" style="left:100px; top:820px; width:550px; line-height:50px;">
+                <label id="id_lv_desc" data-lang="main.tips_content_3"></label>
+                <label id="id_lv_txt" class="cl_orange" ></label>
+            </div>
+            <div id="id_btn_lv" class="abs btn_a btn_a_yellow" style="left:50px; top:1040px; width:650px !important;" data-lang="main.晋级"></div>
+            <div id="id_btn_lv_close" class="abs" style="right:40px; top:250px;"><img src="./img/btn_close_1.png"></div>
+        </div>
+
+        <!-- 顶 -->
+        <img src="./img/bg_top.jpg" class="abs">
+        <div id="id_top" class="abs" style="left:50px; top:50px; width:650px;">
+            <div id="id_btn_back" class="abs" style="left:0px; top:0px;"><img src="./img/btn_back.png"></div>
+            <div id="id_btn_log" class="abs" style="right:0px; top:0px;"><img src="./img/btn_log.png"></div>
+            <label id="txt_exchange" class="abs txt_32 txt_w1 txt_r cl_white" style="right:80px; top:0px; width:300px;">0</label>
+            <div class="abs txt_32 txt_w1" style="left:220px; top:70px;">
+                <label id="txt_title_account" style="color:#FFF;"></label>
+                <label id="txt_title_status" style="margin-left:30px;"></label>
+            </div>
+            <label class="abs txt_38 txt_w2" style="color:#FFF; left:220px; top:120px;">
+                <label style="margin-left:0px;" data-lang="main.轮数"></label>
+                <label id="txt_title_rounds" style="margin-left:10px;"></label>
+            </label>
+            <div id="id_myHead" class="abs" style="left:0px; top:60px;">
+                <img class="abs" style="left:0px; top:0px;" src="./img/mask_r_205.png">
+                <img id="id_head" class="abs" style="-webkit-mask:url(./img/mask_r_200.png); left:2px; top:2px;" src="">
+            </div>
+        </div>
+
+        <!-- 大转盘 -->
+        <div id="id_lotto" class="abs" style="position:fixed; z-index:2000; width:100%; height:100%; display:none;">
+            <div class="bg_mask_lotto" ></div>
+            <div class="abs" style="top:80px;">
+                <img src="./img/round_bg.jpg">
+                <div id="id_lotto_point" class="abs" style="transform-origin:50% 50%; left:75px; top:120px;"><img src="./img/round_point.png"></div>
+                <div id="id_lotto_btn" class="abs btn_a btn_a_yellow" style="left:50px; top:840px; width:650px !important;" data-lang="main.开始抽奖"></div>
+                <label class="abs txt_28 cl_white " style="left:80px; top:1000px; width:610px;" data-lang="main.tips_content_5"></label>
+            </div>
+        </div>
+    </div>
+
+    <div id="id_end" class="abs" style="top:1000px; opacity:0;">.</div>
+
+    <div id="id_header"></div>
+    <div id="id_footer"></div>
+    <div id="id_popupwin"></div>
+    <div id="id_confirmwin"></div>
+    <div id="id_tips"></div>
+
+<script>
+/////////////////// 初始化基础配置相关 ///////////////////
+var zHead = document.getElementsByTagName('head')[0];
+var zScript = document.createElement('script');
+zScript.type = 'text/javascript';
+zScript.src = '../vendor/common.js?ver='+$.cookie('commonJsVer');
+zScript.onload = zScript.onreadystatechange = function() {
+    if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete" ){
+        common.init(['c_m_popUpWin', 'c_m_footer', 'c_m_pwd2', 'c_m_waiting']);
+    }
+}
+zHead.appendChild(zScript);
+var id_interval = 0;
+window.onload = function ready(){id_interval=setInterval(function(){if(common!=undefined && common.JS_IS_LOADED==true){clearInterval(id_interval); init();}}, 100);};
+/////////////////// 初始化基础配置相关 ///////////////////
+window.onresize = windowResize;
+
+var endHeight = 2500;
+var userInfo = {};
+var groupInfo = {};
+var isFirst = true;
+var orderList = [];
+var isNeedTimer = false;
+var checkOrderInfo = {};
+var isPlayMovie = false;
+var movieFrameCounter = 0;
+var angle = 0; 
+var lottoAngle = 0;
+var lottoIsStart = false;
+var lottoPointSpeed = 20;   //角速度
+var lottoPointRSpeed = 0.2; //减速角速度
+var lottoPointESpeed = 0.8; //最终最小角速度
+var lottoCount = 0;
+var lottoPos = 0; //最终停在哪个中奖地
+var lottoType = 0; //中奖类型
+var lottoMoney = 0;//中奖金额
+var exchangeList = [];
+var curExchangeRate = 1;
+
+//初始化
+function init() {
+    c_m_footer.init("id_footer", 1);
+
+    $('#id_btn_lv_close').click({myType:"id_btn_lv_close"}, btnClickHandler);
+    $('#id_btn_lv').click({myType:"id_btn_lv"}, btnClickHandler);
+    $('#id_myHead').click({myType:"id_myHead"}, btnClickHandler);
+    $('#id_btn_back').click({myType:"id_btn_back"}, btnClickHandler);
+    $('#id_btn_log').click({myType:"id_btn_log"}, btnClickHandler);
+    $('#id_btn_invite_friends_1').click({myType:"id_btn_invite_friends"}, btnClickHandler);
+    $('#id_btn_invite_friends_2').click({myType:"id_btn_invite_friends"}, btnClickHandler);
+    $('#id_group_tui_1_1').click({myType:"id_group_tui_1_1"}, btnClickHandler);
+    $('#id_group_tui_1_2').click({myType:"id_group_tui_1_2"}, btnClickHandler);
+    $('#id_group_tui_1_3').click({myType:"id_group_tui_1_3"}, btnClickHandler);
+    $('#id_lotto_btn').click({myType:"id_lotto_btn"}, btnClickHandler);
+
+    windowResize();
+
+    api_userInfo();
+
+    common.lang();
+    $('#id_main_page').show();
+
+    setInterval(timeRum, 1000);
+    requestAnimationFrame(playMovie);
+}
+
+//按钮点击事件
+function btnClickHandler(p_obj_event){
+    switch(p_obj_event.data.myType){
+        case "id_btn_lv_close":
+            $('#id_lv').hide();
+            isPlayMovie = false;
+            break;
+        case "id_btn_lv":
+            api_userLvUp();
+            break;
+        case "id_myHead":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('mine.html');
+            break;
+        case "id_btn_back":
+            common.onBackFun();
+            break;
+        case "id_btn_log":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('log.html');
+            break;
+        case "id_btn_invite_friends":
+            if(!userInfo.pwd2){
+                c_m_popUpWin.init("id_popupwin", 2, "tips.t_tips", "tips.1004", "main.确认", function(){common.gotoWebSite('setpwd2.html')});
+                return;
+            }
+            if(!userInfo.wallet_addr){
+                c_m_popUpWin.init("id_popupwin", 2, "tips.t_tips", "tips.1005", "main.确认", function(){common.gotoWebSite('setAddr.html')});
+                return;
+            }
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('invitation.html');
+            break;
+        // case "id_admin_check_btn":
+        //     if(!userInfo.pwd2){
+        //         c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "main.请设置交易密码", "tips.b_ok", function(){common.gotoWebSite('setpwd2.html')});
+        //         return;
+        //     }
+        //     c_m_pwd2.init("id_confirmwin", checkOrderInfo.id, 1, checkOrderInfo.from_id);
+        //     break;
+        case "id_group_tui_1_1":
+            var zId = $('#id_group_tui_1_1').attr("data-id");
+            api_groupList(zId, 2, 1);
+            break;
+        case "id_group_tui_1_2":
+            var zId = $('#id_group_tui_1_2').attr("data-id");
+            api_groupList(zId, 2, 2);
+            break;
+        case "id_group_tui_1_3":
+            var zId = $('#id_group_tui_1_3').attr("data-id");
+            api_groupList(zId, 2, 3);
+            break;
+        case "id_lotto_btn":
+            api_getLotto();
+            // lottoPos = 195;
+            // lottoIsStart = true;
+            break;
+    }
+}
+
+//窗口尺寸重置
+function windowResize()
+{
+    var zScale = common.initScale(1);
+    zScale = (zScale<1) ? 1 : zScale;
+    
+    var zWinWidth = parseInt(window.screen.availWidth);
+    var zWineHeight = parseInt(window.screen.availHeight);
+    var zMyWidth = document.body.clientWidth;
+    var zObjWidth = parseInt($('#id_main_page').css("width"))*zScale;
+
+    var zMiddleWidth = (zMyWidth-zObjWidth)/2/zScale;
+    $('#id_main_page').css({"left":zMiddleWidth+"px"});
+
+    // c_m_header.windowResize(zMiddleWidth);
+    c_m_footer.windowResize(zMiddleWidth);
+    c_m_footer.updateTop(endHeight);
+    c_m_popUpWin.setSizePos(zScale);
+}
+
+function updateMySelf(){
+    var zImgUrl =  "./img/head/head_" + userInfo.img_id + ".jpg";
+    $('#id_head').attr("src", zImgUrl);
+
+    $('#txt_title_status').attr("data-lang", "main.status_"+userInfo.status);
+    var zColor = "#FFF";
+    switch(userInfo.status){
+        case 0:
+            zColor = "#ccc";
+            break;
+        case 1:
+            zColor = "#aaeaff";
+            break;
+        case 2:
+            zColor = "#ffde6b";
+            break;
+    }
+    $('#txt_title_status').css("color", zColor);
+    $('#txt_title_rounds').text(userInfo.rounds);
+    $('#txt_title_account').html(userInfo.name);
+
+    if(exchangeList && exchangeList[0]){
+        curExchangeRate = exchangeList[0].rate;
+        var zExchangeShowStr = "$1 = " + curExchangeRate + common.COIN_NAME;
+        $('#txt_exchange').text(zExchangeShowStr);
+    }
+    
+    //显示晋级界面
+    if(userInfo.is_lv==1){
+        var zLevelUpRounds = userInfo.rounds+1;
+        if(zLevelUpRounds>=5){
+            $('#id_lv_desc').attr("data-lang", "main.tips_content_4");
+            $('#id_lv_txt').hide();
+        }else{
+            $('#id_lv_txt').show();
+            $('#id_lv_txt').text(zLevelUpRounds);
+        }
+        
+        $('#id_lv_img').attr("src", "./img/bg_ag_01.png");
+        $('#id_lv').show();
+        isPlayMovie = true;
+    }else if(userInfo.lotto_status==1){
+        $('#id_lotto').show();
+    }
+    // else{
+    //     //显示支付给公共地址的界面
+    //     if((userInfo.rounds==2 || userInfo.rounds==3) && userInfo.status==2 && userInfo.is_lv==0){
+    //         $('#id_footer').hide();
+    //         $('#id_admin_check').show();
+    //         api_orderList(userInfo.id);
+    //     }
+    // }
+    common.lang();
+}
+
+function selectTui_1(pPos){
+    $('#id_group_tui_1_1').css("background-color", "#FFF");
+    $('#id_group_tui_1_2').css("background-color", "#FFF");
+    $('#id_group_tui_1_3').css("background-color", "#FFF");
+    $('#id_group_tui_1_'+pPos).css("background-color", "#FFD821");
+}
+
+//更新信息
+function updateGroup(pInfo){
+    if(pInfo){
+        groupInfo[pInfo.id.toString()] = pInfo.list;
+        //判断是不是我自己的直推队伍
+        if(parseInt(pInfo.lv)==1){
+            if(pInfo.rounds==0){
+                if(pInfo.list.length==0){
+                    $('#id_group_0').show();
+                    $('#id_group_1_3').hide();
+                    $('#id_group_3').hide();
+                    $('#id_group_tui_1').hide();
+                    $('#id_group_tui_2').hide();
+                }else if(pInfo.list.length>0 && pInfo.list.length<3){
+                    $('#id_group_0').hide();
+                    $('#id_group_1_3').show();
+                    $('#id_group_3').hide();
+                    $('#id_group_tui_1').show();
+                    $('#id_group_tui_2').hide();
+                }else if(pInfo.list.length>=3){
+                    $('#id_group_0').hide();
+                    $('#id_group_1_3').hide();
+                    $('#id_group_3').show();
+                    $('#id_group_tui_1').show();
+                    $('#id_group_tui_2').hide();
+                }
+            }else{
+                $('#id_group_0').hide();
+                $('#id_group_1_3').hide();
+                $('#id_group_3').show();
+                $('#id_group_tui_1').show();
+                $('#id_group_tui_2').hide();
+                $('#id_group_tui_3').hide();
+
+                $('#id_group_tui_1_1').css({"left":"120px"});
+                $('#id_group_tui_1_2').css({"left":"420px"});
+            }
+            
+            //更新团队状态(一推)
+            for(var i=0; i<pInfo.list.length; i++){
+                var zInfoA = pInfo.list[i];
+                var zIndex = i + 1;
+                $('#id_group_tui_1_'+zIndex).attr("data-id", zInfoA.id);
+                $('#id_group_tui_1_'+zIndex).show();
+                $('#id_group_tui_1_'+zIndex+'_img').attr("src", "./img/head/head_"+zInfoA.img_id+".jpg");
+                $('#id_group_tui_1_'+zIndex+'_txt').text(zInfoA.name);
+                if(zInfoA.status==1){
+                    $('#id_group_tui_1_'+zIndex+'_mask').hide();
+                }else{
+                    $('#id_group_tui_1_'+zIndex+'_mask').show();
+                }
+
+                //默认选第二队列
+                if(i==0){
+                    api_groupList(zInfoA.id, 2, 1);
+                }
+            }
+        }else if(parseInt(pInfo.lv)==2){//二推
+            $('#id_group_tui_2_1').hide();
+            $('#id_group_tui_2_2').hide();
+            $('#id_group_tui_2_3').hide();
+            $('#id_group_tui_2').show();
+
+            selectTui_1(pInfo.pos);
+            for(var i=0; i<pInfo.list.length; i++){
+                var zInfoA = pInfo.list[i];
+                var zIndex = i + 1;
+                $('#id_group_tui_2_'+zIndex).attr("data-id", zInfoA.id);
+                $('#id_group_tui_2_'+zIndex).show();
+                $('#id_group_tui_2_'+zIndex+'_img').attr("src", "./img/head/head_"+zInfoA.img_id+".jpg");
+                $('#id_group_tui_2_'+zIndex+'_txt').text(zInfoA.name);
+                if(zInfoA.status==1){
+                    $('#id_group_tui_2_'+zIndex+'_active0').hide();
+                    $('#id_group_tui_2_'+zIndex+'_active1').show();
+                }else{
+                    $('#id_group_tui_2_'+zIndex+'_active0').show();
+                    $('#id_group_tui_2_'+zIndex+'_active1').hide();
+                }
+                // $('#id_group_tui_2_'+zIndex+'_arrow0').show();
+                // $('#id_group_tui_2_'+zIndex+'_arrow1').hide();
+            }
+        }
+    }
+    else{
+        console.log("updateGroup接收到的pInfo为空");
+    }
+    common.lang();
+}
+
+//更新筛选特定的订单
+function updateOrderList(){
+    for(var i=0; i<orderList.length; i++){
+        var zInfo = orderList[i];
+        // console.log("order: ", zInfo.id, zInfo.from_id, zInfo.to_id, zInfo.rounds,"|",userInfo.id,userInfo.rounds);
+        if(zInfo.to_id==0 && zInfo.rounds==userInfo.rounds && zInfo.rounds<4){
+            // console.log("find !!!");
+            var zAddrType = ["", "ERC20", "OMNI"]
+            zAddrTxt = zAddrType[parseInt(zInfo.to_addr_type)] + " : " + zInfo.to_addr;
+            // $('#id_admin_check_addr').html(zAddrTxt);
+
+            var zBtnClass="btn_payment_"+zInfo.status+"1";
+            var zBtnName = "main.btn_payment_"+zInfo.status+"1";
+            // $('#id_admin_check_btn').attr("data-lang", zBtnName);
+            // $('#id_admin_check_btn').addClass(zBtnClass);
+
+            var zMoney = "USD:"+zInfo.money;
+            // $('#id_admin_check_money').html(zMoney);
+
+            //是否可点击（未打款状态为可点击）
+            // if(parseInt(zInfo.status)==0){
+            //     $('#id_admin_check_btn').click({myType:"id_admin_check_btn"}, btnClickHandler);
+            // }
+            isNeedTimer = true;
+            checkOrderInfo = orderList[i];
+            break;
+        }
+    }
+    common.lang();
+}
+
+function timeRum(){
+    if(isNeedTimer==false) return;
+    var zConf = JSON.parse(common.getCookie("conf"));
+    var zMaxTime = parseInt(zConf["pay_time"])*3600;//时间限制
+    const zTime = parseInt(Date.now()/1000);
+    checkOrderInfo.create_time -= 1;
+    var zShowTime = checkOrderInfo.create_time + zMaxTime - zTime;
+    if(zShowTime<0){
+        zShowTime = 0;
+    }
+    // $('#id_admin_check_timer').html(common.getTimeStrFromNum(zShowTime));
+}
+
+function playMovie(){
+    //旋转阳光背景
+    if(isPlayMovie==true){
+        movieFrameCounter ++;
+        if(movieFrameCounter>=2){
+            movieFrameCounter = 0;
+            angle += 3;
+            $('#id_lv_img_bg').css({"transform":"rotate("+angle+"deg)"});
+        }
+    }
+
+    //大转盘
+    if(lottoIsStart==true){
+        if(lottoCount>3 && lottoPointSpeed!=lottoPointESpeed ){
+            lottoCount = 0;
+            lottoPointSpeed -= lottoPointRSpeed;
+            if(lottoPointSpeed<lottoPointESpeed){
+                lottoPointSpeed = lottoPointESpeed;
+            }
+        }
+        lottoAngle += lottoPointSpeed;
+        $('#id_lotto_point').css({"transform":"rotate("+lottoAngle+"deg)"});
+        lottoCount ++;
+
+        //判断是否到终点
+        var zTrueAngel = lottoAngle%360;
+        // console.log(lottoPointSpeed,zTrueAngel,lottoPos);
+        if(lottoPointSpeed==lottoPointESpeed && zTrueAngel>(lottoPos-1) && zTrueAngel<(lottoPos+1)){
+            c_m_popUpWin.init("id_popupwin", 3, "main.转盘奖"+lottoType, "@$ "+lottoMoney, "tips.b_ok", function(){$('#id_lotto').hide();});
+            lottoIsStart = false;
+        }
+    }
+
+    requestAnimationFrame(playMovie);
+}
+
+//////////////////////////////////// php相关 ////////////////////////////////////
+//获取用户id
+function api_userInfo(){
+    $.ajax({
+        url: common.getApiUrl("user_detail"),
+        type: "get",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_userInfo success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    userInfo = evt.data.userInfo;
+                    exchangeList = evt.data.exchangeList;
+                    common.setCookie("userInfo", JSON.stringify(evt.data.userInfo));
+                    updateMySelf();
+                    if(isFirst==true){
+                        api_groupList(userInfo.id, 1, 1);
+                    }
+                    break;
+                case 10001:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+        },error: function(error){
+            console.log("api_userInfo error:"+error.msg);
+        }
+    });
+}
+
+//获取队伍信息
+//@pId  队伍直属推荐人id
+//@pLv  点击的推荐人层级（1,2,3）
+//@pPos 点击的推荐人位置（1,2,3）
+function api_groupList(pId, pLv, pPos){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("group_list"),
+        type: "get",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{id:pId, lv:pLv, pos:pPos, rounds:userInfo.rounds},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_groupList success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    updateGroup(evt.data);
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_groupList error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+//获取订单
+//@pId 订单人
+function api_orderList(pId){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("order_list"),
+        type: "get",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{id:pId},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_orderList success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    orderList = evt.data.list;
+                    updateOrderList();
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_orderList error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+//升级
+function api_userLvUp(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("user_lv_up"),
+        type: "post",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_userLvUp success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok", function(){common.onRefreshFun();});
+                    break;
+                case 10001:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_userLvUp error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+
+//获取转盘抽奖结果
+function api_getLotto(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("lotto_start"),
+        type: "get",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_getLotto success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    lottoType = evt.data.lottoType;
+                    lottoMoney = evt.data.money;
+                    var zWinPos = [];
+                    switch(parseInt(lottoType)){
+                        case 0:
+                            zWinPos = [1,2,7,8];
+                            break;
+                        case 1:
+                            zWinPos = [0,6];
+                            break;
+                        case 2:
+                            zWinPos = [4,10];
+                            break;
+                        case 3:
+                            zWinPos = [3,9];
+                            break;
+                        case 4:
+                            zWinPos = [5,11];
+                            break;
+                    }
+                    lottoPos = 15+30*zWinPos[Math.round(Math.random()*(zWinPos.length-1))];
+                    // console.log(lottoType,lottoMoney,zWinPos,lottoPos);
+                    lottoIsStart = true;
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_getLotto error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+</script>
+
+</body>
+</html>

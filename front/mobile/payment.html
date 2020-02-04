@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Angel City</title> 
+    <meta name="viewport" content="width=device-width,user-scalable=no, initial-scale=1">
+    <link rel='icon' href='./img/logo_16.ico' type='image/x-ico' />
+    <script type="text/javascript" src="../vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../vendor/jquery/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../vendor/clipboard.min.js"></script>
+</head>
+
+
+<body class="body_css">
+    <!--主页面容器-->
+    <div class="main_page" id="id_main_page" style="display:none;">
+        <img src="./img/bg_top.jpg">
+        <div id="id_top" class="abs" style="left:50px; top:50px; width:650px;">
+            <div id="id_btn_back" class="abs" style="left:0px; top:0px;"><img src="./img/btn_back.png"></div>
+            <div id="id_btn_log" class="abs" style="right:0px; top:0px;"><img src="./img/btn_log.png"></div>
+            <label id="txt_exchange" class="abs txt_32 txt_w1 txt_r cl_white" style="right:80px; top:0px; width:300px;">0</label>
+            <div class="abs txt_32 txt_w1" style="left:220px; top:70px;">
+                <label id="txt_title_account" style="color:#FFF;"></label>
+                <label id="txt_title_status" style="margin-left:30px;"></label>
+            </div>
+            <label class="abs txt_38 txt_w2" style="color:#FFF; left:220px; top:120px;">
+                <label style="margin-left:0px;" data-lang="main.轮数"></label>
+                <label id="txt_title_rounds" style="margin-left:10px;"></label>
+            </label>
+            <div id="id_myHead" class="abs" style="left:0px; top:60px;">
+                <img class="abs" style="left:0px; top:0px;" src="./img/mask_r_205.png">
+                <img id="id_head" class="abs" style="-webkit-mask:url(./img/mask_r_200.png); left:2px; top:2px;" src="">
+            </div>
+        </div>
+        
+        <div id="id_table_a_content" class="abs" style="left:50px; top:300px; width:650px; height:1100px;"></div>
+        
+        <!-- <div id="id_test" class="abs textCanSelect" style="left:180px; top:720px;">11224445</div> -->
+        <!-- <div id="id_btn_copy" class="abs txt_26 txt_c" style="left:180px; top:820px; border-radius:10px; width:240px; height:80px; line-height:80px;" data-clipboard-action="copy" data-clipboard-target="#id_test">复制</div> -->
+    </div>
+
+    <div id="id_end" class="abs" style="top:1000px; opacity:0;">.</div>
+
+    <div id="id_header"></div>
+    <div id="id_footer"></div>
+    <div id="id_confirmwin"></div>
+    <div id="id_popupwin"></div>
+    <div id="id_tips"></div>
+
+<script>
+/////////////////// 初始化基础配置相关 ///////////////////
+var zHead = document.getElementsByTagName('head')[0];
+var zScript = document.createElement('script');
+zScript.type = 'text/javascript';
+zScript.src = '../vendor/common.js?ver='+$.cookie('commonJsVer');
+zScript.onload = zScript.onreadystatechange = function() {
+    if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete" ){
+        common.init(['c_m_popUpWin', 'c_m_footer', 'c_m_pwd2', 'c_m_waiting']);
+    }
+}
+zHead.appendChild(zScript);
+var id_interval = 0;
+window.onload = function ready(){id_interval=setInterval(function(){if(common!=undefined && common.JS_IS_LOADED==true){clearInterval(id_interval); init();}}, 100);};
+/////////////////// 初始化基础配置相关 ///////////////////
+window.onresize = windowResize;
+
+var endHeight = 2200;
+var userInfo = {};
+var myInfoList = [];
+var isFirst = true;
+var exchangeList = [];
+
+
+//初始化
+function init() {
+    c_m_footer.init("id_footer", 2);
+
+    $('#id_myHead').click({myType:"id_myHead"}, btnClickHandler);
+    $('#id_btn_back').click({myType:"id_btn_back"}, btnClickHandler);
+    $('#id_btn_log').click({myType:"id_btn_log"}, btnClickHandler);
+
+    windowResize();
+
+    api_userInfo();
+    
+    common.lang();
+    $('#id_main_page').show();
+
+    setInterval(timeRum, 1000);
+
+    // c_m_pwd2.init("id_confirmwin", 1, 2, 2);
+}
+
+//按钮点击事件
+function btnClickHandler(p_obj_event){
+    switch(p_obj_event.data.myType){
+        case "id_myHead":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('mine.html');
+            break;
+        case "id_btn_back":
+            common.onBackFun();
+            break;
+        case "id_btn_log":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('log.html');
+            break;
+        case "id_btn_invite_friends":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('invitation.html');
+            break;
+    }
+}
+
+//窗口尺寸重置
+function windowResize()
+{
+    var zScale = common.initScale(1);
+    zScale = (zScale<1) ? 1 : zScale;
+    
+    var zWinWidth = parseInt(window.screen.availWidth);
+    var zWineHeight = parseInt(window.screen.availHeight);
+    var zMyWidth = document.body.clientWidth;
+    var zObjWidth = parseInt($('#id_main_page').css("width"))*zScale;
+
+    var zMiddleWidth = (zMyWidth-zObjWidth)/2/zScale;
+    $('#id_main_page').css({"left":zMiddleWidth+"px"});
+
+    // c_m_header.windowResize(zMiddleWidth);
+    c_m_footer.windowResize(zMiddleWidth);
+    c_m_footer.updateTop(endHeight);
+    c_m_popUpWin.setSizePos(zScale);
+}
+
+function updateMySelf(){
+    var zImgUrl =  "./img/head/head_" + userInfo.img_id + ".jpg";
+    $('#id_head').attr("src", zImgUrl);
+
+    if(exchangeList && exchangeList[0]){
+        var zCurExchangeRate = exchangeList[0].rate;
+        common.setCookie("exchangeRate", zCurExchangeRate);
+
+        var zExchangeShowStr = "$1 = " + zCurExchangeRate + "AGL";
+        $('#txt_exchange').text(zExchangeShowStr);
+    }
+
+    $('#txt_title_status').attr("data-lang", "main.status_"+userInfo.status);
+    var zColor = "#FFF";
+    switch(userInfo.status){
+        case 0:
+            zColor = "#ccc";
+            break;
+        case 1:
+            zColor = "#aaeaff";
+            break;
+        case 2:
+            zColor = "#ffde6b";
+            break;
+    }
+    $('#txt_title_status').css("color", zColor);
+    $('#txt_title_rounds').text(userInfo.rounds);
+    $('#txt_title_account').html(userInfo.name);
+}
+
+//更新列表
+function updateTable(){
+    var zHmlInfo = "";
+    var zTop = 0;
+    var zCurExchangeRate = common.getCookie("exchangeRate");
+    for(var i=0; i<myInfoList.length; i++){
+        zTop = i*200;
+        var zInfo = myInfoList[i];
+        var zOrderType = parseInt(zInfo.order_type);//订单类型（1.天使轮打款  2.公排boss1打款  3.公排boss2打款  4.公排销毁打款  5.公排公共账号打款  6.大转盘收款  7.回馈收款  8.动态奖收款）
+        var zOrderStr = 'data-lang="main.order_type_'+zOrderType+'"';
+        var zRounds = zInfo.rounds;
+        var zStatus = zInfo.status;
+        var zFromId = parseInt(zInfo.from_id);
+        var zFromAddr = zInfo.from_addr;
+        var zFromType = zInfo.from_addr_type;
+        var zToId = parseInt(zInfo.to_id);
+        var zToAddr = zInfo.to_addr;
+        var zToType = zInfo.to_addr_type;
+        var zMoney = "$"+zInfo.money+" = "+zInfo.money*zCurExchangeRate+"AGL";
+        var zUpdateTime = zInfo.update_time;
+        var zBtnClass=""; //状态（0未打款   1已打款   2已确认）
+        var zBtnName = "";
+        var zAddrTxt = "";
+        var zPayState = "";
+        var zPayStateColor = "";
+        var zAddrTypeList = ["", "ERC20", "OMNI"];
+        var zAddrType = "";
+        var zMoneyGetType = 0; // 1打钱  2收钱
+        var zAcount = "";
+        var zRemarks = "";
+        var zClickInfo = {};
+        zClickInfo.id = zInfo.id;
+        zClickInfo.from_id = zFromId;
+        zClickInfo.to_id = zToId;
+        var zClickTxt = "";
+        var zImgName = "";
+        var zTimeDisplay="";
+        if(parseInt(zFromId)==parseInt(userInfo.id)){//付钱
+            zMoneyGetType = 1;
+            zClickInfo.moneyGetType = zMoneyGetType;
+            // zAddrType = zAddrTypeList[parseInt(zToType)] + " : ";
+            zAddrTxt =  zToAddr;
+            zAcount = zInfo.to_name;
+            zRemarks = zInfo.to_remarks;
+            zBtnClass="btn_payment_"+zStatus+"1";
+            zBtnName = "main.btn_payment_"+zStatus+"1";
+            zPayState = "main.付款者";
+            zPayStateColor = "#3da200";
+            if(parseInt(zStatus)==0){
+                zClickTxt = " onClick='onListClickHander("+JSON.stringify(zClickInfo)+")' ";
+            }
+            zImgName = "./img/head/head_"+zInfo.to_img_id+".jpg";
+            if(zInfo.to_id==0){
+                zRounds = 99;
+                zAcount = "";
+                zImgName = "./img/head/sys_get.jpg";
+            }else if(zInfo.to_id==-1){
+                zRounds = 99;
+                zAcount = "";
+                zImgName = "./img/head/sys_lock.jpg";
+            }
+        }else{//收钱
+            zTimeDisplay = "diplay:none;"
+            zMoneyGetType = 2;
+            zClickInfo.moneyGetType = zMoneyGetType;
+            // zAddrType = zAddrTypeList[parseInt(zFromType)] + " : ";
+            zAddrTxt = zFromAddr;
+            zAcount = zInfo.from_name;
+            zRemarks = zInfo.from_remarks;
+            //如果时6，7，8三种公共平台给用户打款的情况，status为1即公共平台已打款情况，自动判断为status=2已完成
+            if(zOrderType>=6 && zStatus==1){
+                zStatus = 2;
+            }
+            zBtnClass="btn_payment_"+zStatus+"2";
+            zBtnName = "main.btn_payment_"+zStatus+"2";
+            zPayState = "main.收款者";
+            zPayStateColor = "#FC7E2A";
+            if(parseInt(zStatus)==1){
+                zClickTxt = " onClick='onListClickHander("+JSON.stringify(zClickInfo)+")' ";
+            }
+            zImgName = "./img/head/head_"+zInfo.from_img_id+".jpg";
+            if(zInfo.from_id==0){
+                zRounds = 99;
+                zAcount = "";
+                zImgName = "./img/head/sys_get.jpg";
+            }else if(zInfo.from_id==-1){
+                zRounds = 99;
+                zAcount = "";
+                zImgName = "./img/head/sys_lock.jpg";
+            }
+        }
+        
+        var zRemarksLang = "";
+        if(zOrderType>=4){
+            zRemarksLang = zOrderStr;
+        }else{
+            zRemarks = zRemarks?zRemarks:"";
+        }
+
+        var zStr = '\
+            <div class="abs bg_white" style="top:'+zTop+'px; width:650px; height:200px; background-color:rgba(0,0,0,0); border:0px solid #eee; border-bottom:2px solid #eee;">\
+                <div class="abs" style="transform:scale(0.6,0.6); top:30px;"><img class="abs" style="-webkit-mask:url(./img/mask_r_200.png);" src="'+zImgName+'"></div>\
+                <div class="abs" style="left:140px; top:20px;">\
+                    <label class="txt_36" style="color:'+zPayStateColor+';" data-lang="'+zPayState+'"></label>\
+                    <label class="txt_36 cl_black" style="margin-left:10px;">'+zAcount+'</label>\
+                    <label class="txt_30 cl_grey" style="margin-left:20px;" data-lang="main.轮数"></label>\
+                    <label class="txt_30 cl_grey" style="margin-left:0px;">'+zInfo.rounds+'</label>\
+                </div>\
+                <label class="abs txt_24 cl_grey txt_y_hide" style="left:140px; top:65px; width:300px; height:50px; ling-height:40px;" '+zRemarksLang+'>'+zRemarks+'</label>\
+                <div class="abs" style="left:10px; top:165px;">\
+                    <div class="txt_20 cl_grey textCanSelect" style="float:left;">'+zAddrType+'</div>\
+                    <div id="id_copy_content_'+zInfo.id+'" class="txt_20 cl_grey textCanSelect" style="float:left; margin-left:10px;">'+zAddrTxt+'</div>\
+                    <div id="id_btn_copy_'+zInfo.id+'" style="float:left; margin-left:10px; margin-top:-5px; border-radius:10px; width:25px; height:25px; line-height:25px;" data-clipboard-action="copy" data-clipboard-target="#id_copy_content_'+zInfo.id+'"><img src="./img/btn_copy.png"></div>\
+                </div>\
+                <div class="abs txt_28 txt_c '+zBtnClass+'" style="right:-10px; top:60px;" data-lang="'+zBtnName+'" '+zClickTxt+'></div>\
+                <label class="abs txt_26 txt_r txt_w1" style="color:'+zPayStateColor+'; right:170px; top:125px; width:400px;">'+zMoney+'</label>\
+                <label id="id_obj_time_'+zInfo.id+'" class="abs txt_26 txt_r txt_w1 cl_grey4" style="right:0px; top:125px; width:650px; '+zTimeDisplay+'"></label>\
+            </div>\
+            ';
+        zHmlInfo += zStr;
+    }
+    $('#id_table_a_content').html(zHmlInfo);
+
+    endHeight = (myInfoList.length+1)*200+230;
+    $('#id_end').css("top", endHeight+"px");
+
+    common.lang();
+
+    //复制按钮
+    for(var j=0; j<myInfoList.length; j++){
+        var infoXX = myInfoList[j];
+        new Clipboard('#id_btn_copy_'+infoXX.id, {text: function(trigger) {
+            c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1", "tips.b_ok");
+        }});
+    }
+}
+
+//按钮被点击
+function onListClickHander(pInfo){
+    var zInfo = pInfo;
+    var zUserId = 0;
+    if(zInfo.moneyGetType==1){
+        zUserId = zInfo.from_id;
+    }else if(zInfo.moneyGetType==2){
+        zUserId = zInfo.to_id;
+    }else{
+        c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.-1", "tips.b_ok");
+        return;
+    }
+
+    if(!userInfo.pwd2){
+        c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "main.请设置交易密码", "tips.b_ok", function(){common.gotoWebSite('setpwd2.html')});
+        return;
+    }
+    c_m_pwd2.init("id_confirmwin", zInfo.id, zInfo.moneyGetType, zUserId);
+}
+
+
+function timeRum(){
+    const zTime = parseInt(Date.now()/1000);
+    if(myInfoList && myInfoList.length>0){
+        var zConf = JSON.parse(common.getCookie("conf"));
+        var zMaxTime = parseInt(zConf["pay_time"])*3600;//时间限制
+
+        for(var i=0; i<myInfoList.length; i++){
+            var zInfo = myInfoList[i];
+            zInfo.create_time -= 1;
+            myInfoList[i] = zInfo;
+            var zShowTime = zInfo.create_time + zMaxTime - zTime;
+            if(zShowTime<0){
+                zShowTime = 0;
+            }
+            $('#id_obj_time_'+zInfo.id).html(common.getTimeStrFromNum(zShowTime));
+        }
+    }
+}
+
+//////////////////////////////////// php相关 ////////////////////////////////////
+//获取用户id
+function api_userInfo(){
+    $.ajax({
+        url: common.getApiUrl("user_detail"),
+        type: "get",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_userInfo success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    userInfo = evt.data.userInfo;
+                    exchangeList = evt.data.exchangeList;
+                    common.setCookie("userInfo", JSON.stringify(evt.data.userInfo));
+                    updateMySelf();
+                    api_orderList(userInfo.id);
+                    break;
+                case 10001:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+        },error: function(error){
+            console.log("api_userInfo error:"+error.msg);
+        }
+    });
+}
+
+//获取订单
+//@pId 订单人
+function api_orderList(pId){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("order_list"),
+        type: "get",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{id:pId, isLog:0},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_orderList success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    myInfoList = evt.data.list;
+                    updateTable();
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_orderList error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+
+
+</script>
+
+</body>
+</html>

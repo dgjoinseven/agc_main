@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Angel City</title> 
+    <meta name="viewport" content="width=device-width,user-scalable=no, initial-scale=1">
+    <link rel='icon' href='./img/logo_16.ico' type='image/x-ico' />
+    <script type="text/javascript" src="../vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../vendor/jquery/jquery.cookie.js"></script>
+</head>
+
+<!-- -webkit-mask:url(./img/mask_r_200.png);  -->
+
+<body class="body_css">
+    <!--主页面容器-->
+    <div class="main_page" id="id_main_page" style="display:none;">
+        <img src="./img/bg_main.jpg">
+        <div class="abs" style="left:30px; top:30px; ">
+            <label class="abs txt_54 txt_w2" style="color:#FFF; width:600px; top:0px;" data-lang="main.慈善新闻"></label>
+            <label class="abs txt_36 txt_w1" style="color:#A8A8A8; width:600px; top:80px;" data-lang="main.世界需要更多的爱"></label>
+            <div class="abs" style="left:540px; top:0px; transform:scale(0.7,0.7);">
+                <img id="id_head" class="abs" style="-webkit-mask:url(./img/mask_r_200.png);" src="">
+            </div>
+            <div class="abs" style="left:35px; top:160px;">
+                <img id="id_adv_1" class="abs" style="-webkit-mask:url(./img/mask_sqr_620_332.png);" src="./img/adv_1.jpg">
+                <img id="id_adv_2" class="abs" style="-webkit-mask:url(./img/mask_sqr_620_332.png); display:none;" src="./img/adv_2.jpg">
+            </div>
+        </div>
+        <div class="abs" style="left:30px; top:2280px;">
+            <label class="abs txt_44 txt_c txt_w2" style="color:#FFF; width:690px; display:none;" data-lang="main.世界需要更多的爱"></label>
+            <div id="id_btn_start" class="abs btn_a btn_a_yellow" style="left:0px; top:90px; width:320px !important;" data-lang="main.开始"></div>
+            <div id="id_btn_info" class="abs btn_a btn_a_yellow" style="left:350px; top:90px; width:320px !important;" data-lang="main.消息"></div>
+        </div>
+    </div>
+
+    <div id="id_end" class="abs" style="top:2400px; opacity:0;">.</div>
+
+    <div id="id_header"></div>
+    <div id="id_footer"></div>
+    <div id="id_popupwin"></div>
+    <div id="id_tips"></div>
+
+<script>
+/////////////////// 初始化基础配置相关 ///////////////////
+var zHead = document.getElementsByTagName('head')[0];
+var zScript = document.createElement('script');
+zScript.type = 'text/javascript';
+zScript.src = '../vendor/common.js?ver='+$.cookie('commonJsVer');
+zScript.onload = zScript.onreadystatechange = function() {
+    if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete" ){
+        common.init(['c_m_popUpWin', 'c_m_waiting']);
+    }
+}
+zHead.appendChild(zScript);
+var id_interval = 0;
+window.onload = function ready(){id_interval=setInterval(function(){if(common!=undefined && common.JS_IS_LOADED==true){clearInterval(id_interval); init();}}, 100);};
+/////////////////// 初始化基础配置相关 ///////////////////
+window.onresize = windowResize;
+
+var endHeight = 3200;
+var userInfo = {};
+var myInfoList = [];
+var curAdv = 1;
+var maxAdv = 2;
+
+//初始化
+function init() {
+    if(common.getCookie("userInfo")){
+        userInfo = JSON.parse(common.getCookie("userInfo"));
+    }else{
+        c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
+        windowResize();
+        return;
+    }
+
+    //设置登录密码
+    if(!userInfo.pwd2){
+        c_m_popUpWin.init("id_popupwin", 2, "tips.t_tips", "tips.1004", "main.确认", function(){common.gotoWebSite('setpwd2.html')});
+    }
+    
+    $('#id_btn_start').click({myType:"id_btn_start"}, btnClickHandler);
+    $('#id_btn_info').click({myType:"id_btn_info"}, btnClickHandler);  
+
+    windowResize();
+
+    updateInfo();
+
+    common.lang();
+    $('#id_main_page').show();
+
+    setInterval(timeRum, 3000);
+}
+
+//按钮点击事件
+function btnClickHandler(p_obj_event){
+    switch(p_obj_event.data.myType){
+        case "id_btn_start":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('team.html');
+            break;
+        case "id_btn_info":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('noticeList.html');
+            // c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "main.敬请期待", "tips.b_ok");
+            break;
+    }
+}
+
+//窗口尺寸重置
+function windowResize()
+{
+    var zScale = common.initScale(1);
+    zScale = (zScale<1) ? 1 : zScale;
+    
+    var zWinWidth = parseInt(window.screen.availWidth);
+    var zWineHeight = parseInt(window.screen.availHeight);
+    var zMyWidth = document.body.clientWidth;
+    var zObjWidth = parseInt($('#id_main_page').css("width"))*zScale;
+
+    var zMiddleWidth = (zMyWidth-zObjWidth)/2/zScale;
+    $('#id_main_page').css({"left":zMiddleWidth+"px"});
+
+    // c_m_header.windowResize(zMiddleWidth);
+    // c_m_footer.windowResize(zMiddleWidth);
+    // c_m_footer.updateTop(endHeight);
+    c_m_popUpWin.setSizePos(zScale);
+}
+
+//更新信息
+function updateInfo(){
+    console.log(userInfo);
+    var zImgUrl =  "./img/head/head_" + userInfo.img_id + ".jpg";
+    $('#id_head').attr("src", zImgUrl);
+}
+
+//轮播广告
+function timeRum(){
+    $('#id_adv_'+curAdv).fadeOut();
+
+    curAdv ++;
+    if(curAdv>maxAdv){
+        curAdv = 1;
+    }
+    $('#id_adv_'+curAdv).fadeIn();
+}
+
+//////////////////////////////////// php相关 ////////////////////////////////////
+//登录
+function api_getUserInfo(){
+    $.ajax({
+        url: common.getApiUrl("login"),
+        type: "post",
+        // beforeSend: function(Request) {
+            // Request.setRequestHeader("token",common.getCookie('token'));
+        // },
+        data:{account:$('#id_input_account').val(), pwd:$('#id_input_pwd').val()},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_setdefault success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    common.setCookie("token", evt.data.token);
+                    common.setCookie("userInfo", evt.data.userInfo);
+                    // console.log(common.getCookie("token"),common.getCookie("userInfo"));
+                    // common.gotoWebSite('home_main');
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+        },error: function(error){
+            console.log("php_setdefault error:"+error.msg);
+        }
+    });
+}
+
+
+
+</script>
+
+</body>
+</html>

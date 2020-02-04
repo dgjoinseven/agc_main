@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Angel City</title> 
+    <meta name="viewport" content="width=device-width,user-scalable=no, initial-scale=1">
+    <link rel='icon' href='./pc/img/zao_icon.ico' type='image/x-ico' />
+</head>
+
+<body>
+
+<!--JS引用-->
+<script>
+window.onload = init;
+
+// var myWidth = document.body.clientWidth;
+
+//初始化
+function init() 　　
+{ 
+    var zWidth = parseInt(window.screen.width);
+    // var zHeight = parseInt(window.screen.height);
+    // var zNow = new Date().getTime();
+    
+    var zUrl = window.location.href;    
+    // if (zUrl.indexOf("https") < 0) {    
+    //     zUrl = zUrl.replace("http:", "https:");
+    // } 
+    // console.log("token1:", $.cookie("token"));
+    // console.log("username1:", $.cookie("username"));
+
+    // if(zWidth > 750){
+    //     javascript:location.href = zUrl+'pc/begin.html';
+    // }else{
+        javascript:location.href = zUrl+'mobile/begin.html';
+    // }
+}
+
+</script>
+
+</body>
+</html>

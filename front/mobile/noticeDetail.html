@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Angel City</title> 
+    <meta name="viewport" content="width=device-width,user-scalable=no, initial-scale=1">
+    <link rel='icon' href='./img/logo_16.ico' type='image/x-ico' />
+    <script type="text/javascript" src="../vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../vendor/jquery/jquery.cookie.js"></script>
+</head>
+
+
+<body class="body_css">
+    <!--主页面容器-->
+    <div class="main_page" id="id_main_page" style="display:none;">
+        <img id="id_img" class="abs" style="left:0px; top:0px; width:750px; height:500px;">
+        <div id="id_btn_back" class="abs" style="left:50px; top:55px;"><img src="./img/btn_back4.png"></div>
+        <label id="id_title" class="abs txt_44 txt_w2 cl_black" style="left:30px; top:570px; width:690px;"></label>
+        <label id="id_createTime" class="abs txt_28 cl_grey" style="left:30px; top:640px; width:690px;"></label>
+        <label id="id_contents" class="abs txt_28 cl_black" style="left:30px; top:690px; width:690px; line-height:40px;"></label>
+    </div>
+
+    <div id="id_end" class="abs" style="top:1000px; opacity:0;">.</div>
+
+    <div id="id_header"></div>
+    <div id="id_footer"></div>
+    <div id="id_popupwin"></div>
+    <div id="id_tips"></div>
+
+<script>
+/////////////////// 初始化基础配置相关 ///////////////////
+var zHead = document.getElementsByTagName('head')[0];
+var zScript = document.createElement('script');
+zScript.type = 'text/javascript';
+zScript.src = '../vendor/common.js?ver='+$.cookie('commonJsVer');
+zScript.onload = zScript.onreadystatechange = function() {
+    if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete" ){
+        common.init(['c_m_popUpWin', 'c_m_waiting']);
+    }
+}
+zHead.appendChild(zScript);
+var id_interval = 0;
+window.onload = function ready(){id_interval=setInterval(function(){if(common!=undefined && common.JS_IS_LOADED==true){clearInterval(id_interval); init();}}, 100);};
+/////////////////// 初始化基础配置相关 ///////////////////
+window.onresize = windowResize;
+
+var endHeight = 2200;
+var userInfo = {};
+var myInfoList = [];
+
+//初始化
+function init() {
+    windowResize();
+
+    $('#id_btn_back').click({myType:"id_btn_back"}, btnClickHandler);
+
+    updateInfo();
+
+    common.lang();
+    $('#id_main_page').show();
+}
+
+//按钮点击事件
+function btnClickHandler(p_obj_event){
+    switch(p_obj_event.data.myType){
+        case "id_btn_back":
+            common.onBackFun();
+            break;
+    }
+}
+
+//窗口尺寸重置
+function windowResize()
+{
+    var zScale = common.initScale(1);
+    zScale = (zScale<1) ? 1 : zScale;
+    
+    var zWinWidth = parseInt(window.screen.availWidth);
+    var zWineHeight = parseInt(window.screen.availHeight);
+    var zMyWidth = document.body.clientWidth;
+    var zObjWidth = parseInt($('#id_main_page').css("width"))*zScale;
+
+    var zMiddleWidth = (zMyWidth-zObjWidth)/2/zScale;
+    $('#id_main_page').css({"left":zMiddleWidth+"px"});
+
+    // c_m_header.windowResize(zMiddleWidth);
+    // c_m_footer2.windowResize(zMiddleWidth);
+    // c_m_footer2.updateTop(endHeight);
+    c_m_popUpWin.setSizePos(zScale);
+}
+
+function updateInfo(){
+    var zInfo = JSON.parse(common.getCookie("noticeDetail"));
+    $('#id_img').attr("src", zInfo.imgBig);
+    $('#id_title').html(zInfo.title);
+    $('#id_createTime').html(zInfo.createTime);
+    $('#id_contents').html(zInfo.contents);
+}
+
+
+//////////////////////////////////// php相关 ////////////////////////////////////
+//获取公告
+function api_noticeList(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("notice_list"),
+        type: "get",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_noticeList success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    myInfoList = evt.data.list;
+                    updateTable();
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_noticeList error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+
+
+</script>
+
+</body>
+</html>

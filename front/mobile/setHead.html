@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Angel City</title> 
+    <meta name="viewport" content="width=device-width,user-scalable=no, initial-scale=1">
+    <link rel='icon' href='./img/logo_16.ico' type='image/x-ico' />
+    <script type="text/javascript" src="../vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../vendor/jquery/jquery.cookie.js"></script>
+</head>
+
+
+<body class="body_css">
+    <!--主页面容器-->
+    <div class="main_page" id="id_main_page" style="display:none;">
+        <div id="id_table_a_content" class="abs" style="left:50px; top:180px; width:650px; height:1100px;"></div>
+    </div>
+
+    <div id="id_end" class="abs" style="top:1000px; opacity:0;">.</div>
+
+    <div id="id_header"></div>
+    <div id="id_footer"></div>
+    <div id="id_popupwin"></div>
+    <div id="id_tips"></div>
+
+<script>
+/////////////////// 初始化基础配置相关 ///////////////////
+var zHead = document.getElementsByTagName('head')[0];
+var zScript = document.createElement('script');
+zScript.type = 'text/javascript';
+zScript.src = '../vendor/common.js?ver='+$.cookie('commonJsVer');
+zScript.onload = zScript.onreadystatechange = function() {
+    if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete" ){
+        common.init(['c_m_popUpWin', 'c_m_header', 'c_m_waiting']);
+    }
+}
+zHead.appendChild(zScript);
+var id_interval = 0;
+window.onload = function ready(){id_interval=setInterval(function(){if(common!=undefined && common.JS_IS_LOADED==true){clearInterval(id_interval); init();}}, 100);};
+/////////////////// 初始化基础配置相关 ///////////////////
+window.onresize = windowResize;
+
+var endHeight = 2200;
+var userInfo = {};
+var headSum = 21;   //头像总数
+var selectId = 0;
+
+
+//初始化
+function init() {
+    c_m_header.init("id_header", "main.改变头像");
+
+    if(common.getCookie("userInfo")){
+        userInfo = JSON.parse(common.getCookie("userInfo"));
+    }else{
+        c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
+        windowResize();
+        return;
+    }
+    updateTable();
+    windowResize();
+
+    common.lang();
+    $('#id_main_page').show();
+}
+
+//按钮点击事件
+// function btnClickHandler(p_obj_event){
+//     switch(p_obj_event.data.myType){
+//     }
+// }
+
+//窗口尺寸重置
+function windowResize()
+{
+    var zScale = common.initScale(1);
+    zScale = (zScale<1) ? 1 : zScale;
+    
+    var zWinWidth = parseInt(window.screen.availWidth);
+    var zWineHeight = parseInt(window.screen.availHeight);
+    var zMyWidth = document.body.clientWidth;
+    var zObjWidth = parseInt($('#id_main_page').css("width"))*zScale;
+
+    var zMiddleWidth = (zMyWidth-zObjWidth)/2/zScale;
+    $('#id_main_page').css({"left":zMiddleWidth+"px"});
+
+    c_m_header.windowResize(zMiddleWidth);
+    // c_m_footer.windowResize(zMiddleWidth);
+    // c_m_footer.updateTop(endHeight);
+    c_m_popUpWin.setSizePos(zScale);
+}
+
+//更新列表
+function updateTable(){
+    var zHmlInfo = "";
+    var zTop = 0;
+    var zLeft = 0;
+    var zImgName = "";
+    for(var i=0; i<headSum; i++){
+        zLeft = i%3 * 220;
+        zTop = Math.floor(i/3)*230;
+        zImgName = "./img/head/head_"+i+".jpg";
+        var zClickInfo = {};
+        zClickInfo.id = i;
+        var zClickTxt = " onClick='onListClickHander("+JSON.stringify(zClickInfo)+")' ";
+        var zStr = '\
+            <div class="abs" style="left:'+zLeft+'px; top:'+zTop+'px; width:650px; height:220px;" '+zClickTxt+'>\
+                <img class="abs" style="-webkit-mask:url(./img/mask_r_200.png);" src="'+zImgName+'">\
+            </div>\
+            ';
+        zHmlInfo += zStr;
+    }
+    $('#id_table_a_content').html(zHmlInfo);
+
+    endHeight = (Math.floor(headSum/3)+1)*220+230;
+    $('#id_end').css("top", endHeight+"px");
+
+    common.lang();
+}
+
+//按钮被点击
+function onListClickHander(pInfo){
+    var zInfo = pInfo;
+    selectId = zInfo.id;
+    api_setHead();
+    // c_m_pwd2.init("id_confirmwin", zInfo.id, zInfo.moneyGetType, zUserId);
+}
+
+//////////////////////////////////// php相关 ////////////////////////////////////
+//设置头像
+function api_setHead(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("user_edit"),
+        type: "post",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{type:2, id:userInfo.id,  img_id:selectId},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_setHead success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok", function(){common.onBackFun();});
+                    break;
+                case 10001:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_setHead error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+
+
+</script>
+
+</body>
+</html>

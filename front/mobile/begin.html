@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Angel City</title> 
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1">
+    <link rel='icon' href='./img/logo_16.ico' type='image/x-ico' />
+    <script type="text/javascript" src="../vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../vendor/jquery/jquery.cookie.js"></script>
+</head>
+
+<body>
+
+<!--JS引用-->
+<script>
+/////////////////// 初始化基础配置相关 ///////////////////
+var zNow = new Date().getTime();
+$.cookie('commonJsVer', zNow);
+var zHead = document.getElementsByTagName('head')[0];
+var zScript = document.createElement('script');
+zScript.type = 'text/javascript';
+zScript.src = '../vendor/common.js?ver='+$.cookie('commonJsVer');
+zScript.onload = zScript.onreadystatechange = function() {
+    if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete" ){
+        common.init();
+    }
+}
+zHead.appendChild(zScript);
+var id_interval = 0;
+window.onload = function ready(){id_interval=setInterval(function(){if(common!=undefined && common.JS_IS_LOADED==true){clearInterval(id_interval); init();}}, 100);};
+/////////////////// 初始化基础配置相关 ///////////////////
+
+
+//初始化
+function init() 　　
+{ 
+    var zToken = common.getCookie('token');
+    console.log("token:"+zToken);
+    if(zToken){
+        common.gotoWebSite('home.html');
+    }else{
+        common.gotoWebSite('login.html');
+    }
+}
+
+
+</script>
+
+</body>
+</html>
+

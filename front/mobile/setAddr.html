@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Angel City</title> 
+    <meta name="viewport" content="width=device-width,user-scalable=no, initial-scale=1">
+    <link rel='icon' href='./img/logo_16.ico' type='image/x-ico' />
+    <script type="text/javascript" src="../vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../vendor/jquery/jquery.cookie.js"></script>
+</head>
+
+
+<body class="body_css">
+    <!--主页面容器-->
+    <div class="main_page" id="id_main_page" style="display:none;">
+<!--         <div id="id_btn_erc20" class="btn_b" style="left:50px; top:200px;">ERC20</div>
+        <div id="id_btn_omni" class="btn_b" style="left:250px; top:200px;">OMNI</div> -->
+        <input id="id_input_addr" type="text" class="abs input_a" style="top:300px;" data-placeholder="ph.请输入您的钱包地址"></div>
+        <div id="id_btn_confirm" class="abs btn_a btn_a_yellow" style="left:50px; top:1050px; width:650px !important;" data-lang="main.确认"></div>
+    </div>
+
+    <div id="id_end" class="abs" style="top:1000px; opacity:0;">.</div>
+
+    <div id="id_header"></div>
+    <div id="id_footer"></div>
+    <div id="id_popupwin"></div>
+    <div id="id_tips"></div>
+
+<script>
+/////////////////// 初始化基础配置相关 ///////////////////
+var zHead = document.getElementsByTagName('head')[0];
+var zScript = document.createElement('script');
+zScript.type = 'text/javascript';
+zScript.src = '../vendor/common.js?ver='+$.cookie('commonJsVer');
+zScript.onload = zScript.onreadystatechange = function() {
+    if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete" ){
+        common.init(['c_m_popUpWin', 'c_m_header', 'c_m_waiting']);
+    }
+}
+zHead.appendChild(zScript);
+var id_interval = 0;
+window.onload = function ready(){id_interval=setInterval(function(){if(common!=undefined && common.JS_IS_LOADED==true){clearInterval(id_interval); init();}}, 100);};
+/////////////////// 初始化基础配置相关 ///////////////////
+window.onresize = windowResize;
+
+var endHeight = 3200;
+var userInfo = {};
+var selectType = 0;
+
+//初始化
+function init() {
+    c_m_header.init("id_header", "main.钱包地址");
+
+    if(common.getCookie("userInfo")){
+        userInfo = JSON.parse(common.getCookie("userInfo"));
+    }else{
+        c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
+        windowResize();
+        return;
+    }
+
+    $('#id_btn_confirm').click({myType:"id_btn_confirm"}, btnClickHandler);
+    // $('#id_btn_erc20').click({myType:"id_btn_erc20"}, btnClickHandler);
+    // $('#id_btn_omni').click({myType:"id_btn_omni"}, btnClickHandler);
+
+    windowResize();
+
+    common.lang();
+    $('#id_main_page').show();
+
+    // selectBtn(1);
+}
+
+//按钮点击事件
+function btnClickHandler(p_obj_event){
+    switch(p_obj_event.data.myType){
+        case "id_btn_confirm":
+            if(!$('#id_input_addr').val()){
+                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1024", "tips.b_ok", function(){common.gotoWebSite("setAddr.html")});
+                return;
+            }
+            api_setAddr();
+            break;
+        // case "id_btn_erc20":
+        //     selectBtn(1);
+        //     break;
+        // case "id_btn_omni":
+        //     selectBtn(2);
+        //     break;
+    }
+}
+
+// function selectBtn(pIndex){
+//     selectType = pIndex;
+//     $('#id_btn_erc20').removeClass("btn_b_yellow");
+//     $('#id_btn_omni').removeClass("btn_b_yellow");
+//     switch(pIndex){
+//         case 1:
+//             $('#id_btn_erc20').addClass("btn_b_yellow");
+//             break;
+//         case 2:
+//             $('#id_btn_omni').addClass("btn_b_yellow");
+//             break;
+//     }
+// }
+
+//窗口尺寸重置
+function windowResize()
+{
+    var zScale = common.initScale(1);
+    zScale = (zScale<1) ? 1 : zScale;
+    
+    var zWinWidth = parseInt(window.screen.availWidth);
+    var zWineHeight = parseInt(window.screen.availHeight);
+    var zMyWidth = document.body.clientWidth;
+    var zObjWidth = parseInt($('#id_main_page').css("width"))*zScale;
+
+    var zMiddleWidth = (zMyWidth-zObjWidth)/2/zScale;
+    $('#id_main_page').css({"left":zMiddleWidth+"px"});
+
+    c_m_header.windowResize(zMiddleWidth);
+    // c_m_footer.windowResize(zMiddleWidth);
+    // c_m_footer.updateTop(endHeight);
+    c_m_popUpWin.setSizePos(zScale);
+}
+
+//////////////////////////////////// php相关 ////////////////////////////////////
+//设置地址
+function api_setAddr(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("user_edit"),
+        type: "post",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{type:2, id:userInfo.id,  wallet_addr:$('#id_input_addr').val()},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_setAddr success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok", function(){common.onBackFun();});
+                    break;
+                case 10001:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_setAddr error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Angel City</title> 
+    <meta name="viewport" content="width=device-width,user-scalable=no, initial-scale=1">
+    <link rel='icon' href='./img/logo_16.ico' type='image/x-ico' />
+    <script type="text/javascript" src="../vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../vendor/jquery/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../vendor/clipboard.min.js"></script>
+</head>
+
+
+<body class="body_css">
+    <!--主页面容器-->
+    <div class="main_page" id="id_main_page" style="display:none; width:100%; height:1000px; background-color:#F5F5F5;">
+        <label id="id_test_label_q" class="abs" style="left:80px; top:500px; width:590px; opacity:0;"></label>
+        <label id="id_test_label_a" class="abs" style="left:80px; top:500px; width:590px; opacity:0;"></label>
+        <div id="id_table_a_content" class="abs" style="left:50px; top:180px; width:650px; height:1100px;"></div>
+        
+        <!-- 添加问题窗口 -->
+        <div id="id_add_qa" class="abs" style="position:fixed; z-index:2000; width:100%; height:100%; display:none;">
+            <div class="bg_mask" ></div>
+            <div class="abs bg_bottom" style="height:550px !important;">
+                <div class="abs txt_c txt_w2 txt_36 bg_base" style="width:750px; height:90px; line-height:90px;" data-lang="main.添加"></div>
+                <div id="id_btn_close" class="abs" style="right:30px; top:30px; cursor:pointer;"><img src="./img/btn_close_1.png"></div>
+                <textarea id="id_dd_textarea" class="abs txt_30" style="border:0px solid #000; left:50px; top:150px; width:650px; height:300px !important; resize:none;" onKeyUp="if(this.value.length > 100) this.value=this.value.substr(0,100)" data-placeholder="ph.请输入内容"></textarea>
+                <div id="id_btn_confirm" class="abs btn_a btn_a_yellow" style="left:50px; top:390px; width:650px !important;" data-lang="main.确认"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="id_end" class="abs" style="top:1000px; opacity:0;">.</div>
+
+    <div id="id_header"></div>
+    <div id="id_footer"></div>
+    <div id="id_popupwin"></div>
+    <div id="id_tips"></div>
+
+    <!-- 按钮-添加 -->
+    <div id="id_btn_add" class="abs btn_a btn_a_yellow" style="left:520px; top:40px; width:200px !important; height:60px !important; line-height:60px !important; font-size:28px !important;" data-lang="main.添加"></div>
+
+<script>
+/////////////////// 初始化基础配置相关 ///////////////////
+var zHead = document.getElementsByTagName('head')[0];
+var zScript = document.createElement('script');
+zScript.type = 'text/javascript';
+zScript.src = '../vendor/common.js?ver='+$.cookie('commonJsVer');
+zScript.onload = zScript.onreadystatechange = function() {
+    if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete" ){
+        common.init(['c_m_popUpWin', 'c_m_header', 'c_m_waiting']);
+    }
+}
+zHead.appendChild(zScript);
+var id_interval = 0;
+window.onload = function ready(){id_interval=setInterval(function(){if(common!=undefined && common.JS_IS_LOADED==true){clearInterval(id_interval); init();}}, 100);};
+/////////////////// 初始化基础配置相关 ///////////////////
+window.onresize = windowResize;
+
+var endHeight = 2200;
+var userInfo = {};
+var myInfoList = [];
+var myScale = 1;
+
+//初始化
+function init() {
+    c_m_header.init("id_header", "main.问答");
+
+    if(common.getCookie("userInfo")){
+        userInfo = JSON.parse(common.getCookie("userInfo"));
+    }else{
+        c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
+        windowResize();
+        return;
+    }
+
+    $('#id_btn_add').click({myType:"id_btn_add"}, btnClickHandler);
+    $('#id_btn_close').click({myType:"id_btn_close"}, btnClickHandler);
+    $('#id_btn_confirm').click({myType:"id_btn_confirm"}, btnClickHandler);
+
+    windowResize();
+
+    api_qaList();
+
+    common.lang();
+    $('#id_main_page').show();
+}
+
+//按钮点击事件
+function btnClickHandler(p_obj_event){
+    switch(p_obj_event.data.myType){
+        case "id_btn_add":
+            $('#id_add_qa').show();
+            break;
+        case "id_btn_close":
+            $('#id_add_qa').hide();
+            break;
+        case "id_btn_confirm":
+            if(!$('#id_dd_textarea').val()){
+                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1024", "tips.b_ok");
+                return;
+            }
+            api_setQa();
+            break;
+    }
+}
+
+//窗口尺寸重置
+function windowResize()
+{
+    var zScale = common.initScale(1);
+    myScale = zScale;
+    zScale = (zScale<1) ? 1 : zScale;
+    
+    var zWinWidth = parseInt(window.screen.availWidth);
+    var zWineHeight = parseInt(window.screen.availHeight);
+    var zMyWidth = document.body.clientWidth;
+    var zObjWidth = parseInt($('#id_main_page').css("width"))*zScale;
+
+    var zMiddleWidth = (zMyWidth-zObjWidth)/2/zScale;
+    $('#id_main_page').css({"left":zMiddleWidth+"px"});
+
+    c_m_header.windowResize(zMiddleWidth);
+    // c_m_footer.windowResize(zMiddleWidth);
+    // c_m_footer.updateTop(endHeight);
+    c_m_popUpWin.setSizePos(zScale);
+}
+
+//更新列表
+function updateTable(){
+    var zHmlInfo = "";
+    var zTop = 0;
+    var zTotalH = 0;
+    for(var i=0; i<myInfoList.length; i++){
+        var zInfo = myInfoList[i];
+        var zQuestion = zInfo.question;
+        var zAnswer = zInfo.answer;
+        var zCreateTime = common.formatUnixtimestamp(zInfo.create_time, false);
+        var zUpdateTime = common.formatUnixtimestamp(zInfo.update_time, false);
+        $('#id_test_label_q').text(zQuestion);
+        $('#id_test_label_a').text(zAnswer);
+        var zQH = common.getTextWHXY("id_test_label_q").height;
+        var zQA = common.getTextWHXY("id_test_label_a").height;
+        var zH_q = (zQH + 80)/myScale;
+        var zH_a = (zQH + zQA + 130)/myScale;
+        var zH = zH_q;
+        var zAddAnswer='';
+        if(zAnswer){
+            zH = zH_a;
+            zAddAnswer = '\
+                <div class="abs" style="left:20px; top:'+(zQH+150)+'px; background-color:#ddd; width:610px; height:2px;"></div>\
+                <label class="abs txt_24 cl_grey" style="left:30px; top:'+(zQH+170)+'px; width:350px;">'+zUpdateTime+'</label>\
+                <label class="abs txt_24 txt_y_hide" style="left:30px; top:'+(zQH+210)+'px; width:590px; line-height:30px; color:#c4a846">'+zAnswer+'</label>\
+            ';
+        }
+
+        var zStr = '\
+            <div class="abs bg_white" style="left:0px; top:'+zTotalH+'px; width:650px; height:'+zH+'px !important; border:0px solid #eee; border-radius:30px;">\
+                <label class="abs txt_24 cl_grey" style="left:30px; top:30px; width:350px;">'+zCreateTime+'</label>\
+                <label class="abs txt_24 cl_black txt_y_hide" style="left:30px; top:80px; width:590px; line-height:30px;">'+zQuestion+'</label>'+zAddAnswer+'\
+            </div>\
+            ';
+        zHmlInfo += zStr;
+        zTotalH += (40+zH);
+    }
+    $('#id_table_a_content').html(zHmlInfo);
+
+    endHeight = zTotalH+230;
+    if(endHeight<1500){
+        endHeight = 1500;
+    }
+    $('#id_end').css("top", endHeight+"px");
+    $('#id_main_page').css("height", endHeight+"px");
+
+    common.lang();
+}
+
+//////////////////////////////////// php相关 ////////////////////////////////////
+//获取问答列表
+function api_qaList(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("qa_list"),
+        type: "get",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{to_page:1, page_size:100},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_qaList success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    myInfoList = evt.data.list;
+                    updateTable();
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_qaList error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+//设置评论
+function api_setQa(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("qa_edit"),
+        type: "post",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{user_id:userInfo.id, question:$('#id_dd_textarea').val()},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_setQa success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok", function(){common.onBackFun();});
+                    break;
+                case 10001:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_setQa error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Angel City</title> 
+    <meta name="viewport" content="width=device-width,user-scalable=no, initial-scale=1">
+    <link rel='icon' href='./img/logo_16.ico' type='image/x-ico' />
+    <script type="text/javascript" src="../vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../vendor/jquery/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../vendor/clipboard.min.js"></script>
+</head>
+
+
+<body class="body_css">
+    <!--主页面容器-->
+    <div class="main_page" id="id_main_page" style="display:none;">
+        <div class="abs" style="left:50px; top:150px;">
+            <div class="abs bg_base" style="top:0px; width:650px; height:100px;">
+                <label class="abs txt_32 txt_w2" style="width:650px; height:100px; line-height:100px;" data-lang="main.改变头像"></label>
+                <div id="id_mine_myHead" class="abs" style="left:550px; top:-5px; transform: scale(0.5,0.5);">
+                    <img class="abs" style="left:0px; top:0px;" src="./img/mask_r_205.png">
+                    <img id="id_head" class="abs" style="-webkit-mask:url(./img/mask_r_200.png); left:2px; top:2px;" src="">
+                </div>
+            </div>
+            <div class="abs bg_base" style="top:102px; width:650px; height:100px;">
+                <label class="abs txt_32 txt_w2" style="width:650px; height:100px; line-height:100px;" data-lang="main.团队奖金"></label>
+                <div id="id_mine_groupBonus" class="abs" style="left:620px; top:35px;"><img src="./img/btn_back3.png"></div>
+            </div>
+            <div class="abs bg_base" style="top:204px; width:650px; height:100px;">
+                <label class="abs txt_32 txt_w2" style="width:650px; height:100px; line-height:100px;" data-lang="main.更新密码"></label>
+                <div id="id_mine_pwd" class="abs" style="left:620px; top:35px;"><img src="./img/btn_back3.png"></div>
+            </div>
+            <div class="abs bg_base" style="top:306px; width:650px; height:100px;">
+                <label class="abs txt_32 txt_w2" style="width:650px; height:100px; line-height:100px;" data-lang="main.更改交易密码"></label>
+                <div id="id_mine_pwd2" class="abs" style="left:620px; top:35px;"><img  src="./img/btn_back3.png"></div>
+            </div>
+            <div class="abs bg_base" style="top:408px; width:650px; height:100px;">
+                <label class="abs txt_32 txt_w2" style="width:650px; height:100px; line-height:100px;" data-lang="main.钱包地址"></label>
+                <div id="id_mine_addr" class="abs" style="left:620px; top:35px; display:none;"><img src="./img/btn_back3.png"></div>
+                <div class="abs" style="left:0px; top:75px; width:650px;">
+                    <div id="id_addr_type" class="txt_20 cl_grey textCanSelect" style="float:left;"></div>
+                    <div id="id_addr_txt" class="txt_20 cl_grey textCanSelect" style="float:left; margin-left:0px;"></div>
+                    <div id="id_btn_copy" style="float:left; margin-left:10px; margin-top:-5px; border-radius:10px; width:25px; height:25px; line-height:25px;" data-clipboard-action="copy" data-clipboard-target="#id_addr_txt"><img src="./img/btn_copy.png"></div>
+                </div>
+            </div>
+            <div class="abs bg_base" style="top:510px; width:650px; height:100px;">
+                <label class="abs txt_32 txt_w2" style="width:650px; height:100px; line-height:100px;" data-lang="main.超时用户"></label>
+                <div id="id_mine_timeout" class="abs" style="left:620px; top:35px;"><img src="./img/btn_back3.png"></div>
+            </div>
+            <div class="abs bg_base" style="top:612px; width:650px; height:100px;">
+                <label class="abs txt_32 txt_w2" style="width:650px; height:100px; line-height:100px;" data-lang="main.评论"></label>
+                <div id="id_mine_comment" class="abs" style="left:620px; top:35px;"><img src="./img/btn_back3.png"></div>
+            </div>
+            <div class="abs bg_base" style="top:714px; width:650px; height:100px;">
+                <label class="abs txt_32 txt_w2" style="width:650px; height:100px; line-height:100px;" data-lang="main.联系信息"></label>
+                <div id="id_mine_contact" class="abs" style="left:620px; top:35px;"><img src="./img/btn_back3.png"></div>
+            </div>
+            <div class="abs bg_base" style="top:816px; width:650px; height:100px;">
+                <label class="abs txt_32 txt_w2" style="width:650px; height:100px; line-height:100px;" data-lang="main.问答"></label>
+                <div id="id_mine_qa" class="abs" style="left:620px; top:35px;"><img src="./img/btn_back3.png"></div>
+            </div>
+        </div>
+        <div id="id_btn_logout" class="abs btn_a btn_a_red" style="left:50px; top:1150px; width:650px !important;" data-lang="main.登出"></div>
+    </div>
+
+    <div id="id_end" class="abs" style="top:1000px; opacity:0;">.</div>
+
+    <div id="id_header"></div>
+    <div id="id_footer"></div>
+    <div id="id_popupwin"></div>
+    <div id="id_tips"></div>
+
+    
+
+<script>
+/////////////////// 初始化基础配置相关 ///////////////////
+var zHead = document.getElementsByTagName('head')[0];
+var zScript = document.createElement('script');
+zScript.type = 'text/javascript';
+zScript.src = '../vendor/common.js?ver='+$.cookie('commonJsVer');
+zScript.onload = zScript.onreadystatechange = function() {
+    if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete" ){
+        common.init(['c_m_popUpWin', 'c_m_header', 'c_m_waiting']);
+    }
+}
+zHead.appendChild(zScript);
+var id_interval = 0;
+window.onload = function ready(){id_interval=setInterval(function(){if(common!=undefined && common.JS_IS_LOADED==true){clearInterval(id_interval); init();}}, 100);};
+/////////////////// 初始化基础配置相关 ///////////////////
+window.onresize = windowResize;
+
+var endHeight = 2200;
+var userInfo = {};
+var myInfoList = [];
+var exchangeList = [];
+
+//初始化
+function init() {
+    c_m_header.init("id_header", "main.个人中心");
+
+    $('#id_btn_logout').click({myType:"id_btn_logout"}, btnClickHandler);
+    $('#id_mine_myHead').click({myType:"id_mine_myHead"}, btnClickHandler);
+    $('#id_mine_groupBonus').click({myType:"id_mine_groupBonus"}, btnClickHandler);
+    $('#id_mine_pwd').click({myType:"id_mine_pwd"}, btnClickHandler);
+    $('#id_mine_pwd2').click({myType:"id_mine_pwd2"}, btnClickHandler);
+    $('#id_mine_addr').click({myType:"id_mine_addr"}, btnClickHandler);
+    $('#id_mine_timeout').click({myType:"id_mine_timeout"}, btnClickHandler);
+    $('#id_mine_comment').click({myType:"id_mine_comment"}, btnClickHandler);
+    $('#id_mine_contact').click({myType:"id_mine_contact"}, btnClickHandler);
+    $('#id_mine_qa').click({myType:"id_mine_qa"}, btnClickHandler);
+
+    api_userInfo();
+    windowResize();
+
+    common.lang();
+    $('#id_main_page').show();
+
+    //复制按钮
+    new Clipboard('#id_btn_copy', {text: function(trigger) {
+        c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1", "tips.b_ok");
+    }});
+}
+
+//按钮点击事件
+function btnClickHandler(p_obj_event){
+    switch(p_obj_event.data.myType){
+        case "id_btn_logout":
+            api_logout();
+            break;
+        case "id_mine_myHead":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('setHead.html')
+            break;
+        case "id_mine_groupBonus":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('serGroupBonus.html')
+            break;
+        case "id_mine_pwd":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('setpwd.html')
+            break;
+        case "id_mine_pwd2":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('setpwd2.html')
+            break;
+        case "id_mine_addr":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('setAddr.html')
+            break;
+        case "id_mine_timeout":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('setTimeoutUser.html')
+            break;
+        case "id_mine_comment":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('setComment.html')
+            break;
+        case "id_mine_contact":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('setContact.html')
+            break;
+        case "id_mine_qa":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('setQa.html')
+            break;
+    }
+}
+
+//窗口尺寸重置
+function windowResize()
+{
+    var zScale = common.initScale(1);
+    zScale = (zScale<1) ? 1 : zScale;
+    
+    var zWinWidth = parseInt(window.screen.availWidth);
+    var zWineHeight = parseInt(window.screen.availHeight);
+    var zMyWidth = document.body.clientWidth;
+    var zObjWidth = parseInt($('#id_main_page').css("width"))*zScale;
+
+    var zMiddleWidth = (zMyWidth-zObjWidth)/2/zScale;
+    $('#id_main_page').css({"left":zMiddleWidth+"px"});
+
+    c_m_header.windowResize(zMiddleWidth);
+    // c_m_footer.windowResize(zMiddleWidth);
+    // c_m_footer.updateTop(endHeight);
+    c_m_popUpWin.setSizePos(zScale);
+}
+
+function updateMySelf(){
+    var zImgUrl =  "./img/head/head_" + userInfo.img_id + ".jpg";
+    $('#id_head').attr("src", zImgUrl);
+
+    if(exchangeList && exchangeList[0]){
+        var zCurExchangeRate = exchangeList[0].rate;
+        common.setCookie("exchangeRate", zCurExchangeRate);
+
+        var zExchangeShowStr = "$1 = " + zCurExchangeRate + "AGL";
+        $('#txt_exchange').text(zExchangeShowStr);
+    }
+
+    // var zAddrTypeList = ["", "ERC20", "OMNI"];
+    // var zAddrType = zAddrTypeList[parseInt(userInfo.wallet_type)] + " : ";
+    var zAddrTxt = userInfo.wallet_addr;
+
+    // $('#id_addr_type').html(zAddrType);
+    $('#id_addr_txt').html(zAddrTxt);
+
+    if(!userInfo.wallet_addr){
+        $('#id_mine_addr').show();
+    }
+}
+
+//////////////////////////////////// php相关 ////////////////////////////////////
+//获取用户id
+function api_userInfo(){
+    $.ajax({
+        url: common.getApiUrl("user_detail"),
+        type: "get",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_userInfo success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    userInfo = evt.data.userInfo;
+                    exchangeList = evt.data.exchangeList;
+                    common.setCookie("userInfo", JSON.stringify(evt.data.userInfo));
+                    updateMySelf();
+                    break;
+                case 10001:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+        },error: function(error){
+            console.log("api_userInfo error:"+error.msg);
+        }
+    });
+}
+
+//登出
+function api_logout(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("logout"),
+        type: "post",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{account:userInfo.account},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_logout success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    common.fnTokenFail();
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok", function(){common.gotoWebSite('login.html');});
+                    break;
+                case 10001:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_logout； error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+
+
+</script>
+
+</body>
+</html>

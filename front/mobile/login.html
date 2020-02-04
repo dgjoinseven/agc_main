@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Angel City</title> 
+    <meta name="viewport" content="width=device-width,user-scalable=no, initial-scale=1">
+    <link rel='icon' href='./img/logo_16.ico' type='image/x-ico' />
+    <script type="text/javascript" src="../vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../vendor/jquery/jquery.cookie.js"></script>
+</head>
+
+
+<body class="body_css">
+    <!--主页面容器-->
+    <div class="main_page" id="id_main_page" style="display:none;">
+        <img src="./img/bg_login.jpg">
+        <input id="id_input_account" class="abs input_a" style="top:520px;" data-placeholder="ph.请输入您的邮箱"></div>
+        <input id="id_input_pwd" type="password" class="abs input_a" style="top:640px;" data-placeholder="ph.请输入您的密码"></div>
+        <div id="id_btn_email_x" class="abs" style="left:660px; top:560px;"><img src="./img/btn_close_1.png"></div>
+        <div id="id_btn_eye_1" class="abs" style="left:660px; top:680px;"><img src="./img/btn_eye_1.png"></div>
+        <div id="id_btn_eye_0" class="abs" style="left:660px; top:680px; display:none;"><img src="./img/btn_eye_0.png"></div>
+        <div id="id_btn_signin" class="abs btn_a btn_a_yellow" style="left:50px; top:850px; width:650px !important;" data-lang="main.登录"></div>
+        <div id="id_btn_lang" class="abs txt_28 txt_c cl_white bg_black" style="left:550px; top:1000px; width:150px; height:70px; line-height:70px; border-radius:10px;"></div>
+    
+        <!-- 语言窗口 -->
+        <div id="id_lang_win" class="abs" style="position:fixed; z-index:2000; width:100%; height:100%; display:none;">
+            <div class="bg_mask" ></div>
+            <div class="abs bg_bottom" style="height:550px;">
+                <label class="abs txt_c txt_w2 txt_36 bg_base" style="width:750px; height:90px; line-height:90px;" data-lang="main.更换语言"></label>
+                <div id="id_lang_win_btn_close" class="abs" style="right:30px; top:30px; cursor:pointer;"><img src="./img/btn_close_1.png"></div>
+                <div class="abs" style="left:50px; top:100px; width:650px; height:100px;">
+                    <label class="abs txt_36 txt_w2 bg_base" style="width:650px; height:100px; line-height:100px;">English</label>
+                    <div id="id_lang_win_en" class="abs sq_common" style="left:550px; top:30px;"></div>
+                </div>
+                <div class="abs" style="left:50px; top:202px; width:650px; height:100px;">
+                    <label class="abs txt_36 txt_w2 bg_base" style="width:650px; height:100px; line-height:100px;">繁體中文</label>
+                   <div id="id_lang_win_zh-hk" class="abs sq_common" style="left:550px; top:30px;"></div>
+                </div>
+                <div class="abs" style="left:50px; top:304px; width:650px; height:100px; display:none;">
+                    <label class="abs txt_36 txt_w2 bg_base" style="width:650px; height:100px; line-height:100px;">日本語</label>
+                   <div id="id_lang_win_jp" class="abs sq_common" style="left:550px; top:30px;"></div>
+                </div>
+                <div class="abs" style="left:50px; top:406px; width:650px; height:100px; display:none;">
+                    <label class="abs txt_36 txt_w2 bg_base" style="width:650px; height:100px; line-height:100px;">한국어</label>
+                   <div id="id_lang_win_ko" class="abs sq_common" style="left:550px; top:30px;"></div>
+                </div>
+                <div class="abs" style="left:50px; top:508px; width:650px; height:100px; display:none;">
+                    <label class="abs txt_36 txt_w2 bg_base" style="width:650px; height:100px; line-height:100px;">Français</label>
+                   <div id="id_lang_win_fr" class="abs sq_common" style="left:550px; top:30px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="id_end" class="abs" style="top:1000px; opacity:0;">.</div>
+
+    <div id="id_header"></div>
+    <div id="id_footer"></div>
+    <div id="id_popupwin"></div>
+    <div id="id_tips"></div>
+
+<script>
+/////////////////// 初始化基础配置相关 ///////////////////
+var zHead = document.getElementsByTagName('head')[0];
+var zScript = document.createElement('script');
+zScript.type = 'text/javascript';
+zScript.src = '../vendor/common.js?ver='+$.cookie('commonJsVer');
+zScript.onload = zScript.onreadystatechange = function() {
+    if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete" ){
+        common.init(['c_m_popUpWin', 'c_m_waiting']);
+    }
+}
+zHead.appendChild(zScript);
+var id_interval = 0;
+window.onload = function ready(){id_interval=setInterval(function(){if(common!=undefined && common.JS_IS_LOADED==true){clearInterval(id_interval); init();}}, 100);};
+/////////////////// 初始化基础配置相关 ///////////////////
+window.onresize = windowResize;
+
+var endHeight = 3200;
+var selectedJb = 0;
+var selectedType = 0;
+var selectedJd = 0;
+var selectedCity = "";
+var selectedPx = 0;
+var totalPage = 1;
+var perPage = 10;
+var curPage = 1;
+var myInfoList = [];
+
+//初始化
+function init() {
+    $('#id_btn_email_x').click({myType:"id_btn_email_x"}, btnClickHandler);
+    $('#id_btn_eye_1').click({myType:"id_btn_eye_1"}, btnClickHandler);
+    $('#id_btn_eye_0').click({myType:"id_btn_eye_0"}, btnClickHandler);
+    $('#id_btn_signin').click({myType:"id_btn_signin"}, btnClickHandler);
+    $('#id_btn_lang').click({myType:"id_btn_lang"}, btnClickHandler);
+    $('#id_lang_win_btn_close').click({myType:"id_lang_win_btn_close"}, btnClickHandler);
+    $('#id_lang_win_en').click({myType:"id_lang_win_en"}, btnClickHandler);
+    $('#id_lang_win_zh-hk').click({myType:"id_lang_win_zh-hk"}, btnClickHandler);
+    $('#id_lang_win_jp').click({myType:"id_lang_win_jp"}, btnClickHandler);
+    $('#id_lang_win_ko').click({myType:"id_lang_win_ko"}, btnClickHandler);
+    $('#id_lang_win_fr').click({myType:"id_lang_win_fr"}, btnClickHandler);
+
+    updateLang();
+   
+    windowResize();
+
+    common.lang();
+    $('#id_main_page').show();
+}
+
+//按钮点击事件
+function btnClickHandler(p_obj_event){
+    switch(p_obj_event.data.myType){
+        case "id_btn_email_x":
+            $('#id_input_account').val("");
+            break;
+        case "id_btn_eye_1":
+            $('#id_btn_eye_1').hide();
+            $('#id_btn_eye_0').show();
+            $('#id_input_pwd').attr("type", "text");
+            break;
+        case "id_btn_eye_0":
+            $('#id_btn_eye_1').show();
+            $('#id_btn_eye_0').hide();
+            $('#id_input_pwd').attr("type", "password");
+            break;
+        case "id_btn_signin":
+            if(!$('#id_input_account').val()){
+                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.3002", "tips.b_ok");
+                return;
+            }
+            if(!$('#id_input_pwd').val()){
+                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.3003", "tips.b_ok");
+                return;
+            }
+            api_login();
+            break;
+        case "id_btn_lang":
+            $('#id_lang_win').show();
+            break;
+        case "id_lang_win_btn_close":
+            $('#id_lang_win').hide();
+            break;
+        case "id_lang_win_en":
+            common.setCookie("lang", "en");
+            updateLang();
+            common.onRefreshFun();
+            break;
+        case "id_lang_win_zh-hk":
+            common.setCookie("lang", "zh-hk");
+            updateLang();
+            common.onRefreshFun();
+            break;
+        case "id_lang_win_jp":
+            common.setCookie("lang", "jp");
+            updateLang();
+            common.onRefreshFun();
+            break;
+        case "id_lang_win_ko":
+            common.setCookie("lang", "ko");
+            updateLang();
+            common.onRefreshFun();
+            break;
+        case "id_lang_win_fr":
+            common.setCookie("lang", "fr");
+            updateLang();
+            common.onRefreshFun();
+            break;
+    }
+}
+
+//窗口尺寸重置
+function windowResize()
+{
+    var zScale = common.initScale(1);
+    zScale = (zScale<1) ? 1 : zScale;
+    
+    var zWinWidth = parseInt(window.screen.availWidth);
+    var zWineHeight = parseInt(window.screen.availHeight);
+    var zMyWidth = document.body.clientWidth;
+    var zObjWidth = parseInt($('#id_main_page').css("width"))*zScale;
+
+    var zMiddleWidth = (zMyWidth-zObjWidth)/2/zScale;
+    $('#id_main_page').css({"left":zMiddleWidth+"px"});
+
+    // c_m_header.windowResize(zMiddleWidth);
+    // c_m_footer.windowResize(zMiddleWidth);
+    // c_m_footer.updateTop(endHeight);
+    c_m_popUpWin.setSizePos(zScale);
+}
+
+function resetLangWin(){
+    $('#id_lang_win_en').removeClass("sq_select");
+    $('#id_lang_win_zh-hk').removeClass("sq_select");
+    $('#id_lang_win_jp').removeClass("sq_select");
+    $('#id_lang_win_ko').removeClass("sq_select");
+    $('#id_lang_win_fr').removeClass("sq_select");
+}
+
+function updateLang(){
+    $('#id_btn_lang').text(common.getCurLang());
+
+    resetLangWin();
+    var zLang = common.getCookie("lang")?common.getCookie("lang"):"en";
+    $('#id_lang_win_'+zLang).addClass("sq_select");
+}
+
+//////////////////////////////////// php相关 ////////////////////////////////////
+//登录
+function api_login(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("login"),
+        type: "post",
+        // beforeSend: function(Request) {
+            // Request.setRequestHeader("token",common.getCookie('token'));
+        // },
+        data:{account:$('#id_input_account').val(), pwd:$('#id_input_pwd').val()},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_setdefault success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    common.setCookie("token", evt.data.token);
+                    common.setCookie("userInfo", JSON.stringify(evt.data.userInfo));
+                    common.setCookie("conf", JSON.stringify(evt.data.conf));
+                    // console.log(common.getCookie("token"),common.getCookie("userInfo"));
+                    common.gotoWebSite('home.html');
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("php_setdefault error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+
+
+</script>
+
+</body>
+</html>

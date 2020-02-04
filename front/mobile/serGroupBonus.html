@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Angel City</title> 
+    <meta name="viewport" content="width=device-width,user-scalable=no, initial-scale=1">
+    <link rel='icon' href='./img/logo_16.ico' type='image/x-ico' />
+    <script type="text/javascript" src="../vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../vendor/jquery/jquery.cookie.js"></script>
+</head>
+
+
+<body class="body_css">
+    <!--主页面容器-->
+    <div class="main_page" id="id_main_page" style="display:none;">
+        <div class="abs" style="left:80px; top:180px; width:650px;">
+            <div class="abs txt_32" style="left:0px; top:0px;">
+                <label class="txt_w2" style="margin-left:0px;" data-lang="main.可得奖励"></label>
+                <label class="cl_blue" id="id_bonus_canGet" style="margin-left:10px;"></label>
+            </div>
+            <div class="abs txt_32" style="left:0px; top:70px;">
+                <label class="txt_w2"  style="margin-left:0px;" data-lang="main.冻结奖励"></label>
+                <label class="cl_grey2" id="id_bonus_frozen" style="margin-left:10px;"></label>
+            </div>
+            <div class="abs txt_32" style="left:0px; top:140px;">
+                <label class="txt_w2"  style="margin-left:0px;" data-lang="main.总奖励"></label>
+                <label class="cl_orange" id="id_bonus_total" style="margin-left:10px;"></label>
+            </div>
+        </div>
+        <div id="id_table_a_content" class="abs" style="left:50px; top:450px; width:650px; height:1100px;"></div>
+    </div>
+
+    <div id="id_end" class="abs" style="top:2400px; opacity:0;">.</div>
+
+    <div id="id_header"></div>
+    <div id="id_footer"></div>
+    <div id="id_popupwin"></div>
+    <div id="id_tips"></div>
+
+<script>
+/////////////////// 初始化基础配置相关 ///////////////////
+var zHead = document.getElementsByTagName('head')[0];
+var zScript = document.createElement('script');
+zScript.type = 'text/javascript';
+zScript.src = '../vendor/common.js?ver='+$.cookie('commonJsVer');
+zScript.onload = zScript.onreadystatechange = function() {
+    if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete" ){
+        common.init(['c_m_popUpWin', 'c_m_header', 'c_m_waiting']);
+    }
+}
+zHead.appendChild(zScript);
+var id_interval = 0;
+window.onload = function ready(){id_interval=setInterval(function(){if(common!=undefined && common.JS_IS_LOADED==true){clearInterval(id_interval); init();}}, 100);};
+/////////////////// 初始化基础配置相关 ///////////////////
+window.onresize = windowResize;
+
+var endHeight = 2200;
+var userInfo = {};
+var groupInfo = {};
+var myInfoList = [];
+
+//初始化
+function init() {
+    c_m_header.init("id_header", "main.团队奖金");
+
+    if(common.getCookie("userInfo")){
+        userInfo = JSON.parse(common.getCookie("userInfo"));
+    }else{
+        c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
+        windowResize();
+        return;
+    }
+
+    windowResize();
+    api_dynList();
+
+    common.lang();
+    $('#id_main_page').show();
+}
+
+//按钮点击事件
+function btnClickHandler(p_obj_event){
+    // switch(p_obj_event.data.myType){
+    // }
+}
+
+//窗口尺寸重置
+function windowResize()
+{
+    var zScale = common.initScale(1);
+    zScale = (zScale<1) ? 1 : zScale;
+    
+    var zWinWidth = parseInt(window.screen.availWidth);
+    var zWineHeight = parseInt(window.screen.availHeight);
+    var zMyWidth = document.body.clientWidth;
+    var zObjWidth = parseInt($('#id_main_page').css("width"))*zScale;
+
+    var zMiddleWidth = (zMyWidth-zObjWidth)/2/zScale;
+    $('#id_main_page').css({"left":zMiddleWidth+"px"});
+
+    c_m_header.windowResize(zMiddleWidth);
+    // c_m_footer.windowResize(zMiddleWidth);
+    // c_m_footer.updateTop(endHeight);
+    c_m_popUpWin.setSizePos(zScale);
+}
+
+//更新团队奖励信息
+function updateGroupInfo(){
+    var zCurExchangeRate = common.getCookie("exchangeRate");
+    var zBonusCanGet = 0;
+    var zBonusFrozen = 0;
+    var zBonusTotal = 0;
+    var zTop = 0;
+    var zBonus = 0; 
+    var zHmlInfo = "";
+    for(var i=1; i<=19; i++){
+        var zDynName = "dyn_"+i;
+        var zColor = "#A8A8A8";
+        if(groupInfo[zDynName]){
+            zBonus = parseInt(groupInfo[zDynName]);
+        }else{
+            zBonus = 0;
+        }
+        // console.log(i, zBonus);
+        if(userInfo.rounds >= i){
+            zBonusCanGet += zBonus;
+            zColor = "#";
+        }else{
+            zBonusFrozen += zBonus;
+        }
+        zBonusTotal += zBonus;
+
+        //表
+        zTop = (i-1)*90;
+        var zMoney = "$"+zBonus+"="+(zBonus*zCurExchangeRate)+common.COIN_NAME
+        var zClickInfo = {};
+        zClickInfo.id = i;
+        var zClickTxt = " onClick='onListClickHander("+JSON.stringify(zClickInfo)+")' ";
+        var zStr = '\
+            <div class="abs bg_white" style="top:'+zTop+'px; width:650px; height:60px; background-color:rgba(0,0,0,0); border:0px solid #eee; border-bottom:2px solid #eee;">\
+                <div class="abs txt_32 txt_w2" style="color:'+zColor+'; left:0px; top:0px;">\
+                    <label data-lang="main.轮数"></label>\
+                    <label>'+i+'</label>\
+                </div>\
+                <label class="abs txt_28" style="left:200px; top:5px; color:'+zColor+';">'+zMoney+'</label>\
+                <div class="abs" style="right:10px; top:5px;" '+zClickTxt+'><img src="./img/btn_back3.png"></div>\
+            </div>\
+            ';
+        zHmlInfo += zStr;
+    }
+    $('#id_table_a_content').html(zHmlInfo);
+
+    $('#id_bonus_canGet').html("$"+zBonusCanGet+"="+(zBonusCanGet*zCurExchangeRate)+common.COIN_NAME);
+    $('#id_bonus_frozen').html("$"+zBonusFrozen+"="+(zBonusFrozen*zCurExchangeRate)+common.COIN_NAME);
+    $('#id_bonus_total').html("$"+zBonusTotal+"="+(zBonusTotal*zCurExchangeRate)+common.COIN_NAME);
+
+    common.lang();
+}
+
+//按钮被点击
+function onListClickHander(pInfo){
+    var zInfo = pInfo;
+    selectId = zInfo.id;
+    common.setCookie("groupRounds", selectId);
+
+    common.gotoWebSite('groupBonusLog.html');
+}
+
+//////////////////////////////////// php相关 ////////////////////////////////////
+//动态奖金列表-某个人
+function api_dynList(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("dyn_list"),
+        type: "get",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_dynList success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    groupInfo = evt.data.list[0];
+                    updateGroupInfo();
+                    break;
+                case 10001:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_dynList error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+
+</script>
+
+</body>
+</html>

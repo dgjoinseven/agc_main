@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Angel City</title> 
+    <meta name="viewport" content="width=device-width,user-scalable=no, initial-scale=1">
+    <link rel='icon' href='./img/logo_16.ico' type='image/x-ico' />
+    <script type="text/javascript" src="../vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../vendor/jquery/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../vendor/clipboard.min.js"></script>
+</head>
+
+
+<body class="body_css">
+    <!--主页面容器-->
+    <div class="main_page" id="id_main_page" style="display:none; width:100%; height:1000px; background-color:#F5F5F5;">
+        <label id="id_test_label" class="abs" style="left:80px; top:500px; width:590px; opacity:0;"></label>
+        <div id="id_table_a_content" class="abs" style="left:50px; top:180px; width:650px; height:1100px;"></div>
+    </div>
+
+    <div id="id_end" class="abs" style="top:1000px; opacity:0;">.</div>
+
+    <div id="id_header"></div>
+    <div id="id_footer"></div>
+    <div id="id_popupwin"></div>
+    <div id="id_tips"></div>
+
+<script>
+/////////////////// 初始化基础配置相关 ///////////////////
+var zHead = document.getElementsByTagName('head')[0];
+var zScript = document.createElement('script');
+zScript.type = 'text/javascript';
+zScript.src = '../vendor/common.js?ver='+$.cookie('commonJsVer');
+zScript.onload = zScript.onreadystatechange = function() {
+    if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete" ){
+        common.init(['c_m_popUpWin', 'c_m_header', 'c_m_footer2', 'c_m_waiting']);
+    }
+}
+zHead.appendChild(zScript);
+var id_interval = 0;
+window.onload = function ready(){id_interval=setInterval(function(){if(common!=undefined && common.JS_IS_LOADED==true){clearInterval(id_interval); init();}}, 100);};
+/////////////////// 初始化基础配置相关 ///////////////////
+window.onresize = windowResize;
+
+var endHeight = 2200;
+var userInfo = {};
+var myInfoList = [];
+var myScale = 1;
+
+//初始化
+function init() {
+    c_m_header.init("id_header", "main.用户评论");
+    c_m_footer2.init("id_footer", 2);
+
+    if(common.getCookie("userInfo")){
+        userInfo = JSON.parse(common.getCookie("userInfo"));
+    }else{
+        c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
+        windowResize();
+        return;
+    }
+
+    windowResize();
+
+    api_commentList();
+
+    common.lang();
+    $('#id_main_page').show();
+}
+
+//按钮点击事件
+function btnClickHandler(p_obj_event){
+    // switch(p_obj_event.data.myType){
+    //     case "id_btn_back":
+    //         common.onBackFun();
+    //         break;
+    // }
+}
+
+//窗口尺寸重置
+function windowResize()
+{
+    var zScale = common.initScale(1);
+    myScale = zScale;
+    zScale = (zScale<1) ? 1 : zScale;
+    
+    var zWinWidth = parseInt(window.screen.availWidth);
+    var zWineHeight = parseInt(window.screen.availHeight);
+    var zMyWidth = document.body.clientWidth;
+    var zObjWidth = parseInt($('#id_main_page').css("width"))*zScale;
+
+    var zMiddleWidth = (zMyWidth-zObjWidth)/2/zScale;
+    $('#id_main_page').css({"left":zMiddleWidth+"px"});
+
+    c_m_header.windowResize(zMiddleWidth);
+    c_m_footer.windowResize(zMiddleWidth);
+    c_m_footer.updateTop(endHeight);
+    c_m_popUpWin.setSizePos(zScale);
+}
+
+//更新列表
+function updateTable(){
+    var zHmlInfo = "";
+    var zTop = 0;
+    var zTotalH = 0;
+    for(var i=0; i<myInfoList.length; i++){
+        var zInfo = myInfoList[i];
+        var zName = zInfo.user_name;
+        var zContents = zInfo.contents;
+        var zCreateTime = common.formatUnixtimestamp(zInfo.create_time, true);
+        $('#id_test_label').text(zContents);
+        var zH = (common.getTextWHXY("id_test_label").height+90)/myScale;
+        var zStr = '\
+            <div class="abs bg_white" style="left:0px; top:'+zTotalH+'px; width:650px; height:'+zH+'px !important; border:0px solid #eee; border-radius:30px;">\
+                <label class="abs txt_32 cl_black txt_w2" style="left:30px; top:30px; width:350px;">'+zName+'</label>\
+                <label class="abs txt_24 cl_grey txt_y_hide" style="left:30px; top:80px; width:590px; line-height:30px;">'+zContents+'</label>\
+                <label class="abs txt_24 cl_grey" style="right:30px; top:30px; width:150px;">'+zCreateTime+'</label>\
+            </div>\
+            ';
+        zHmlInfo += zStr;
+        zTotalH += (40+zH);
+    }
+    $('#id_table_a_content').html(zHmlInfo);
+
+    endHeight = zTotalH+230;
+    if(endHeight<1500){
+        endHeight = 1500;
+    }
+    $('#id_end').css("top", endHeight+"px");
+    $('#id_main_page').css("height", endHeight+"px");
+
+    common.lang();
+}
+
+//////////////////////////////////// php相关 ////////////////////////////////////
+//获取用户评论
+function api_commentList(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("comment_list"),
+        type: "get",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{to_page:1, page_size:100},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_commentList success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    myInfoList = evt.data.list;
+                    updateTable();
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_commentList error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+
+
+</script>
+
+</body>
+</html>
