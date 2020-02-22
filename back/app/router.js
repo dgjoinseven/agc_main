@@ -33,13 +33,14 @@ module.exports = app => {
   router.get('/api/frozen_user_list', jwt, tc, controller.cBase.frozenUserList);     //冻结用户列表
   router.post('/api/frozen_user_edit', jwt, tc, controller.cBase.frozenUserEdit);    //冻结用户编辑
   router.get('/api/order_list', jwt, tc, controller.cBase.orderList);       //订单列表
+  router.post('/api/order_appeal', jwt, tc, controller.cBase.orderAppeal);  //订单申诉
   router.post('/api/order_edit', jwt, tc, controller.cBase.orderEdit);      //订单编辑
 
   router.get('/api/dyn_list', jwt, tc, controller.cBase.dynList);           //动态奖金列表
   router.get('/api/dyn_log_list', jwt, tc, controller.cBase.dynLogList);    //动态奖金记录列表
 
   ////////////////////// 其它 //////////////////////
-  // router.post('/upload', tc, controller.uploader.uploadSingle); // 上传
+  router.post('/api/upload_img', tc, controller.cBase.uploadImg); // 上传图片
   // router.get('/getOssAuth', tc, controller.uploader.ossAuth); // 获取上传签名
   // router.post('/updateNotification', tc, controller.cSetup.uploadSingle); // 上传
   

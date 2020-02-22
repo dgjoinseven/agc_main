@@ -7,7 +7,7 @@ class CUserController extends Controller {
     async login() {
         // console.log("==========login");
         const { ctx } = this;
-        const TOTP = this.ctx.helper.totp();
+        // const TOTP = this.ctx.helper.totp();
         const zRes = this.ctx.request.body;
         const zAccount = zRes.account;
         const zPwd = zRes.pwd;
@@ -80,8 +80,9 @@ class CUserController extends Controller {
                         "status":zUserInfo.status,
                         "rounds":zUserInfo.rounds,
                         "wallet_addr":zUserInfo.wallet_addr,
+                        "bank_addr":zUserInfo.bank_addr,
+                        "alipay_addr":zUserInfo.alipay_addr,
                         "wallet_type":zUserInfo.wallet_type,
-                        "remarks":zUserInfo.remarks,
                         "is_special":zUserInfo.is_special,
                         "is_lotto":zUserInfo.is_lotto,
                     };

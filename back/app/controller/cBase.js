@@ -88,6 +88,12 @@ class CBaseController extends Controller {
         if(zData){this.ctx.body = zData ;}else{this.ctx.body = { code:-1, msg:'error'};}
     }
 
+    //订单申诉
+    async orderAppeal() {
+        var zData = await this.ctx.service.mBase.orderAppeal(this.ctx.request.body);
+        if(zData){this.ctx.body = zData;}else{this.ctx.body = { code:-1, msg:'error'};}
+    }
+
     //订单编辑
     async orderEdit() {
         var zData = await this.ctx.service.mBase.orderEdit(this.ctx.request.body);
@@ -105,6 +111,16 @@ class CBaseController extends Controller {
         var zData = await this.ctx.service.mDyn.dynLogList(this.ctx.query);
         if(zData){this.ctx.body = zData ;}else{this.ctx.body = { code:-1, msg:'error'};}
     }
+
+
+
+    ///////////////////////////////////// 其它 /////////////////////////////////////
+    //上传图片
+    async uploadImg() {
+        var zData = await this.ctx.service.mzUploadFile.uploadImg();
+        if(zData){this.ctx.body = zData ;}else{this.ctx.body = { code:-1, msg:'error'};}
+    }
+    
 
 }
 

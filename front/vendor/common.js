@@ -8,9 +8,9 @@ common = {
     ROOT_URL : "",          //基础路径
     COIN_NAME : "AGC",      //币的名字
     PHP_URL_ZSF : "https://api.ctwangelcity.com/api/",
-    // PHP_URL_TEST : "http://120.25.106.197:7002/api/",
+    PHP_URL_TEST : "http://120.25.106.197:7002/api/",
     // PHP_URL_ZSF : "http://127.0.0.1:7002/api/",
-    PHP_URL_TEST : "http://127.0.0.1:7002/api/",
+    // PHP_URL_TEST : "http://127.0.0.1:7002/api/",
 
     //初始化
     init : function(p_cp_list){
@@ -164,6 +164,7 @@ common = {
                 lang = lang_en;
                 break;
         }
+        // lang = lang_zhhk;
         $('[data-lang],[data-placeholder]').each(function (){
             if($(this).attr("data-lang")){
                 var zDotIndex1 = $(this).attr("data-lang").indexOf(".");

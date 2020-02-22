@@ -247,7 +247,7 @@ class MBaseService extends Service {
         const zTokenInfo = ctx.helper.verifyToken(ctx.header.authorization);// 解密获取的Tokenid
         const zTime = parseInt(Date.now()/1000);
 
-        const zSql = ` select id,name,account,img_id,boss_id,boss_id_2,boss_list,is_lv,pwd2,status,rounds,wallet_addr,wallet_type,remarks,is_special,lotto_status from ctw_user where id=${zTokenInfo.id} `;
+        const zSql = ` select id,name,account,img_id,boss_id,boss_id_2,boss_list,is_lv,pwd2,status,rounds,wallet_addr,bank_addr,alipay_addr,is_special,lotto_status from ctw_user where id=${zTokenInfo.id} `;
         const zUserList = await this.app.mysql.get('db1').query(zSql);
         const zExchangeList = await this.app.mysql.get('db1').query(`select * from ctw_exchange order by id desc`);
         if(zUserList && zExchangeList){
@@ -321,23 +321,27 @@ class MBaseService extends Service {
         let zBossInfo;
 
         ////////////////////// 优先排列到天使轮的领导旗下 //////////////////////
-        let zBossIdList = zUserInfo.boss_list.split(",");
-        let zBossIdCountList = [];
-        for(let i=0; i<zBossIdList.length; i++){
-            let zBossIdStr = zBossIdList[i];
-            if(zBossIdStr!=""){
-                let zBossId = parseInt(zBossIdStr);
-                zBossIdCountList.push(zBossId);
+        let zBossHavePoint;
+        if(zUserInfo.boss_list){
+            let zBossIdList = zUserInfo.boss_list.split(",");
+            let zBossIdCountList = [];
+            for(let i=0; i<zBossIdList.length; i++){
+                let zBossIdStr = zBossIdList[i];
+                if(zBossIdStr!=""){
+                    let zBossId = parseInt(zBossIdStr);
+                    zBossIdCountList.push(zBossId);
+                }
             }
+            let zBossNewStr = zBossIdCountList.join(",");
+            // console.log(`添加ctw_rounds队列============  zRounds=${zRounds}, zBossNewStr=${zBossNewStr}`);
+            zBossHavePoint = await this.app.mysql.get('db1').query(`select * from ctw_rounds where zt_sum<2 and rounds=${zRounds} and user_id in(${zBossNewStr}) order by id`);
         }
-        let zBossNewStr = zBossIdCountList.join(",");
-        console.log(`添加ctw_rounds队列============  zRounds=${zRounds}, zBossNewStr=${zBossNewStr}`);
-        let zBossHavePoint = await this.app.mysql.get('db1').query(`select * from ctw_rounds where zt_sum<2 and rounds=${zRounds} and user_id in(${zBossNewStr}) order by id`);
+        
         if(zBossHavePoint && zBossHavePoint[0]){
             zBossInfo = zBossHavePoint[0];
-            console.log("ctw_rounds =1============找到boss位置 boss:"+zBossInfo.user_id);
+            // console.log("ctw_rounds =1============找到boss位置 boss:"+zBossInfo.user_id);
         }else{
-            console.log("ctw_rounds =2============使用常规位置");
+            // console.log("ctw_rounds =2============使用常规位置");
             ////////////////////// 闲散按照从上到下，从左到右的顺序插入三角形队列 //////////////////////
             //获取将要挂靠的boss信息
             let zBossInfoList = await this.app.mysql.get('db1').query(`select * from ctw_rounds where zt_sum<2 and rounds=${zRounds} order by id`);
@@ -403,9 +407,11 @@ class MBaseService extends Service {
                 
                 //距离上次帮人注册，不超过一定时间
                 let zConfigDic = await this.ctx.helper.getConfigDic();
-                let zNextRegisterTime = zCreaterUserInfo.register_time + parseInt(zConfigDic.zt_time)*3600;
-                if(zTime < zNextRegisterTime){
-                    return {code:1025, msg:ReturnCode[1025]};
+                if(parseInt(zConfigDic.is_zt_time)==1){
+                    let zNextRegisterTime = zCreaterUserInfo.register_time + parseInt(zConfigDic.zt_time)*3600;
+                    if(zTime < zNextRegisterTime){
+                        return {code:1025, msg:ReturnCode[1025]};
+                    }
                 }
                 
                 //计算boss_list
@@ -436,7 +442,7 @@ class MBaseService extends Service {
                 if(pParam.wallet_addr!=undefined){
                     let zEditUserInfo = await ctx.service.mUser.getUserInfo(pParam.id);
                     if(zEditUserInfo.wallet_addr){
-                        return {code:10029, msg:`地址不可重复设置`};
+                        return {code:1029, msg:`地址不可重复设置`};
                     }
                     zParam += ` wallet_addr='${pParam.wallet_addr}', `;
                 }
@@ -499,19 +505,35 @@ class MBaseService extends Service {
         const { ctx } = this;
         // const zTokenInfo = ctx.helper.verifyToken(ctx.header.authorization);// 解密获取的Token
         let zParamInfo = ``;
-        if(pParam.isLog && pParam.isLog==1){
-            zParamInfo += ` and (a.from_id=${pParam.id} or a.to_id=${pParam.id}) and a.status=2`;
+        if(pParam.isFinish==1){
+            zParamInfo += ` and (a.from_id=${pParam.id} or a.to_id=${pParam.id}) and a.status>=2`;
         }else{
-            zParamInfo += ` and (a.from_id=${pParam.id} or a.to_id=${pParam.id}) and a.status!=2`;
+            zParamInfo += ` and (a.from_id=${pParam.id} or a.to_id=${pParam.id}) and a.status<2`;
         }
-        let zShowTime = parseInt(new Date(2030,1,1,0,0,0).getTime()/1000);//2030年1月1日（小于这个时间则被认为是不可显示的单子）
-        const zSql = ` select distinct a.id, a.*, b.name as from_name, b.img_id as from_img_id, b.remarks as from_remarks, c.name as to_name, c.remarks as to_remarks, c.img_id as to_img_id from ctw_order a LEFT JOIN ctw_user b ON a.from_id=b.id LEFT JOIN ctw_user c ON a.to_id=c.id  where a.id>0 ${zParamInfo} and a.create_time<${zShowTime} order by a.create_time desc`;
+        const zSql = ` select distinct a.id, a.*, b.name as from_name, b.tel as from_tel, b.img_id as from_img_id, c.name as to_name, c.tel as to_tel, c.img_id as to_img_id from ctw_order a LEFT JOIN ctw_user b ON a.from_id=b.id LEFT JOIN ctw_user c ON a.to_id=c.id  where a.id>0 ${zParamInfo} order by a.create_time desc`;
         const zList = await this.app.mysql.get('db1').query(zSql);
         if(zList){
             return { code:1, msg:'success', data:{list:zList} };
         }else{
             return null;
         }
+    }
+
+    //订单申诉
+    async orderAppeal(pParam) {
+        const { ctx } = this;
+        const zTokenInfo = ctx.helper.verifyToken(ctx.header.authorization);// 解密获取的Token
+        let zSql = '';
+        let zParam = [];
+        let zResult = {};
+        const zTime = parseInt(Date.now()/1000);
+        const zCK = await ctx.helper.checkIdOk("ctw_order", pParam.id);
+
+        //申诉类型
+
+        //申诉时间
+
+        //给user表添加申诉次数
     }
 
     //订单编辑
@@ -543,13 +565,24 @@ class MBaseService extends Service {
         }
 
         //操作ctw_order库
-        if(parseInt(pParam.type)==1){//确认打款
-            zSql = `update ctw_order set status=1 where id=${pParam.id} and from_id=${zTokenInfo.id} and status=0`;
-        }else if(parseInt(pParam.type)==2){//确认收款
-            zSql = `update ctw_order set status=2 where id=${pParam.id} and to_id=${zTokenInfo.id} and status=1`;
-        }else{
-            return {code:-1, msg:`操作类型错误，type:${pParam.type}`};
+        switch(parseInt(pParam.type)){
+            case 1://打款
+                zSql = `update ctw_order set status=1, pay_time=${zTime}, update_time=${zTime} where id=${pParam.id} and from_id=${zTokenInfo.id} and status=0`;
+                break;
+            case 2://确认收款
+                zSql = `update ctw_order set status=2, confirm_time=${zTime}, update_time=${zTime} where id=${pParam.id} and to_id=${zTokenInfo.id} and status=1`;
+                break;
+            case 3://拒绝
+                zSql = `update ctw_order set arbitraction_type=1, reason_refuse=${pParam.reason_refuse}, refuse_time=${zTime}, update_time=${zTime} where id=${pParam.id} and to_id=${zTokenInfo.id}`;
+                break;
+            case 4://申诉
+                zSql = `update ctw_order set arbitraction_type=2, reason_appeal=${pParam.reason_appeal}, appeal_time=${zTime}, update_time=${zTime} where id=${pParam.id} and from_id=${zTokenInfo.id}`;
+                break;
+            default:
+                return {code:-1, msg:`操作类型错误，type:${pParam.type}`};
+                break;
         }
+
         // console.log("zSql:",zSql);
         zResult = await this.app.mysql.get('db1').query(zSql);
         if(zResult && zResult["affectedRows"]>0){
@@ -588,6 +621,9 @@ class MBaseService extends Service {
         let zCurPayMoney = Number(zConfigDic["money_"+zCurRounds]);
         let zDelAddr = zConfigDic["del_addr"];
 
+        //当前汇率
+        let zExchange = await ctx.helper.getCurExchange();
+
         //随机生成公共地址
         let zGgAddrList = await this.app.mysql.get('db1').query(`select * from ctw_gg_addr where is_use=1`);
         if(!zGgAddrList || !zGgAddrList[0]){
@@ -600,51 +636,62 @@ class MBaseService extends Service {
         let zOrderParamList = [];
         if(pOrderType==6){ ////////////// 大转盘奖励
             let zOrderParam_lotto = {};
+            zOrderParam_lotto["order_type"] = 6;
             zOrderParam_lotto["fromId"] = 0;
-            zOrderParam_lotto["fromAddr"] = zGgAddr; 
+            zOrderParam_lotto["fromAddr"] = zGgAddr;
+            zOrderParam_lotto["fromBank"] = "";
+            zOrderParam_lotto["fromAlipay"] = "";
             zOrderParam_lotto["toId"] = zUserInfo.id;
             zOrderParam_lotto["toAddr"] = zUserInfo.wallet_addr;
+            zOrderParam_lotto["toBank"] = zUserInfo.bank_addr;
+            zOrderParam_lotto["toAlipay"] = zUserInfo.alipay_addr;
             zOrderParam_lotto["rounds"] = 1;
             zOrderParam_lotto["money"] = pDynMoney;
-            zOrderParam_lotto["order_type"] = 6;
+            zOrderParam_lotto["money_agc"] = pDynMoney*zExchange;
             zOrderParam_lotto["active_id"] = 0;
+            zOrderParam_lotto["is_rmb"] = 0;
             zOrderParam_lotto["is_use"] = 1;
             zOrderParamList.push(zOrderParam_lotto);
-        }else if(pOrderType==7){ ////////////// 回馈700的单子
+        }else if(pOrderType==7){ ////////////// 回馈单子
             let zOrderParam_backe = {};
-            zOrderParam_backe["fromId"] = 0;
-            zOrderParam_backe["fromAddr"] = zGgAddr; 
-            zOrderParam_backe["toId"] = zUserInfo.id;
-            zOrderParam_backe["toAddr"] = zUserInfo.wallet_addr;
-            zOrderParam_backe["rounds"] = 0;
-            zOrderParam_backe["money"] = zConfBackMoney;
             zOrderParam_backe["order_type"] = 7;
-            zOrderParam_backe["active_id"] = 0;
-            zOrderParam_backe["is_use"] = 1;
+            zOrderParam_backe["user_id"] = zUserInfo.id;
             zOrderParamList.push(zOrderParam_backe);
         }else if(pOrderType==8){ ////////////// 动态奖金
             let zOrderParam_dyn = {};
+            zOrderParam_dyn["order_type"] = 8;
             zOrderParam_dyn["fromId"] = 0;
-            zOrderParam_dyn["fromAddr"] = zGgAddr; 
+            zOrderParam_dyn["fromAddr"] = zGgAddr;
+            zOrderParam_dyn["fromBank"] = "";
+            zOrderParam_dyn["fromAlipay"] = "";
             zOrderParam_dyn["toId"] = zUserInfo.id;
             zOrderParam_dyn["toAddr"] = zUserInfo.wallet_addr;
+            zOrderParam_dyn["toBank"] = zUserInfo.bank_addr;
+            zOrderParam_dyn["toAlipay"] = zUserInfo.alipay_addr;
             zOrderParam_dyn["rounds"] = zUserInfo.rounds;
             zOrderParam_dyn["money"] = pDynMoney;
-            zOrderParam_dyn["order_type"] = 8;
+            zOrderParam_dyn["money_agc"] = pDynMoney*zExchange;
             zOrderParam_dyn["active_id"] = 0;
+            zOrderParam_dyn["is_rmb"] = 0;
             zOrderParam_dyn["is_use"] = 1;
             zOrderParamList.push(zOrderParam_dyn);
         }else{
             if(zCurRounds==0){ ////////////// 天使轮排
                 let zOrderParam_angle = {};
+                zOrderParam_angle["order_type"] = 1;
                 zOrderParam_angle["fromId"] = zUserInfo.id;
                 zOrderParam_angle["fromAddr"] = zUserInfo.wallet_addr;
-                zOrderParam_angle["toId"] = 0;
-                zOrderParam_angle["toAddr"] = zGgAddr;
+                zOrderParam_angle["fromBank"] = zUserInfo.bank_addr;
+                zOrderParam_angle["fromAlipay"] = zUserInfo.alipay_addr;
+                zOrderParam_angle["toId"] = -99;
+                zOrderParam_angle["toAddr"] = "";
+                zOrderParam_angle["toBank"] = "";
+                zOrderParam_angle["toAlipay"] = "";
                 zOrderParam_angle["rounds"] = 0;
                 zOrderParam_angle["money"] = zCurPayMoney;
-                zOrderParam_angle["order_type"] = 1;
+                zOrderParam_angle["money_agc"] = -1;
                 zOrderParam_angle["active_id"] = pActiveId;
+                zOrderParam_angle["is_rmb"] = 1;
                 zOrderParam_angle["is_use"] = 1;
                 zOrderParamList.push(zOrderParam_angle);
             }else{ ///////////// 公排
@@ -659,63 +706,87 @@ class MBaseService extends Service {
                 //boss_1
                 if(zUserInfoBoss_1){
                     let zOrderParam_boss_1 = {};
+                    zOrderParam_boss_1["order_type"] = 2;
                     zOrderParam_boss_1["fromId"] = zUserInfo.id;
                     zOrderParam_boss_1["fromAddr"] = zUserInfo.wallet_addr;
+                    zOrderParam_boss_1["fromBank"] = zUserInfo.bank_addr;
+                    zOrderParam_boss_1["fromAlipay"] = zUserInfo.alipay_addr;
                     zOrderParam_boss_1["toId"] = zUserInfoBoss_1.id;
                     zOrderParam_boss_1["toAddr"] = zUserInfoBoss_1.wallet_addr;
+                    zOrderParam_boss_1["toBank"] = zUserInfoBoss_1.bank_addr;
+                    zOrderParam_boss_1["toAlipay"] = zUserInfoBoss_1.alipay_addr;
                     zOrderParam_boss_1["rounds"] = zCurRounds;
                     zOrderParam_boss_1["money"] = zConfRateBoss1*zCurPayMoney;
-                    zOrderParam_boss_1["order_type"] = 2;
+                    zOrderParam_boss_1["money_agc"] = zConfRateBoss1*zCurPayMoney*zExchange;
                     zOrderParam_boss_1["active_id"] = 0;
                     let zIsCanSee_1 = 0;
                     if(zUserInfoBoss_1.rounds>zCurRounds){ zIsCanSee_1=1 };
                     if(zUserInfoBoss_1.rounds==zCurRounds && zUserInfoBoss_1.status==1){ zIsCanSee_1=1 };
                     zOrderParam_boss_1["is_use"] = zIsCanSee_1; //////////////////////////////////
+                    zOrderParam_boss_1["is_rmb"] = 0;
                     zOrderParamList.push(zOrderParam_boss_1);
                 }
                 
                 //boss_2
                 if(zUserInfoBoss_2){
                     let zOrderParam_boss_2 = {};
+                    zOrderParam_boss_2["order_type"] = 3;
                     zOrderParam_boss_2["fromId"] = zUserInfo.id;
                     zOrderParam_boss_2["fromAddr"] = zUserInfo.wallet_addr;
+                    zOrderParam_boss_2["fromBank"] = zUserInfo.bank_addr;
+                    zOrderParam_boss_2["fromAlipay"] = zUserInfo.alipay_addr;
                     zOrderParam_boss_2["toId"] = zUserInfoBoss_2.id;
                     zOrderParam_boss_2["toAddr"] = zUserInfoBoss_2.wallet_addr;
+                    zOrderParam_boss_2["toBank"] = zUserInfoBoss_2.bank_addr;
+                    zOrderParam_boss_2["toAlipay"] = zUserInfoBoss_2.alipay_addr;
                     zOrderParam_boss_2["rounds"] = zCurRounds;
                     zOrderParam_boss_2["money"] = zConfRateBoss2*zCurPayMoney;
-                    zOrderParam_boss_2["order_type"] = 3;
+                    zOrderParam_boss_2["money_agc"] = zConfRateBoss2*zCurPayMoney*zExchange;
                     zOrderParam_boss_2["active_id"] = 0;
                     let zIsCanSee_2 = 0;
                     if(zOrderParam_boss_2.rounds>zCurRounds){ zIsCanSee_2=1 };
                     if(zOrderParam_boss_2.rounds==zCurRounds && zOrderParam_boss_2.status==1){ zIsCanSee_2=1 };
                     zOrderParam_boss_2["is_use"] = zIsCanSee_2; //////////////////////////////////
+                    zOrderParam_boss_2["is_rmb"] = 0;
                     zOrderParamList.push(zOrderParam_boss_2);
                 }
 
                 //销毁账号
                 let zOrderParam_del = {};
+                zOrderParam_del["order_type"] = 4;
                 zOrderParam_del["fromId"] = zUserInfo.id;
                 zOrderParam_del["fromAddr"] = zUserInfo.wallet_addr;
+                zOrderParam_del["fromBank"] = zUserInfo.bank_addr;
+                zOrderParam_del["fromAlipay"] = zUserInfo.alipay_addr;
                 zOrderParam_del["toId"] = -1;
                 zOrderParam_del["toAddr"] = zDelAddr;
+                zOrderParam_del["toBank"] = "";
+                zOrderParam_del["toAlipay"] = "";
                 zOrderParam_del["rounds"] = zCurRounds;
                 zOrderParam_del["money"] = zConfRateDel*zCurPayMoney;
-                zOrderParam_del["order_type"] = 4;
+                zOrderParam_del["money_agc"] = zConfRateDel*zCurPayMoney*zExchange;
                 zOrderParam_del["active_id"] = 0;
                 zOrderParam_del["is_use"] = 1;
+                zOrderParam_del ["is_rmb"] = 0;
                 zOrderParamList.push(zOrderParam_del);
 
                 //公共账号
                 let zOrderParam_sys = {};
+                zOrderParam_sys["order_type"] = 5;
                 zOrderParam_sys["fromId"] = zUserInfo.id;
                 zOrderParam_sys["fromAddr"] = zUserInfo.wallet_addr;
+                zOrderParam_sys["fromBank"] = zUserInfo.bank_addr;
+                zOrderParam_sys["fromAlipay"] = zUserInfo.alipay_addr;
                 zOrderParam_sys["toId"] = 0;
                 zOrderParam_sys["toAddr"] = zGgAddr;
+                zOrderParam_sys["toBank"] = "";
+                zOrderParam_sys["toAlipay"] = "";
                 zOrderParam_sys["rounds"] = zCurRounds;
                 zOrderParam_sys["money"] = zConfRateSys*zCurPayMoney;
-                zOrderParam_sys["order_type"] = 5;
+                zOrderParam_sys["money_agc"] = zConfRateSys*zCurPayMoney*zExchange;
                 zOrderParam_sys["active_id"] = 0;
                 zOrderParam_sys["is_use"] = 1;
+                zOrderParam_sys["is_rmb"] = 0;
                 zOrderParamList.push(zOrderParam_sys);
             }
         }
@@ -724,21 +795,31 @@ class MBaseService extends Service {
         for(let i=0; i<zOrderParamList.length; i++){
             let zInfo = zOrderParamList[i];
             let zTime = parseInt(Date.now()/1000);
-            if(zInfo.is_use==0){
-                zTime = parseInt(new Date(2095,1,1,0,0,0).getTime()/1000);
-            }
-            let zParam = ` ${zInfo.order_type}, ${zInfo.fromId}, '${zInfo.fromAddr}', ${zInfo.toId}, '${zInfo.toAddr}', ${zInfo.money}, ${zInfo.rounds}, ${zInfo.active_id}, ${zInfo.is_use}, ${zTime}, ${zTime} `;
-            let zSql = `insert into ctw_order (order_type, from_id, from_addr, to_id, to_addr, money, rounds, active_id, is_use, create_time, update_time) values (${zParam})`;
-            let zResult = await this.app.mysql.get('db1').query(zSql);
-            if(zResult && zResult["affectedRows"]>0){
-                ctx.logger.info(`订单添加成功, 轮数=${zInfo.rounds}, fromId=${zInfo.fromId}, toId=${zInfo.toId}`);
+            if(zInfo.order_type==7){
+                let zParam = ` ${zInfo.user_id}, ${zTime}, ${zTime} `;
+                let zSql = `insert into ctw_order_pd (user_id, create_time, update_time) values (${zParam})`;
+                let zResult = await this.app.mysql.get('db1').query(zSql);
+                if(zResult && zResult["affectedRows"]>0){
+                    console.log(`订单回馈订单添加成功, user_id=${zInfo.user_id}`);
+                }else{
+                    ctx.logger.info(`订单回馈订单添加失败, user_id=${zInfo.user_id}`);
+                }
             }else{
-                ctx.logger.info(`订单添加失败, 轮数=${zInfo.rounds}, fromId=${zInfo.fromId}, toId=${zInfo.toId}`);
+                if(zInfo.is_use==0){
+                    zTime = parseInt(new Date(2095,1,1,0,0,0).getTime()/1000);
+                }
+                let zParam = ` ${zInfo.order_type}, ${zInfo.fromId}, '${zInfo.fromAddr}','${zInfo.fromBank}','${zInfo.fromAlipay}', ${zInfo.toId}, '${zInfo.toAddr}','${zInfo.toBank}','${zInfo.toAlipay}', ${zInfo.money}, ${zInfo.money_agc}, ${zInfo.rounds}, ${zInfo.active_id}, ${zInfo.is_use}, ${zInfo.is_rmb}, ${zTime}, ${zTime} `;
+                let zSql = `insert into ctw_order (order_type, from_id, from_addr,from_bank,from_alipay to_id, to_addr,to_bank,to_alipay to_id, money, money_agc, rounds, active_id, is_use, is_rmb, create_time, update_time) values (${zParam})`;
+                let zResult = await this.app.mysql.get('db1').query(zSql);
+                if(zResult && zResult["affectedRows"]>0){
+                    console.log(`订单添加成功, 轮数=${zInfo.rounds}, fromId=${zInfo.fromId}, toId=${zInfo.toId}`);
+                }else{
+                    ctx.logger.info(`订单添加失败, 轮数=${zInfo.rounds}, fromId=${zInfo.fromId}, toId=${zInfo.toId}`);
+                }
             }
         }
         return true;
     }
-
     
 }
 module.exports = MBaseService;

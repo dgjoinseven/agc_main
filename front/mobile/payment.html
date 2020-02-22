@@ -33,10 +33,63 @@
             </div>
         </div>
         
-        <div id="id_table_a_content" class="abs" style="left:50px; top:300px; width:650px; height:1100px;"></div>
-        
-        <!-- <div id="id_test" class="abs textCanSelect" style="left:180px; top:720px;">11224445</div> -->
-        <!-- <div id="id_btn_copy" class="abs txt_26 txt_c" style="left:180px; top:820px; border-radius:10px; width:240px; height:80px; line-height:80px;" data-clipboard-action="copy" data-clipboard-target="#id_test">复制</div> -->
+        <div class="abs" style="left:310px; top:250px;">
+            <div id="id_btn_pay_processing" class="abs btn txt_22 txt_c btn_payment_1" style="left:0px; top:0px;" data-lang="main.处理中"></div>
+            <div id="id_btn_pay_finished" class="abs btn txt_22 txt_c btn_payment_0" style="left:220px; top:0px;" data-lang="main.已完成"></div>\
+        </div>
+
+        <!-- 表格内容 -->
+        <div id="id_table_a_content" class="abs" style="left:50px; top:350px; width:650px; height:1100px;"></div>
+    </div>
+
+    <!-- 支付信息详情 -->
+    <div id="id_table_detail" class="abs" style="position:fixed; z-index:2000; width:100%; height:100%; display:none;">
+        <div class="bg_mask" ></div>
+        <div class="abs bg_bottom" style="height:1150px;">
+            <label class="abs txt_c txt_w2 txt_36 bg_base" style="width:750px; height:90px; line-height:90px;" data-lang="main.支付详情"></label>
+            <div id="id_btn_details_close" class="abs" style="right:30px; top:30px; cursor:pointer;"><img src="./img/btn_close_1.png"></div>
+            <!-- 人民币支付 -->
+            <div id="id_details_rmb" class="abs" style="left:50px; top:120px; display:none;">
+                <div id="id_img_small_container" class="abs" style="left:210px; top:0px; width:220px; height:220px; border:1px solid #666;">
+                    <img id="id_img_small" class="abs" style="left:10px; top:10px; width:200px; height:200px; display:none;" >
+                    <img id="id_img_default" class="abs" style="left:10px; top:10px; width:200px; height:200px;" src="./img/upload_img.png">
+                </div>
+                <div id="id_btn_upload" class="abs btn_b btn_b_orange" style="left:230px; top:240px; width:180px; height:50px;" data-lang="main.上传图片"></div>
+                <input id="id_mine_rn_img_click" type="file" class="abs bg_red" style="left:280px; top:360px; width:180px; height:50px; cursor:pointer; opacity:0;">
+                <div class="abs txt_28" style="left:0px; top:350px;">
+                    <label class="abs txt_r" style="width:200px; top:0px;" data-lang="main.银行名称"></label><label id="id_txt_bank_name" class="abs details_txt" style="top:0px;"></label>
+                    <label class="abs txt_r" style="width:200px; top:60px;" data-lang="main.银行账号"></label><label id="id_txt_bank_account" class="abs details_txt" style="top:60px;"></label>
+                    <label class="abs txt_r" style="width:200px; top:120px;" data-lang="main.支行名称"></label><label id="id_txt_bank_branch" class="abs details_txt" style="top:120px;"></label>
+                    <label class="abs txt_r" style="width:200px; top:180px;" data-lang="main.收款人姓名"></label><label id="id_txt_bank_payee" class="abs details_txt" style="top:180px;"></label>
+                    <label class="abs txt_r" style="width:200px; top:240px;" data-lang="main.收款人电话"></label><label id="id_txt_bank_tel" class="abs details_txt" style="top:240px;"></label>
+                    <label class="abs txt_r" style="width:200px; top:320px;" data-lang="main.支付宝账号"></label><label id="id_txt_alipay" class="abs details_txt" style="top:320px;"></label>
+                </div>
+            </div>
+
+            <!-- AGC支付 -->
+            <div id="id_details_agc" class="abs txt_28" style="left:0px; top:120px; display:none;">
+                <label class="abs txt_r" style="width:200px; top:150px;" data-lang="main.交易ID"></label><label id="id_txt_agc_tran" class="abs details_txt cl_blue" style="top:150px;"></label>
+                <label class="abs txt_r" style="width:200px; top:350px;" data-lang="main.AGC地址"></label><label id="id_txt_agc_addr" class="abs details_txt textCanSelect" style="top:350px;"></label>
+                <div id="id_txt_agc_copy" class="abs btn_b btn_b_orange" style="left:220px; top:450px; width:150px; height:50px; line-height:50px;" data-clipboard-action="copy" data-clipboard-target="#id_txt_agc_addr" data-lang="main.复制"></div>
+            </div>
+
+            <!-- 拒绝 -->
+            <div id="id_details_refuse" class="abs txt_28" style="left:0px; top:600px; display:inline;">
+<!--                 <div id="id_btn_refuse" class="abs btn_b btn_b_yellow" style="left:530px; top:260px; width:180px; height:80px; line-height:80px;" data-lang="main.拒绝"></div>
+                <label id="id_txt_refuse" class="abs cl_red txt_32" style="left:530px; top:260px; width:180px; height:80px; line-height:80px; display:none;" data-lang="main.被拒绝"></label> -->
+                <textarea id="id_textarea_refuse" class="abs" style="font-size:28px; left:100px; top:260px; width:400px; height:80px; line-height:40px;" onKeyUp="if(this.value.length > 30) this.value=this.value.substr(0,30)" data-placeholder="ph.最多输入30个字"></textarea>
+            </div>
+
+            <!-- 申诉 -->
+        </div>
+    </div>
+
+    <!-- 图片 -->
+    <div id="id_big_img" class="abs" style="z-index:2000; width:100%; height:100%; display:none;">
+        <div class="bg_mask" ></div>
+            <div id="id_btn_img_close" class="abs" style="right:40px; top:40px; cursor:pointer;"><img src="./img/btn_close_2.png"></div>
+            <img id="id_img_details" class="abs" style="left:0px; top:120px; width:750px;">
+        </div>
     </div>
 
     <div id="id_end" class="abs" style="top:1000px; opacity:0;">.</div>
@@ -69,6 +122,8 @@ var userInfo = {};
 var myInfoList = [];
 var isFirst = true;
 var exchangeList = [];
+var isFinish = 0;
+var selectedInfo;
 
 
 //初始化
@@ -78,15 +133,26 @@ function init() {
     $('#id_myHead').click({myType:"id_myHead"}, btnClickHandler);
     $('#id_btn_back').click({myType:"id_btn_back"}, btnClickHandler);
     $('#id_btn_log').click({myType:"id_btn_log"}, btnClickHandler);
+    $('#id_btn_pay_processing').click({myType:"id_btn_pay_processing"}, btnClickHandler);
+    $('#id_btn_pay_finished').click({myType:"id_btn_pay_finished"}, btnClickHandler);
+    $('#id_btn_details_close').click({myType:"id_btn_details_close"}, btnClickHandler);
+    $('#id_btn_img_close').click({myType:"id_btn_img_close"}, btnClickHandler);
+    $('#id_img_small_container').click({myType:"id_img_small_container"}, btnClickHandler);
+    $('#id_txt_agc_tran').click({myType:"id_txt_agc_tran"}, btnClickHandler);
+    $('#id_mine_rn_img_click').on("change", api_uploadImg);
 
     windowResize();
 
     api_userInfo();
-    
+
     common.lang();
     $('#id_main_page').show();
 
     setInterval(timeRum, 1000);
+
+    new Clipboard('#id_txt_agc_copy', {text: function(trigger) {
+        c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1", "tips.b_ok");
+    }});
 
     // c_m_pwd2.init("id_confirmwin", 1, 2, 2);
 }
@@ -108,6 +174,28 @@ function btnClickHandler(p_obj_event){
         case "id_btn_invite_friends":
             c_m_waiting.init("id_tips");
             common.gotoWebSite('invitation.html');
+            break;
+        case "id_btn_pay_processing":
+            selectBtn(0);
+            break;
+        case "id_btn_pay_finished":
+            selectBtn(1);
+            break;
+        case "id_btn_details_close":
+            $('#id_table_detail').hide();
+            break;
+        case "id_btn_img_close":
+            $('#id_big_img').hide();
+            break;
+        case "id_txt_agc_tran":
+            console.log(selectedInfo);
+            var zUrl = "https://etherscan.io/tx/"+selectedInfo.agcTran;
+            window.open(zUrl, '_blank');
+            break;
+        case "id_img_small_container":
+            var zImgUrlInfo = {};
+            zImgUrlInfo.img_url = $('#id_img_small').attr("src");
+            onImgClickHander(zImgUrlInfo);
             break;
     }
 }
@@ -132,6 +220,24 @@ function windowResize()
     c_m_popUpWin.setSizePos(zScale);
 }
 
+//选择进行中/已完成
+function selectBtn(pIndex){
+    isFinish = pIndex;
+    $('#id_btn_pay_processing').removeClass("btn_payment_1");
+    $('#id_btn_pay_finished').removeClass("btn_payment_1");
+    $('#id_btn_pay_processing').removeClass("btn_payment_0");
+    $('#id_btn_pay_finished').removeClass("btn_payment_0");
+    if(isFinish==0){
+        $('#id_btn_pay_processing').addClass("btn_payment_1");
+        $('#id_btn_pay_finished').addClass("btn_payment_0");
+        api_orderList(userInfo.id, 0);
+    }else{
+        $('#id_btn_pay_processing').addClass("btn_payment_0");
+        $('#id_btn_pay_finished').addClass("btn_payment_1");
+        api_orderList(userInfo.id, 1);
+    }
+}
+
 function updateMySelf(){
     var zImgUrl =  "./img/head/head_" + userInfo.img_id + ".jpg";
     $('#id_head').attr("src", zImgUrl);
@@ -140,7 +246,7 @@ function updateMySelf(){
         var zCurExchangeRate = exchangeList[0].rate;
         common.setCookie("exchangeRate", zCurExchangeRate);
 
-        var zExchangeShowStr = "$1 = " + zCurExchangeRate + "AGL";
+        var zExchangeShowStr = "$1 = " + zCurExchangeRate + common.COIN_NAME;
         $('#txt_exchange').text(zExchangeShowStr);
     }
 
@@ -168,19 +274,32 @@ function updateTable(){
     var zTop = 0;
     var zCurExchangeRate = common.getCookie("exchangeRate");
     for(var i=0; i<myInfoList.length; i++){
-        zTop = i*200;
+        zTop = i*210;
         var zInfo = myInfoList[i];
         var zOrderType = parseInt(zInfo.order_type);//订单类型（1.天使轮打款  2.公排boss1打款  3.公排boss2打款  4.公排销毁打款  5.公排公共账号打款  6.大转盘收款  7.回馈收款  8.动态奖收款）
         var zOrderStr = 'data-lang="main.order_type_'+zOrderType+'"';
         var zRounds = zInfo.rounds;
-        var zStatus = zInfo.status;
+        var zStatus = parseInt(zInfo.status);
         var zFromId = parseInt(zInfo.from_id);
         var zFromAddr = zInfo.from_addr;
+        var zFromBank = zInfo.from_bank;
+        var zFromAlipay = zInfo.from_alipay;
         var zFromType = zInfo.from_addr_type;
         var zToId = parseInt(zInfo.to_id);
         var zToAddr = zInfo.to_addr;
+        var zToBank = zInfo.to_bank;
+        var zToAlipay = zInfo.to_alipay;
         var zToType = zInfo.to_addr_type;
-        var zMoney = "$"+zInfo.money+" = "+zInfo.money*zCurExchangeRate+"AGL";
+        var zIsNotShowAGC = " display:none;";
+        var zIsNotShowRMB = " display:none;";
+        var zMoney = "";
+        if(zInfo.is_rmb==1){
+            zMoney = "￥"+ zInfo.money;
+            zIsNotShowRMB = "";
+        }else{
+            zMoney = zInfo.money_agc+"AGC";
+            zIsNotShowAGC = "";
+        }
         var zUpdateTime = zInfo.update_time;
         var zBtnClass=""; //状态（0未打款   1已打款   2已确认）
         var zBtnName = "";
@@ -191,7 +310,6 @@ function updateTable(){
         var zAddrType = "";
         var zMoneyGetType = 0; // 1打钱  2收钱
         var zAcount = "";
-        var zRemarks = "";
         var zClickInfo = {};
         zClickInfo.id = zInfo.id;
         zClickInfo.from_id = zFromId;
@@ -199,15 +317,32 @@ function updateTable(){
         var zClickTxt = "";
         var zImgName = "";
         var zTimeDisplay="";
+        var zTel = "";
+        var zClickDetailInfo = {};
+        zClickDetailInfo.img_url = zInfo.img_url;
+        zClickDetailInfo.img_sum = zInfo.img_sum;
+        zClickDetailInfo.order_id = zInfo.id;
+        zClickDetailInfo.is_rmb = zInfo.is_rmb;
+        var zClickDetailTxt = "";
+        var zClickImgInfo = {};
+        zClickImgInfo.img_url = zInfo.img_url;
+        var zClickImgTxt = "";
         if(parseInt(zFromId)==parseInt(userInfo.id)){//付钱
             zMoneyGetType = 1;
             zClickInfo.moneyGetType = zMoneyGetType;
             // zAddrType = zAddrTypeList[parseInt(zToType)] + " : ";
             zAddrTxt =  zToAddr;
             zAcount = zInfo.to_name;
-            zRemarks = zInfo.to_remarks;
+            zClickDetailInfo.bank = zToBank;
+            zClickDetailInfo.alipay = zToAlipay;
+            zClickDetailInfo.moneyGetType = zMoneyGetType;
+            zClickDetailInfo.agcAddr = zAddrTxt;
+            zClickDetailInfo.agcTran = zInfo.tran_id;
+            zClickDetailTxt = " onClick='onDetailClickHander("+JSON.stringify(zClickDetailInfo)+")' ";
+            zClickImgTxt = " onClick='onImgClickHander("+JSON.stringify(zClickImgInfo)+")' ";
             zBtnClass="btn_payment_"+zStatus+"1";
             zBtnName = "main.btn_payment_"+zStatus+"1";
+            zTel = zInfo.to_tel;
             zPayState = "main.付款者";
             zPayStateColor = "#3da200";
             if(parseInt(zStatus)==0){
@@ -224,13 +359,19 @@ function updateTable(){
                 zImgName = "./img/head/sys_lock.jpg";
             }
         }else{//收钱
-            zTimeDisplay = "diplay:none;"
             zMoneyGetType = 2;
             zClickInfo.moneyGetType = zMoneyGetType;
             // zAddrType = zAddrTypeList[parseInt(zFromType)] + " : ";
             zAddrTxt = zFromAddr;
+            zClickDetailInfo.bank = zFromBank;
+            zClickDetailInfo.alipay = zFromAlipay;
+            zClickDetailInfo.moneyGetType = zMoneyGetType;
+            zClickDetailInfo.agcAddr = zAddrTxt;
+            zClickDetailInfo.agcTran = zInfo.tran_id;
+            zClickDetailTxt = " onClick='onDetailClickHander("+JSON.stringify(zClickDetailInfo)+")' ";
+            zClickImgTxt = " onClick='onImgClickHander("+JSON.stringify(zClickImgInfo)+")' ";
             zAcount = zInfo.from_name;
-            zRemarks = zInfo.from_remarks;
+            zTel = zInfo.from_tel;
             //如果时6，7，8三种公共平台给用户打款的情况，status为1即公共平台已打款情况，自动判断为status=2已完成
             if(zOrderType>=6 && zStatus==1){
                 zStatus = 2;
@@ -253,51 +394,55 @@ function updateTable(){
                 zImgName = "./img/head/sys_lock.jpg";
             }
         }
-        
-        var zRemarksLang = "";
-        if(zOrderType>=4){
-            zRemarksLang = zOrderStr;
-        }else{
-            zRemarks = zRemarks?zRemarks:"";
-        }
 
+        if(zStatus>=2){
+            zTimeDisplay = "diplay:none;"
+        }
         var zStr = '\
-            <div class="abs bg_white" style="top:'+zTop+'px; width:650px; height:200px; background-color:rgba(0,0,0,0); border:0px solid #eee; border-bottom:2px solid #eee;">\
+            <div class="abs bg_white" style="top:'+zTop+'px; width:650px; height:210px; background-color:rgba(0,0,0,0); border:0px solid #eee; border-bottom:2px solid #eee;">\
                 <div class="abs" style="transform:scale(0.6,0.6); top:30px;"><img class="abs" style="-webkit-mask:url(./img/mask_r_200.png);" src="'+zImgName+'"></div>\
-                <div class="abs" style="left:140px; top:20px;">\
+                <div class="abs" style="left:140px; top:30px;">\
                     <label class="txt_36" style="color:'+zPayStateColor+';" data-lang="'+zPayState+'"></label>\
-                    <label class="txt_36 cl_black" style="margin-left:10px;">'+zAcount+'</label>\
-                    <label class="txt_30 cl_grey" style="margin-left:20px;" data-lang="main.轮数"></label>\
-                    <label class="txt_30 cl_grey" style="margin-left:0px;">'+zInfo.rounds+'</label>\
+                    <label class="txt_36 txt_r txt_w1" style="color:'+zPayStateColor+'; margin-left:10px;">'+zMoney+'</label>\
                 </div>\
-                <label class="abs txt_24 cl_grey txt_y_hide" style="left:140px; top:65px; width:300px; height:50px; ling-height:40px;" '+zRemarksLang+'>'+zRemarks+'</label>\
-                <div class="abs" style="left:10px; top:165px;">\
-                    <div class="txt_20 cl_grey textCanSelect" style="float:left;">'+zAddrType+'</div>\
-                    <div id="id_copy_content_'+zInfo.id+'" class="txt_20 cl_grey textCanSelect" style="float:left; margin-left:10px;">'+zAddrTxt+'</div>\
-                    <div id="id_btn_copy_'+zInfo.id+'" style="float:left; margin-left:10px; margin-top:-5px; border-radius:10px; width:25px; height:25px; line-height:25px;" data-clipboard-action="copy" data-clipboard-target="#id_copy_content_'+zInfo.id+'"><img src="./img/btn_copy.png"></div>\
+                <div class="abs txt_28" style="left:140px; top:80px;">\
+                    <label class="cl_black" style="margin-left:0px;">'+zAcount+'</label>\
+                    <label class="cl_grey" style="margin-left:20px;" data-lang="main.轮数"></label>\
+                    <label class="cl_grey" style="margin-left:0px;">'+zInfo.rounds+'</label>\
                 </div>\
-                <div class="abs txt_28 txt_c '+zBtnClass+'" style="right:-10px; top:60px;" data-lang="'+zBtnName+'" '+zClickTxt+'></div>\
-                <label class="abs txt_26 txt_r txt_w1" style="color:'+zPayStateColor+'; right:170px; top:125px; width:400px;">'+zMoney+'</label>\
-                <label id="id_obj_time_'+zInfo.id+'" class="abs txt_26 txt_r txt_w1 cl_grey4" style="right:0px; top:125px; width:650px; '+zTimeDisplay+'"></label>\
+                <div class="abs txt_28" style="left:140px; top:120px;">\
+                    <label class="cl_grey" style="margin-left:0px;" data-lang="main.联系电话"></label>\
+                    <label class="cl_grey" style="margin-left:10px;">'+zTel+'</label>\
+                </div>\
+                <div class="abs" style="left:230px; top:160px;">\
+                    <div id="id_btn_detail_'+zInfo.id+'" class="abs txt_c txt_24" style="background-color:#000; color:#FFF; border-radius:10px; width:160px; height:40px; line-height:40px;" '+zClickDetailTxt+' data-lang="main.支付详情"></div>\
+                </div>\
+                <div class="abs txt_28 txt_c '+zBtnClass+'" style="right:-10px; top:40px;" data-lang="'+zBtnName+'" '+zClickTxt+'></div>\
+                <label id="id_obj_time_'+zInfo.id+'" class="abs txt_26 txt_r txt_w1 cl_grey4" style="right:20px; top:160px; width:200px; '+zTimeDisplay+'" data-pay-type="'+zMoneyGetType+'"></label>\
             </div>\
             ';
         zHmlInfo += zStr;
     }
     $('#id_table_a_content').html(zHmlInfo);
 
-    endHeight = (myInfoList.length+1)*200+230;
+    endHeight = (myInfoList.length+1)*210+230;
     $('#id_end').css("top", endHeight+"px");
 
     common.lang();
 
     //复制按钮
-    for(var j=0; j<myInfoList.length; j++){
-        var infoXX = myInfoList[j];
-        new Clipboard('#id_btn_copy_'+infoXX.id, {text: function(trigger) {
-            c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1", "tips.b_ok");
-        }});
-    }
+    // for(var j=0; j<myInfoList.length; j++){
+    //     var infoXX = myInfoList[j];
+    //     new Clipboard('#id_btn_copy_'+infoXX.id, {text: function(trigger) {
+    //         c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1", "tips.b_ok");
+    //     }});
+    // }
 }
+
+                // <div class="abs" style="left:10px; top:170px;">\
+                //     <div id="id_copy_content_'+zInfo.id+'" class="abs txt_dot txt_24 cl_grey textCanSelect" style="left:0px; width:250px;">'+zAddrTxt+'</div>\
+                //     <div id="id_btn_copy_'+zInfo.id+'" class="abs txt_dot" style="left:260px; border-radius:10px; width:25px; height:25px; line-height:25px;" data-clipboard-action="copy" data-clipboard-target="#id_copy_content_'+zInfo.id+'"><img src="./img/btn_copy.png"></div>\
+                // </div>\
 
 //按钮被点击
 function onListClickHander(pInfo){
@@ -319,22 +464,104 @@ function onListClickHander(pInfo){
     c_m_pwd2.init("id_confirmwin", zInfo.id, zInfo.moneyGetType, zUserId);
 }
 
+//详情按钮点击
+function onDetailClickHander(pInfo){
+    var zInfo = pInfo;
+    selectedInfo = zInfo;
+
+    //显示人民币还是AGC
+    if(parseInt(zInfo.is_rmb)==1){
+        var zBankInfo = JSON.parse(zInfo.bank);
+        $('#id_txt_bank_name').text(zBankInfo.bank);
+        $('#id_txt_bank_account').text(zBankInfo.account);
+        $('#id_txt_bank_branch').text(zBankInfo.branch);
+        $('#id_txt_bank_payee').text(zBankInfo.name);
+        $('#id_txt_bank_tel').text(zBankInfo.tel);
+        $('#id_txt_alipay').text(zInfo.alipay);
+
+        $('#id_details_rmb').show();
+        $('#id_details_agc').hide();
+    }else{
+        $('#id_txt_agc_addr').text(zInfo.agcAddr);
+        $('#id_txt_agc_tran').text(zInfo.agcTran);
+
+        $('#id_details_rmb').hide();
+        $('#id_details_agc').show();
+    }
+
+    //付钱，收钱逻辑
+    if(parseInt(zInfo.moneyGetType)==1){ //付钱
+        var zConf = common.getCookie("conf");
+
+        zInfo.agcAddr;
+        zInfo.bank;
+        zInfo.alipay;
+
+        if(zConf && parseInt(zInfo.img_sum)>=parseInt(JSON.parse(zConf)["upload_img_max"])){
+            $('#id_btn_upload').hide();
+            $('#id_mine_rn_img_click').hide();
+        }else{
+            $('#id_btn_upload').show();
+            $('#id_mine_rn_img_click').show();
+        }
+    }else{ //收钱
+        $('#id_btn_upload').hide();
+        $('#id_mine_rn_img_click').hide();
+    }
+
+    //图片
+    if(zInfo.img_url){
+        $('#id_img_default').hide();
+        $('#id_img_small').attr("src", zInfo.img_url);
+        $('#id_img_small').show();
+    }else{
+        $('#id_img_default').show();
+        $('#id_img_small').hide();
+    }
+    
+    //总显示
+    $('#id_table_detail').show();
+}
+
+//图片点击
+function onImgClickHander(pInfo){
+    var zInfo = pInfo;
+    if(zInfo.img_url){
+        $('#id_img_details').attr("src", zInfo.img_url);
+        $('#id_big_img').show();
+    }
+}
+
+
 
 function timeRum(){
     const zTime = parseInt(Date.now()/1000);
     if(myInfoList && myInfoList.length>0){
         var zConf = JSON.parse(common.getCookie("conf"));
-        var zMaxTime = parseInt(zConf["pay_time"])*3600;//时间限制
+        var zPayMaxTime = parseInt(zConf["pay_time"])*3600;//时间限制
+        var zConfirmMaxTime = parseInt(zConf["confirm_time"])*3600;
 
         for(var i=0; i<myInfoList.length; i++){
             var zInfo = myInfoList[i];
-            zInfo.create_time -= 1;
-            myInfoList[i] = zInfo;
-            var zShowTime = zInfo.create_time + zMaxTime - zTime;
-            if(zShowTime<0){
-                zShowTime = 0;
+            var zPayShowTime = zInfo.create_time + zPayMaxTime - zTime;
+            var zConfirmShowTime = zInfo.pay_time + zConfirmMaxTime - zTime;
+            if(zPayShowTime<0){
+                zPayShowTime = 0;
             }
-            $('#id_obj_time_'+zInfo.id).html(common.getTimeStrFromNum(zShowTime));
+            if(zConfirmShowTime<0){
+                zConfirmShowTime = 0;
+            }
+
+            //判断显示哪个时间 //status：0未付款  1已付款  2已收款
+            var zPayType = parseInt($('#id_obj_time_'+zInfo.id).attr("data-pay-type"));//付款状态：1付款  2收款
+            switch(parseInt(zInfo.status)){
+                case 0:
+                    $('#id_obj_time_'+zInfo.id).html(common.getTimeStrFromNum(zPayShowTime));
+                    break;
+                case 1:
+                    $('#id_obj_time_'+zInfo.id).html(common.getTimeStrFromNum(zConfirmShowTime));
+                    break;
+            }
         }
     }
 }
@@ -360,7 +587,7 @@ function api_userInfo(){
                     exchangeList = evt.data.exchangeList;
                     common.setCookie("userInfo", JSON.stringify(evt.data.userInfo));
                     updateMySelf();
-                    api_orderList(userInfo.id);
+                    selectBtn(0);
                     break;
                 case 10001:
                     c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
@@ -377,7 +604,7 @@ function api_userInfo(){
 
 //获取订单
 //@pId 订单人
-function api_orderList(pId){
+function api_orderList(pId, pIndex){
     c_m_waiting.init("id_tips");
     $.ajax({
         url: common.getApiUrl("order_list"),
@@ -385,7 +612,7 @@ function api_orderList(pId){
         beforeSend: function(Request) {
             Request.setRequestHeader("Authorization",common.getCookie('token'));
         },
-        data:{id:pId, isLog:0},
+        data:{id:pId, isFinish:pIndex},
         dataType: "json", //指定服务器返回的数据类型
         cache:false,
         success: function (evt) {
@@ -408,6 +635,61 @@ function api_orderList(pId){
     });
 }
 
+//上传图片
+function api_uploadImg(){
+    c_m_waiting.init("id_tips");
+    var formData = new FormData();
+    formData.append("token", common.getCookie('token'));
+    formData.append("nickname", userInfo.name);
+    formData.append("orderid", selectedInfo.order_id);
+    var file = $("#id_mine_rn_img_click")[0].files[0];
+
+    if(file.size==undefined){
+        return;
+    }
+
+    var fSize = ((file.size)/1024).toFixed(2);//获取图片大小转换成KB
+    //限制文件上传的大小在1-500KB以内
+    if(fSize < 1 || fSize > 500){
+        c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1030", "tips.b_ok");
+        return;
+    }
+
+    formData.append("image", file);
+    $.ajax({
+        url: common.getApiUrl("upload_img"),
+        type: 'POST',
+        data: formData,
+        processData: false,// 告诉jQuery不要去处理发送的数据
+        contentType: false,// 告诉jQuery不要去设置Content-Type请求头
+        beforeSend: function(){
+            uploading = true;
+        },
+        success : function(evt) {
+            console.log("api_uploadImg success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    var zUrl = evt.data.url;
+                    $('#id_img_default').hide();
+                    $('#id_img_small').attr("src", zUrl);
+                    $('#id_img_small').show();
+                    break;
+                case 1030:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    console.log("图片上传失败");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_uploadImg error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
 
 
 </script>

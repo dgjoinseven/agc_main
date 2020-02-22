@@ -42,7 +42,8 @@ class MJudgeService extends Service {
                     }
                 }
 
-                //天使轮打款达到3人，生成回馈700的订单(48小時内打款)
+                //天使轮打款达到3人，生成回馈订单
+                console.log(`zActiveOrderList.length : ${zActiveOrderList.length}`);
                 if(zActiveOrderList.length>=3){
                     await ctx.service.mBase.genOrder(zSqlOrderInfo.from_id, 1, 7);
                 }
@@ -109,8 +110,8 @@ class MJudgeService extends Service {
         let zSql=``;
         switch(parseInt(pOrderInfo.rounds)){
             case 0://天使轮
-                //判断已打款给自己的直属上司的3笔订单是否都已经确定状态
-                zSql = `select * from ctw_order where from_id=${pOrderInfo.from_id} and to_id=${pOrderInfo.to_id} and rounds=0 and status=2`;
+                //判断已打款出去（3笔单子）
+                zSql = `select * from ctw_order where from_id=${pOrderInfo.from_id} and rounds=0 and status=2`;
                 zSqlOrderList = await this.app.mysql.get('db1').query(zSql);
                 if(zSqlOrderList && zSqlOrderList[0]){
                     return {code:1, msg:`验证给直属上司打款成功，round=${pOrderInfo.rounds}, count=${zSqlOrderList[0].count}`, from_id:pOrderInfo.from_id, order_list:zSqlOrderList};
@@ -324,9 +325,11 @@ class MJudgeService extends Service {
         }
         //如果状态为觉醒，则打开order
         if(zUserInfo.status>0){
-            console.log("打开订单----------", zUserInfo.id, zUserInfo.name, zUserInfo.status);
+            // console.log("打开订单----------", zUserInfo.id, zUserInfo.name, zUserInfo.status);
             const zTime = parseInt(Date.now()/1000);
-            await this.app.mysql.get('db1').query(`update ctw_order set is_use=1, create_time=${zTime}, update_time=${zTime} where to_id=${zUserInfo.id} and rounds=${zUserInfo.rounds}`);
+            //当前汇率
+            let zExchange = await ctx.helper.getCurExchange();
+            await this.app.mysql.get('db1').query(`update ctw_order set is_use=1, money_agc=money*${zExchange}, create_time=${zTime}, update_time=${zTime} where to_id=${zUserInfo.id} and rounds<=${zUserInfo.rounds} and is_use=0`);
         }
     }
 
