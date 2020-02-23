@@ -25,20 +25,20 @@ $ npm stop
 
 ### 部署
 - 测试环境
+cd /data/www/agc_main/back/
+cd /data/www/agc_main/front/
+
+cd /data/www/agc_admin/back/
+cd /data/www/agc_admin/front/
+
     ```bash
     启动指令：$  EGG_SERVER_ENV=test npm run start
     停止指令：$  npm run stop
     ```
+
+
 - 生产环境
     ```bash
-
-cd /data/node/ctw_front_back/
-cd /data/www/html/
-3cyepbp3+
-
-cd /data/node/ctw_admin_back/
-cd /data/www/html/
-t2mu6cnc+
 
 sudo git pull
 

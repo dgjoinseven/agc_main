@@ -1,16 +1,15 @@
 common = {
-    VER : "1.8",    //版本号
-    isZSF : 0,      //是否正式服（这个值不是真正的值，根据zsf.json设置是否正式服）
+    VER : "1.9",    //版本号
     PC_WIDTH : 1200,    //PC端的标准宽度
     MOBILE_WIDTH : 750, //mobile端的标准宽度
     JS_LOAD_COUNTER : 0,    //已经加载的js个数
     JS_IS_LOADED : false,   //所有预加载的js是否都加载完毕
     ROOT_URL : "",          //基础路径
     COIN_NAME : "AGC",      //币的名字
-    PHP_URL_ZSF : "https://api.ctwangelcity.com/api/",
+    server_type : 0,      //服务器状态（0本地 1测试服 2正式服，上传到不同服务器的时候记得设置zsf.json）
+    PHP_URL_LOCAL : "http://127.0.0.1:7002/api/",
     PHP_URL_TEST : "http://120.25.106.197:7002/api/",
-    // PHP_URL_ZSF : "http://127.0.0.1:7002/api/",
-    // PHP_URL_TEST : "http://127.0.0.1:7002/api/",
+    PHP_URL_ZSF : "https://api.ctwangelcity.com/api/",
 
     //初始化
     init : function(p_cp_list){
@@ -18,12 +17,15 @@ common = {
         var pos = curWwwPath.indexOf("src");
         var localhostPaht = curWwwPath.substring(0, pos);
         common.ROOT_URL = localhostPaht;
-
+        console.log("1==========");
         //是否正式服
         $.getJSON("../vendor/zsf.json?ver="+$.cookie('commonJsVer'), function (data){
+            console.log("2==========");
           $.each(data, function (infoIndex, info){
-            if(infoIndex=="is_zsf"){
-                common.isZSF = parseInt(info);
+            console.log("3==========");
+            if(infoIndex=="server_type"){
+                console.log("4==========");
+                common.server_type = parseInt(info);
                 common.initCssJs(p_cp_list);
             }
           })
@@ -377,10 +379,17 @@ common = {
 
     //获取申请php的地址
     getApiUrl : function(p_str_name){
-        // var zIsZSF = common.getCookie("isZSF");
-        var zPreUrl = common.PHP_URL_ZSF;
-        if(common.isZSF!=1){
-            zPreUrl = common.PHP_URL_TEST;
+        var zPreUrl = common.PHP_URL_LOCAL;
+        switch(common.server_type){
+            case 0:
+                zPreUrl = common.PHP_URL_LOCAL;
+                break;
+            case 1:
+                zPreUrl = common.PHP_URL_TEST;
+                break;
+            case 2:
+                zPreUrl = common.PHP_URL_ZSF;
+                break;
         }
         var zUrl = zPreUrl + p_str_name;
         return zUrl;
