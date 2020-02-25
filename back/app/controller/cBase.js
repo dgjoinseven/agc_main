@@ -88,9 +88,9 @@ class CBaseController extends Controller {
         if(zData){this.ctx.body = zData ;}else{this.ctx.body = { code:-1, msg:'error'};}
     }
 
-    //订单申诉
-    async orderAppeal() {
-        var zData = await this.ctx.service.mBase.orderAppeal(this.ctx.request.body);
+    //设置信息
+    async orderSetInfo() {
+        var zData = await this.ctx.service.mBase.orderSetInfo(this.ctx.request.body);
         if(zData){this.ctx.body = zData;}else{this.ctx.body = { code:-1, msg:'error'};}
     }
 

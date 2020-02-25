@@ -50,8 +50,8 @@ module.exports = app => {
         let zOrderPayList = await app.mysql.get('db1').query(zOrderPaySql);
         if(zOrderPayList){ 
           for(let zOrderIndex in zOrderPayList){
-            zSet.add(zOrderPayList[zOrderIndex].from_id);
-            console.log("order:", zOrderPayList[zOrderIndex].from_id);
+            //冻结用户
+            await ctx.service.mBase.fronzenUser(zOrderPayList[zOrderIndex].from_id, zOrderPayList[zOrderIndex].to_id, zOrderPayList[zOrderIndex].id, 1);
 
             //更新订单状态（create_time）
             let zOrderUpdateSql = `update ctw_order set create_time=${zNowTime} where id=${zOrderPayList[zOrderIndex].id}`;
@@ -69,8 +69,8 @@ module.exports = app => {
         let zOrderConfirmList = await app.mysql.get('db1').query(zOrderConfirmSql);
         if(zOrderConfirmList){ 
           for(let zOrderIndex in zOrderConfirmList){
-            zSet.add(zOrderConfirmList[zOrderIndex].from_id);
-            console.log("order:", zOrderConfirmList[zOrderIndex].from_id);
+            //冻结用户
+            await ctx.service.mBase.fronzenUser(zOrderConfirmList[zOrderIndex].to_id, zOrderConfirmList[zOrderIndex].from_id, zOrderConfirmList[zOrderIndex].id, 2);
 
             //更新订单状态（pay_time）
             let zOrderUpdateSql = `update ctw_order set pay_time=${zNowTime} where id=${zOrderConfirmList[zOrderIndex].id}`;
@@ -83,49 +83,36 @@ module.exports = app => {
           }
         }
 
-
-        // //直推团队超时
-        // let zGroupSql = `select id from ctw_user where create_time<${zGroupTimeJudge} and is_use=1 and zt_sum<3`;
-        // let zGroupSqlList = await app.mysql.get('db1').query(zGroupSql);
-        // if(zGroupSqlList){
-        //   for(let zGroupIndex in zGroupSqlList){
-        //     zSet.add(zGroupSqlList[zGroupIndex].id);
-        //     console.log("group:", zGroupSqlList[zGroupIndex].id);
+        // // 遍历Set
+        // for (let zSetId of zSet) {
+        //   let zUserInfo = await ctx.service.mUser.getUserInfo(zSetId);
+        //   if(zUserInfo){
+        //       let zParam = ``;
+        //       if(zUserInfo.rounds==0){ //天使轮
+        //         await ctx.service.mPD.resetPD(zSetId);
+        //         zParam += `is_use=0, `;
+        //         zParam += `update_time=${zNowTime} `;
+        //       }else{ //公排
+        //         zParam += `account='f${zSetId}', `;
+        //         zParam += `pwd='d7a1b9e05367224e69b4ebf70d13675e8584393e', `;
+        //         zParam += `salt='ptrz', `;
+        //         zParam += `wallet_addr='${zConf["frozen_addr"]}', `;
+        //         zParam += `is_use=2, `;
+        //         zParam += `update_time=${zNowTime} `;
+        //       }
+        //       let zUpdateSql = `update ctw_user set ${zParam} where id=${zSetId}`;
+        //       let zResult = await app.mysql.get('db1').query(zUpdateSql);
+        //       if(zResult && zResult["affectedRows"]>0){
+        //         ctx.logger.info(`-=-=-= 定时任务recover成功，userId=${zSetId}`);
+        //       }else{
+        //         ctx.logger.info(`定时任务更新User失败! user不存在，userId=${zSetId}`);
+        //       }
+        //   }else{
+        //     ctx.logger.info(`定时任务拿取User失败! user不存在，userId=${zSetId}`);
         //   }
         // }
 
-        // 遍历Set
-        for (let zSetId of zSet) { 
-          console.log(`遍历set id=${zSetId}`);
-          let zUserInfo = await ctx.service.mUser.getUserInfo(zSetId);
-          if(zUserInfo){
-            // if(zUserInfo.recover_to==0){
-              let zRecoverId = zUserInfo.boss_id;
-              // if(zUserInfo.recover_to>0){
-              //   let zUserBossInfo = await ctx.service.mUser.getUserInfo(zUserInfo.recover_to);
-              //   if(zUserBossInfo){
-              //     zRecoverId = zUserBossInfo.boss_id;
-              //   }else{
-              //     ctx.logger.info(`定时任务拿取User失败! recover user不存在，recoverId=${zUserInfo.recover_to}`);
-              //     break;
-              //   }
-              // }
-              // console.log(`update ctw_user set is_use=0, recover_to=${zRecoverId}, update_time=${zNowTime} where id=${zSetId}`);
-              let zUpdateSql = `update ctw_user set is_use=0, recover_to=${zRecoverId}, create_time=${zNowTime}, update_time=${zNowTime} where id=${zSetId}`;
-              let zResult = await app.mysql.get('db1').query(zUpdateSql);
-              if(zResult && zResult["affectedRows"]>0){
-                ctx.logger.info(`-=-=-= 定时任务recover成功，userId=${zSetId}`);
-              }else{
-                ctx.logger.info(`定时任务更新User失败! user不存在，userId=${zSetId}`);
-              }
-            // }else{
-            //   console.log(`这个用户已经抛过给领导，不可再抛。`);
-            //   //是否需要弄个列表记录着，然后集体清楚这些坏掉的订单，别在这里碍事
-            // }
-          }else{
-            ctx.logger.info(`定时任务拿取User失败! user不存在，userId=${zSetId}`);
-          }
-        }
+
       }catch (error) {
         throw error;
       }

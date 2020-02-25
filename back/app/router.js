@@ -33,7 +33,7 @@ module.exports = app => {
   router.get('/api/frozen_user_list', jwt, tc, controller.cBase.frozenUserList);     //冻结用户列表
   router.post('/api/frozen_user_edit', jwt, tc, controller.cBase.frozenUserEdit);    //冻结用户编辑
   router.get('/api/order_list', jwt, tc, controller.cBase.orderList);       //订单列表
-  router.post('/api/order_appeal', jwt, tc, controller.cBase.orderAppeal);  //订单申诉
+  router.post('/api/orderSetInfo', jwt, tc, controller.cBase.orderSetInfo);  //订单信息修改
   router.post('/api/order_edit', jwt, tc, controller.cBase.orderEdit);      //订单编辑
 
   router.get('/api/dyn_list', jwt, tc, controller.cBase.dynList);           //动态奖金列表

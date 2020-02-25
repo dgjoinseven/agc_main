@@ -42,10 +42,13 @@ class MJudgeService extends Service {
                     }
                 }
 
-                //天使轮打款达到3人，生成回馈订单
+                //天使轮打款达到3人，生成回馈订单(如果没有生成过回馈排单，则生成一个回馈排单)
                 console.log(`zActiveOrderList.length : ${zActiveOrderList.length}`);
                 if(zActiveOrderList.length>=3){
-                    await ctx.service.mBase.genOrder(zSqlOrderInfo.from_id, 1, 7);
+                    let zIsHavePd = this.app.mysql.get('db1').query(`select * from ctw_order_pd where user_id=${zSqlOrderInfo.from_id}`);
+                    if(!zIsHavePd || !zIsHavePd[0]){
+                        await ctx.service.mBase.genOrder(zSqlOrderInfo.from_id, 1, 7);
+                    }
                 }
             }else{
             //公排
@@ -105,7 +108,7 @@ class MJudgeService extends Service {
     async judgeActived(pOrderInfo) {
         const { ctx } = this;
         //  1.1 天使轮rounds=0，给自己直属上司打3笔
-        //  1.2 公排rounds=1-19，给自己的上2级打，给公司账号打
+        //  1.2 公排rounds=1-20，给自己的上2级打，给公司账号打
         let zSqlOrderList;
         let zSql=``;
         switch(parseInt(pOrderInfo.rounds)){

@@ -40,10 +40,10 @@ class CUserController extends Controller {
             let zUserInfo = zResult[0];
             // const totp = new TOTP(zResult.totpKey);
             // const totpcode = totp.genOTP();
-            if(zUserInfo.is_del==1){
-                this.ctx.body = { code: 1003, msg:ReturnCode[1003] };
-                return;
-            }
+            // if(zUserInfo.is_del==1){
+            //     this.ctx.body = { code: 1003, msg:ReturnCode[1003] };
+            //     return;
+            // }
             if(zUserInfo.is_use==0){
                 this.ctx.body = { code: 1012, msg:ReturnCode[1012] };
                 return;

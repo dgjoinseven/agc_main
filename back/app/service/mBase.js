@@ -334,22 +334,25 @@ class MBaseService extends Service {
             }
             let zBossNewStr = zBossIdCountList.join(",");
             // console.log(`添加ctw_rounds队列============  zRounds=${zRounds}, zBossNewStr=${zBossNewStr}`);
-            zBossHavePoint = await this.app.mysql.get('db1').query(`select * from ctw_rounds where zt_sum<2 and rounds=${zRounds} and user_id in(${zBossNewStr}) order by id`);
+            zBossHavePoint = await this.app.mysql.get('db1').query(`select distinct a.id as a_id, b.* from ctw_user a LEFT JOIN ctw_rounds b ON a.id=b.user_id where b.zt_sum<2 and b.rounds=${zRounds} and b.user_id in(${zBossNewStr}) and a.is_use=1 order by b.id`);
         }
         
         if(zBossHavePoint && zBossHavePoint[0]){
+            //如果有天使轮的boss空挂靠点
             zBossInfo = zBossHavePoint[0];
-            // console.log("ctw_rounds =1============找到boss位置 boss:"+zBossInfo.user_id);
         }else{
-            // console.log("ctw_rounds =2============使用常规位置");
+            //如果没有天使轮的boss空挂靠点，但是有闲散挂靠点
+
             ////////////////////// 闲散按照从上到下，从左到右的顺序插入三角形队列 //////////////////////
             //获取将要挂靠的boss信息
             let zBossInfoList = await this.app.mysql.get('db1').query(`select * from ctw_rounds where zt_sum<2 and rounds=${zRounds} order by id`);
-            if(!zBossInfoList || !zBossInfoList[0]){
-                ctx.logger.info(`addRoundUser失败！！没有zBossInfoList，也就是说本轮挂靠点用完了，user_id=${zUserId}, rounds=${zRounds}`);
-                return false;
+            if(zBossInfoList && zBossInfoList[0]){
+                zBossInfo = zBossInfoList[0];
+            }else{
+                //连闲散点都没有，只能挂在第二排的第一个人下面
+                let zDaBossList = await this.app.mysql.get('db1').query(`select * from ctw_rounds where rounds=${zRounds} order by id`);
+                zBossInfo = zDaBossList[1];
             }
-            zBossInfo = zBossInfoList[0];
         }
 
         //插入
@@ -426,8 +429,7 @@ class MBaseService extends Service {
                 break;
             case 2://修改
                 if(zCK){ return zCK }
-                zParam += (pParam.name!=undefined) ? ` name='${pParam.name}' ,` : ``;
-                zParam += (pParam.account!=undefined) ? ` account='${pParam.account}' ,` : ``;
+                let zEditUserInfo = await ctx.service.mUser.getUserInfo(pParam.id);
                 if(pParam.pwd){
                     zPwd = ctx.helper.md5(pParam.pwd, zSalt);
                     zParam += ` pwd='${zPwd}' ,`;
@@ -440,22 +442,36 @@ class MBaseService extends Service {
                     zParam += ` salt2='${zSalt2}' ,`;
                 }
                 if(pParam.wallet_addr!=undefined){
-                    let zEditUserInfo = await ctx.service.mUser.getUserInfo(pParam.id);
                     if(zEditUserInfo.wallet_addr){
                         return {code:1029, msg:`地址不可重复设置`};
                     }
                     zParam += ` wallet_addr='${pParam.wallet_addr}', `;
                 }
-                
+                if(pParam.bank_addr!=undefined){
+                    if(zEditUserInfo.bank_addr){
+                        return {code:1033, msg:`银行信息不可重复设置`};
+                    }
+                    zParam += ` bank_addr='${pParam.bank_addr}', `;
+                }
+                if(pParam.alipay_addr!=undefined){
+                    if(zEditUserInfo.alipay_addr){
+                        return {code:1034, msg:`支付宝不可重复设置`};
+                    }
+                    zParam += ` alipay_addr='${pParam.alipay_addr}', `;
+                }
+                if(pParam.tel!=undefined){
+                    zParam += ` tel='${pParam.tel}', `;
+                }
+                // zParam += (pParam.name!=undefined) ? ` name='${pParam.name}' ,` : ``;
+                // zParam += (pParam.account!=undefined) ? ` account='${pParam.account}' ,` : ``;
                 // zParam += (pParam.wallet_type!=undefined) ? ` wallet_type='${pParam.wallet_type}' ,` : ``;
+                // zParam += (pParam.remarks!=undefined) ? ` remarks='${pParam.remarks}' ,` : ``;
+                // zParam += (pParam.is_use!=undefined) ? ` is_use=${pParam.is_use} ,` : ``;
                 zParam += (pParam.img_id!=undefined) ? ` img_id='${pParam.img_id}' ,` : ``;
-                zParam += (pParam.remarks!=undefined) ? ` remarks='${pParam.remarks}' ,` : ``;
-                zParam += (pParam.is_use!=undefined) ? ` is_use=${pParam.is_use} ,` : ``;
                 zParam += ` update_time=${zTime} `;
                 zSql = `update ctw_user set ${zParam} where id=${pParam.id}`;
                 break;
         }
-
         zResult = await this.app.mysql.get('db1').query(zSql); // 初始化事务
         if(zResult && zResult["affectedRows"]>0){
             //如果是帮朋友注册，直推总数+1
@@ -498,6 +514,36 @@ class MBaseService extends Service {
         }
     }
     
+    //冻结用户
+    //@pPayType  1付钱  2收钱确认
+    async fronzenUser(pFrozenUserId, pResetUserId, pOrderId, pPayType) {
+        let zUserInfo = await ctx.service.mUser.getUserInfo(pFrozenUserId);
+        if(zUserInfo){
+            let zParam = ``;
+            if(zUserInfo.rounds==0){ //天使轮
+                await ctx.service.mPD.resetPD(pFrozenUserId, pResetUserId, pOrderId, pPayType);
+
+                zParam += `is_use=0, `;
+                zParam += `update_time=${zNowTime} `;
+            }else{ //公排
+                zParam += `account='f${pFrozenUserId}', `;
+                zParam += `pwd='d7a1b9e05367224e69b4ebf70d13675e8584393e', `;
+                zParam += `salt='ptrz', `;
+                zParam += `wallet_addr='${zConf["frozen_addr"]}', `;
+                zParam += `is_use=2, `;
+                zParam += `update_time=${zNowTime} `;
+            }
+            let zUpdateSql = `update ctw_user set ${zParam} where id=${pFrozenUserId}`;
+            let zResult = await app.mysql.get('db1').query(zUpdateSql);
+            if(zResult && zResult["affectedRows"]>0){
+                ctx.logger.info(`-=-=-= 定时任务成功，userId=${pFrozenUserId}`);
+            }else{
+                ctx.logger.info(`定时任务更新User失败! user不存在，userId=${pFrozenUserId}`);
+            }
+        }else{
+        ctx.logger.info(`定时任务拿取User失败! user不存在，userId=${pFrozenUserId}`);
+        }
+    }
 
     /////////////////////////////////////////////// 订单 ////////////////////////////////////////////////////
     //订单列表
@@ -510,7 +556,7 @@ class MBaseService extends Service {
         }else{
             zParamInfo += ` and (a.from_id=${pParam.id} or a.to_id=${pParam.id}) and a.status<2`;
         }
-        const zSql = ` select distinct a.id, a.*, b.name as from_name, b.tel as from_tel, b.img_id as from_img_id, c.name as to_name, c.tel as to_tel, c.img_id as to_img_id from ctw_order a LEFT JOIN ctw_user b ON a.from_id=b.id LEFT JOIN ctw_user c ON a.to_id=c.id  where a.id>0 ${zParamInfo} order by a.create_time desc`;
+        const zSql = ` select distinct a.id, a.*, b.name as from_name, b.tel as from_tel, b.wallet_addr as from_addr, b.bank_addr as from_bank, b.alipay_addr as from_alipay, b.img_id as from_img_id, c.name as to_name, c.tel as to_tel, c.wallet_addr as to_addr, c.bank_addr as to_bank, c.alipay_addr as to_alipay, c.img_id as to_img_id from ctw_order a LEFT JOIN ctw_user b ON a.from_id=b.id LEFT JOIN ctw_user c ON a.to_id=c.id  where a.id>0 ${zParamInfo} order by a.create_time desc`;
         const zList = await this.app.mysql.get('db1').query(zSql);
         if(zList){
             return { code:1, msg:'success', data:{list:zList} };
@@ -519,21 +565,28 @@ class MBaseService extends Service {
         }
     }
 
-    //订单申诉
-    async orderAppeal(pParam) {
+    //设置订单信息
+    async orderSetInfo(pParam) {
         const { ctx } = this;
         const zTokenInfo = ctx.helper.verifyToken(ctx.header.authorization);// 解密获取的Token
         let zSql = '';
-        let zParam = [];
+        let zParam = ``;
         let zResult = {};
         const zTime = parseInt(Date.now()/1000);
         const zCK = await ctx.helper.checkIdOk("ctw_order", pParam.id);
 
-        //申诉类型
+        if(!pParam.id){ return {code:-1, msg:'订单id不能为空'}; }
+        
+        if(pParam.tran_id!=undefined){zParam += ` tran_id='${pParam.tran_id}' ,`};
+        zParam += ` update_time=${zTime} `;
 
-        //申诉时间
-
-        //给user表添加申诉次数
+        zSql = `update ctw_order set ${zParam} where id=${pParam.id}`;
+        zResult = await this.app.mysql.get('db1').query(zSql);
+        if(zResult && zResult["affectedRows"]>0){
+            return {code:1, msg:'success', data:pParam, result:zResult};
+        }else{
+            return {code:-1, msg:'data为空，操作失败'};
+        }
     }
 
     //订单编辑
@@ -573,10 +626,10 @@ class MBaseService extends Service {
                 zSql = `update ctw_order set status=2, confirm_time=${zTime}, update_time=${zTime} where id=${pParam.id} and to_id=${zTokenInfo.id} and status=1`;
                 break;
             case 3://拒绝
-                zSql = `update ctw_order set arbitraction_type=1, reason_refuse=${pParam.reason_refuse}, refuse_time=${zTime}, update_time=${zTime} where id=${pParam.id} and to_id=${zTokenInfo.id}`;
+                zSql = `update ctw_order set status=3, reason_refuse='${pParam.reason}', refuse_time=${zTime}, update_time=${zTime} where id=${pParam.id} and to_id=${zTokenInfo.id}`;
                 break;
             case 4://申诉
-                zSql = `update ctw_order set arbitraction_type=2, reason_appeal=${pParam.reason_appeal}, appeal_time=${zTime}, update_time=${zTime} where id=${pParam.id} and from_id=${zTokenInfo.id}`;
+                zSql = `update ctw_order set status=4, reason_appeal='${pParam.reason}', appeal_time=${zTime}, update_time=${zTime} where id=${pParam.id} and from_id=${zTokenInfo.id}`;
                 break;
             default:
                 return {code:-1, msg:`操作类型错误，type:${pParam.type}`};
@@ -638,13 +691,9 @@ class MBaseService extends Service {
             let zOrderParam_lotto = {};
             zOrderParam_lotto["order_type"] = 6;
             zOrderParam_lotto["fromId"] = 0;
-            zOrderParam_lotto["fromAddr"] = zGgAddr;
-            zOrderParam_lotto["fromBank"] = "";
-            zOrderParam_lotto["fromAlipay"] = "";
             zOrderParam_lotto["toId"] = zUserInfo.id;
-            zOrderParam_lotto["toAddr"] = zUserInfo.wallet_addr;
-            zOrderParam_lotto["toBank"] = zUserInfo.bank_addr;
-            zOrderParam_lotto["toAlipay"] = zUserInfo.alipay_addr;
+            zOrderParam_lotto["sys_addr"] = zGgAddr;
+            zOrderParam_lotto["lock_addr"] = "";
             zOrderParam_lotto["rounds"] = 1;
             zOrderParam_lotto["money"] = pDynMoney;
             zOrderParam_lotto["money_agc"] = pDynMoney*zExchange;
@@ -652,7 +701,7 @@ class MBaseService extends Service {
             zOrderParam_lotto["is_rmb"] = 0;
             zOrderParam_lotto["is_use"] = 1;
             zOrderParamList.push(zOrderParam_lotto);
-        }else if(pOrderType==7){ ////////////// 回馈单子
+        }else if(pOrderType==7){ ////////////// 排单收款
             let zOrderParam_backe = {};
             zOrderParam_backe["order_type"] = 7;
             zOrderParam_backe["user_id"] = zUserInfo.id;
@@ -661,13 +710,9 @@ class MBaseService extends Service {
             let zOrderParam_dyn = {};
             zOrderParam_dyn["order_type"] = 8;
             zOrderParam_dyn["fromId"] = 0;
-            zOrderParam_dyn["fromAddr"] = zGgAddr;
-            zOrderParam_dyn["fromBank"] = "";
-            zOrderParam_dyn["fromAlipay"] = "";
             zOrderParam_dyn["toId"] = zUserInfo.id;
-            zOrderParam_dyn["toAddr"] = zUserInfo.wallet_addr;
-            zOrderParam_dyn["toBank"] = zUserInfo.bank_addr;
-            zOrderParam_dyn["toAlipay"] = zUserInfo.alipay_addr;
+            zOrderParam_dyn["sys_addr"] = zGgAddr;
+            zOrderParam_dyn["lock_addr"] = "";
             zOrderParam_dyn["rounds"] = zUserInfo.rounds;
             zOrderParam_dyn["money"] = pDynMoney;
             zOrderParam_dyn["money_agc"] = pDynMoney*zExchange;
@@ -680,13 +725,9 @@ class MBaseService extends Service {
                 let zOrderParam_angle = {};
                 zOrderParam_angle["order_type"] = 1;
                 zOrderParam_angle["fromId"] = zUserInfo.id;
-                zOrderParam_angle["fromAddr"] = zUserInfo.wallet_addr;
-                zOrderParam_angle["fromBank"] = zUserInfo.bank_addr;
-                zOrderParam_angle["fromAlipay"] = zUserInfo.alipay_addr;
                 zOrderParam_angle["toId"] = -99;
-                zOrderParam_angle["toAddr"] = "";
-                zOrderParam_angle["toBank"] = "";
-                zOrderParam_angle["toAlipay"] = "";
+                zOrderParam_angle["sys_addr"] = "";
+                zOrderParam_angle["lock_addr"] = "";
                 zOrderParam_angle["rounds"] = 0;
                 zOrderParam_angle["money"] = zCurPayMoney;
                 zOrderParam_angle["money_agc"] = -1;
@@ -708,13 +749,9 @@ class MBaseService extends Service {
                     let zOrderParam_boss_1 = {};
                     zOrderParam_boss_1["order_type"] = 2;
                     zOrderParam_boss_1["fromId"] = zUserInfo.id;
-                    zOrderParam_boss_1["fromAddr"] = zUserInfo.wallet_addr;
-                    zOrderParam_boss_1["fromBank"] = zUserInfo.bank_addr;
-                    zOrderParam_boss_1["fromAlipay"] = zUserInfo.alipay_addr;
                     zOrderParam_boss_1["toId"] = zUserInfoBoss_1.id;
-                    zOrderParam_boss_1["toAddr"] = zUserInfoBoss_1.wallet_addr;
-                    zOrderParam_boss_1["toBank"] = zUserInfoBoss_1.bank_addr;
-                    zOrderParam_boss_1["toAlipay"] = zUserInfoBoss_1.alipay_addr;
+                    zOrderParam_boss_1["sys_addr"] = "";
+                    zOrderParam_boss_1["lock_addr"] = "";
                     zOrderParam_boss_1["rounds"] = zCurRounds;
                     zOrderParam_boss_1["money"] = zConfRateBoss1*zCurPayMoney;
                     zOrderParam_boss_1["money_agc"] = zConfRateBoss1*zCurPayMoney*zExchange;
@@ -732,13 +769,9 @@ class MBaseService extends Service {
                     let zOrderParam_boss_2 = {};
                     zOrderParam_boss_2["order_type"] = 3;
                     zOrderParam_boss_2["fromId"] = zUserInfo.id;
-                    zOrderParam_boss_2["fromAddr"] = zUserInfo.wallet_addr;
-                    zOrderParam_boss_2["fromBank"] = zUserInfo.bank_addr;
-                    zOrderParam_boss_2["fromAlipay"] = zUserInfo.alipay_addr;
                     zOrderParam_boss_2["toId"] = zUserInfoBoss_2.id;
-                    zOrderParam_boss_2["toAddr"] = zUserInfoBoss_2.wallet_addr;
-                    zOrderParam_boss_2["toBank"] = zUserInfoBoss_2.bank_addr;
-                    zOrderParam_boss_2["toAlipay"] = zUserInfoBoss_2.alipay_addr;
+                    zOrderParam_boss_2["sys_addr"] = "";
+                    zOrderParam_boss_2["lock_addr"] = "";
                     zOrderParam_boss_2["rounds"] = zCurRounds;
                     zOrderParam_boss_2["money"] = zConfRateBoss2*zCurPayMoney;
                     zOrderParam_boss_2["money_agc"] = zConfRateBoss2*zCurPayMoney*zExchange;
@@ -755,13 +788,9 @@ class MBaseService extends Service {
                 let zOrderParam_del = {};
                 zOrderParam_del["order_type"] = 4;
                 zOrderParam_del["fromId"] = zUserInfo.id;
-                zOrderParam_del["fromAddr"] = zUserInfo.wallet_addr;
-                zOrderParam_del["fromBank"] = zUserInfo.bank_addr;
-                zOrderParam_del["fromAlipay"] = zUserInfo.alipay_addr;
                 zOrderParam_del["toId"] = -1;
-                zOrderParam_del["toAddr"] = zDelAddr;
-                zOrderParam_del["toBank"] = "";
-                zOrderParam_del["toAlipay"] = "";
+                zOrderParam_del["sys_addr"] = "";
+                zOrderParam_del["lock_addr"] = zDelAddr;
                 zOrderParam_del["rounds"] = zCurRounds;
                 zOrderParam_del["money"] = zConfRateDel*zCurPayMoney;
                 zOrderParam_del["money_agc"] = zConfRateDel*zCurPayMoney*zExchange;
@@ -774,13 +803,9 @@ class MBaseService extends Service {
                 let zOrderParam_sys = {};
                 zOrderParam_sys["order_type"] = 5;
                 zOrderParam_sys["fromId"] = zUserInfo.id;
-                zOrderParam_sys["fromAddr"] = zUserInfo.wallet_addr;
-                zOrderParam_sys["fromBank"] = zUserInfo.bank_addr;
-                zOrderParam_sys["fromAlipay"] = zUserInfo.alipay_addr;
                 zOrderParam_sys["toId"] = 0;
-                zOrderParam_sys["toAddr"] = zGgAddr;
-                zOrderParam_sys["toBank"] = "";
-                zOrderParam_sys["toAlipay"] = "";
+                zOrderParam_sys["sys_addr"] = zGgAddr;
+                zOrderParam_sys["lock_addr"] = "";
                 zOrderParam_sys["rounds"] = zCurRounds;
                 zOrderParam_sys["money"] = zConfRateSys*zCurPayMoney;
                 zOrderParam_sys["money_agc"] = zConfRateSys*zCurPayMoney*zExchange;
@@ -808,8 +833,8 @@ class MBaseService extends Service {
                 if(zInfo.is_use==0){
                     zTime = parseInt(new Date(2095,1,1,0,0,0).getTime()/1000);
                 }
-                let zParam = ` ${zInfo.order_type}, ${zInfo.fromId}, '${zInfo.fromAddr}','${zInfo.fromBank}','${zInfo.fromAlipay}', ${zInfo.toId}, '${zInfo.toAddr}','${zInfo.toBank}','${zInfo.toAlipay}', ${zInfo.money}, ${zInfo.money_agc}, ${zInfo.rounds}, ${zInfo.active_id}, ${zInfo.is_use}, ${zInfo.is_rmb}, ${zTime}, ${zTime} `;
-                let zSql = `insert into ctw_order (order_type, from_id, from_addr,from_bank,from_alipay to_id, to_addr,to_bank,to_alipay to_id, money, money_agc, rounds, active_id, is_use, is_rmb, create_time, update_time) values (${zParam})`;
+                let zParam = ` ${zInfo.order_type}, ${zInfo.fromId}, ${zInfo.toId},  ${zInfo.money}, ${zInfo.money_agc}, ${zInfo.rounds}, ${zInfo.active_id}, ${zInfo.is_use}, ${zInfo.is_rmb}, '${zInfo.sys_addr}', '${zInfo.lock_addr}', ${zTime}, ${zTime} `;
+                let zSql = `insert into ctw_order (order_type, from_id, to_id, money, money_agc, rounds, active_id, is_use, is_rmb, sys_addr, lock_addr, create_time, update_time) values (${zParam})`;
                 let zResult = await this.app.mysql.get('db1').query(zSql);
                 if(zResult && zResult["affectedRows"]>0){
                     console.log(`订单添加成功, 轮数=${zInfo.rounds}, fromId=${zInfo.fromId}, toId=${zInfo.toId}`);
