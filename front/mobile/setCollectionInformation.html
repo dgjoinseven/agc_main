@@ -13,7 +13,16 @@
 <body class="body_css">
     <!--主页面容器-->
     <div class="main_page" id="id_main_page" style="display:none;">
-        <input id="id_input_addr" type="text" class="abs input_a" style="top:300px;" data-placeholder="ph.请输入您的钱包地址"></div>
+<!--         <div id="id_btn_erc20" class="btn_b" style="left:50px; top:200px;">ERC20</div>
+        <div id="id_btn_omni" class="btn_b" style="left:250px; top:200px;">OMNI</div> -->
+        <div class="abs txt_28" style="left:30px; top:250px;">
+            <label class="abs txt_r" style="width:200px; top:0px;" data-lang="main.银行名称"></label><input id="id_txt_bank_name" type="text" class="abs input_b" style="top:0px;">
+            <label class="abs txt_r" style="width:200px; top:80px;" data-lang="main.银行账号"></label><input id="id_txt_bank_account" class="abs input_b" style="top:80px;">
+            <label class="abs txt_r" style="width:200px; top:160px;" data-lang="main.支行名称"></label><input id="id_txt_bank_branch" class="abs input_b" style="top:160px;">
+            <label class="abs txt_r" style="width:200px; top:240px;" data-lang="main.收款人姓名"></label><input id="id_txt_bank_payee" class="abs input_b" style="top:240px;">
+            <label class="abs txt_r" style="width:200px; top:320px;" data-lang="main.收款人电话"></label><input id="id_txt_bank_tel" class="abs input_b" style="top:320px;">
+            <label class="abs txt_r" style="width:200px; top:450px;" data-lang="main.支付宝账号"></label><input id="id_txt_alipay" class="abs input_b" style="top:450px;">
+        </div>
         <label class="abs txt_28 cl_red" style="left:50px; top:850px;" data-lang="main.注：只有一次机会，请认真填写"></label>
         <div id="id_btn_confirm" class="abs btn_a btn_a_yellow" style="left:50px; top:1050px; width:650px !important;" data-lang="main.确认"></div>
     </div>
@@ -48,7 +57,7 @@ var selectType = 0;
 
 //初始化
 function init() {
-    c_m_header.init("id_header", "main.钱包地址");
+    c_m_header.init("id_header", "main.收款信息");
 
     if(common.getCookie("userInfo")){
         userInfo = JSON.parse(common.getCookie("userInfo"));
@@ -74,34 +83,22 @@ function init() {
 function btnClickHandler(p_obj_event){
     switch(p_obj_event.data.myType){
         case "id_btn_confirm":
-            if(!$('#id_input_addr').val()){
-                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1024", "tips.b_ok", function(){common.gotoWebSite("setAddr.html")});
+            if(!$('#id_txt_alipay').val()){
+                if(!$('#id_txt_bank_account').val()){
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.10002", "tips.b_ok");
+                    return;
+                }
+            }
+
+            if(!$('#id_txt_bank_tel').val()){
+                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.10003", "tips.b_ok");
                 return;
             }
-            api_setAddr();
+
+            api_setCI();
             break;
-        // case "id_btn_erc20":
-        //     selectBtn(1);
-        //     break;
-        // case "id_btn_omni":
-        //     selectBtn(2);
-        //     break;
     }
 }
-
-// function selectBtn(pIndex){
-//     selectType = pIndex;
-//     $('#id_btn_erc20').removeClass("btn_b_yellow");
-//     $('#id_btn_omni').removeClass("btn_b_yellow");
-//     switch(pIndex){
-//         case 1:
-//             $('#id_btn_erc20').addClass("btn_b_yellow");
-//             break;
-//         case 2:
-//             $('#id_btn_omni').addClass("btn_b_yellow");
-//             break;
-//     }
-// }
 
 //窗口尺寸重置
 function windowResize()
@@ -123,17 +120,32 @@ function windowResize()
     c_m_popUpWin.setSizePos(zScale);
 }
 
+//产生银行信息的json格式
+function genBankJsonInfo(){
+    var zBankInfo = {};
+    zBankInfo["bank"] = $('#id_txt_bank_name').val();
+    zBankInfo["account"] = $('#id_txt_bank_account').val();
+    zBankInfo["branch"] = $('#id_txt_bank_branch').val();
+    zBankInfo["name"] = $('#id_txt_bank_payee').val();
+    zBankInfo["tel"] = $('#id_txt_bank_tel').val();
+
+    return JSON.stringify(zBankInfo);
+}
+
+
 //////////////////////////////////// php相关 ////////////////////////////////////
 //设置地址
-function api_setAddr(){
+function api_setCI(){
     c_m_waiting.init("id_tips");
+    var zBankInfoStr = genBankJsonInfo();
+
     $.ajax({
         url: common.getApiUrl("user_edit"),
         type: "post",
         beforeSend: function(Request) {
             Request.setRequestHeader("Authorization",common.getCookie('token'));
         },
-        data:{type:2, id:userInfo.id,  wallet_addr:$('#id_input_addr').val()},
+        data:{type:2, id:userInfo.id,  bank_addr:zBankInfoStr, alipay_addr:$('#id_txt_alipay').val(), tel:$('#id_txt_bank_tel').val()},
         dataType: "json", //指定服务器返回的数据类型
         cache:false,
         success: function (evt) {

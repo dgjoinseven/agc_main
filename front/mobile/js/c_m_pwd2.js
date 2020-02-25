@@ -5,6 +5,7 @@ c_m_pwd2 = {
     param_parentId : "",       //参数-父级对象的id
     param_orderId : 0,       
     param_orderType : 0,     
+    param_reason : "",
     param_is_haveKeyEvent : 0, 
     htmlCode :  '\
                 <div class="c_m_pwd2_container" id="id_c_m_pwd2_container">\
@@ -41,10 +42,11 @@ c_m_pwd2 = {
     //@p_int_orderId    订单ID
     //@p_int_orderType  订单类型（1付款 2收款）
     //@p_int_orderUserId    确认人id
-    init : function(p_str_parentId, p_int_orderId, p_int_orderType){
+    init : function(p_str_parentId, p_int_orderId, p_int_orderType, p_str_reason){
         this.param_parentId = p_str_parentId;
         this.param_orderId = p_int_orderId;
         this.param_orderType = p_int_orderType;
+        this.param_reason = p_str_reason;
 
         this.loadCss();
         this.loadHtml();
@@ -140,7 +142,7 @@ c_m_pwd2 = {
     },
 
 //////////////////////////////////// php相关 ////////////////////////////////////
-    //确认
+    //支付/确认
     api_orderComfirm : function(){
         c_m_waiting.init("id_tips");
         $.ajax({
@@ -149,7 +151,7 @@ c_m_pwd2 = {
             beforeSend: function(Request) {
                 Request.setRequestHeader("Authorization",common.getCookie('token'));
             },
-            data:{type:c_m_pwd2.param_orderType, id:c_m_pwd2.param_orderId, pwd2:$("#id_c_m_pwd2_input").val()},
+            data:{type:c_m_pwd2.param_orderType, id:c_m_pwd2.param_orderId, pwd2:$("#id_c_m_pwd2_input").val(), reason:c_m_pwd2.param_reason},
             dataType: "json", //指定服务器返回的数据类型
             cache:false,
             success: function (evt) {

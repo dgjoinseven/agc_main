@@ -193,6 +193,11 @@ function btnClickHandler(p_obj_event){
             isPlayMovie = false;
             break;
         case "id_btn_lv":
+            //如果没有设置AGC地址
+            if(userInfo.wallet_addr){
+                c_m_popUpWin.init("id_popupwin", 2, "tips.t_tips", "tips.1005", "main.确认", function(){common.gotoWebSite('setAddr.html')});
+                return;
+            }
             api_userLvUp();
             break;
         case "id_myHead":
@@ -204,15 +209,15 @@ function btnClickHandler(p_obj_event){
             break;
         case "id_btn_log":
             c_m_waiting.init("id_tips");
-            common.gotoWebSite('log.html');
+            common.gotoWebSite('serGroupBonus.html');
             break;
         case "id_btn_invite_friends":
             if(!userInfo.pwd2){
                 c_m_popUpWin.init("id_popupwin", 2, "tips.t_tips", "tips.1004", "main.确认", function(){common.gotoWebSite('setpwd2.html')});
                 return;
             }
-            if(!userInfo.wallet_addr){
-                c_m_popUpWin.init("id_popupwin", 2, "tips.t_tips", "tips.1005", "main.确认", function(){common.gotoWebSite('setAddr.html')});
+            if(!userInfo.bank_addr || !userInfo.alipay_addr){
+                c_m_popUpWin.init("id_popupwin", 2, "tips.t_tips", "tips.1005", "main.确认", function(){common.gotoWebSite('setCollectionInformation.html')});
                 return;
             }
             c_m_waiting.init("id_tips");
@@ -449,7 +454,7 @@ function updateOrderList(){
 
 function timeRum(){
     if(isNeedTimer==false) return;
-    var zConf = JSON.parse(common.getCookie("conf"));
+    var zConf = common.getCookie("conf");
     var zMaxTime = parseInt(zConf["pay_time"])*3600;//时间限制
     const zTime = parseInt(Date.now()/1000);
     checkOrderInfo.create_time -= 1;

@@ -1,5 +1,5 @@
 common = {
-    VER : "1.9",    //版本号
+    VER : "2.0",    //版本号
     PC_WIDTH : 1200,    //PC端的标准宽度
     MOBILE_WIDTH : 750, //mobile端的标准宽度
     JS_LOAD_COUNTER : 0,    //已经加载的js个数
@@ -17,14 +17,11 @@ common = {
         var pos = curWwwPath.indexOf("src");
         var localhostPaht = curWwwPath.substring(0, pos);
         common.ROOT_URL = localhostPaht;
-        console.log("1==========");
+
         //是否正式服
         $.getJSON("../vendor/zsf.json?ver="+$.cookie('commonJsVer'), function (data){
-            console.log("2==========");
           $.each(data, function (infoIndex, info){
-            console.log("3==========");
             if(infoIndex=="server_type"){
-                console.log("4==========");
                 common.server_type = parseInt(info);
                 common.initCssJs(p_cp_list);
             }
@@ -350,7 +347,7 @@ common = {
                 zValue = $.cookie("userInfo");
                 break;
             case "conf":
-                zValue = $.cookie("conf");
+                zValue = JSON.parse($.cookie("conf"));
                 break;
             case "isLogin":
                 zValue = $.cookie("isLogin");

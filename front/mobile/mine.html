@@ -44,18 +44,18 @@
                 </div>
             </div>
             <div class="abs bg_base" style="top:510px; width:650px; height:100px;">
-                <label class="abs txt_32 txt_w2" style="width:650px; height:100px; line-height:100px;" data-lang="main.超时用户"></label>
-                <div id="id_mine_timeout" class="abs" style="left:620px; top:35px;"><img src="./img/btn_back3.png"></div>
+                <label class="abs txt_32 txt_w2" style="width:650px; height:100px; line-height:100px;" data-lang="main.收款信息"></label>
+                <div id="id_mine_ci" class="abs" style="left:620px; top:35px;"><img src="./img/btn_back3.png"></div>
             </div>
             <div class="abs bg_base" style="top:612px; width:650px; height:100px;">
                 <label class="abs txt_32 txt_w2" style="width:650px; height:100px; line-height:100px;" data-lang="main.评论"></label>
                 <div id="id_mine_comment" class="abs" style="left:620px; top:35px;"><img src="./img/btn_back3.png"></div>
             </div>
-            <div class="abs bg_base" style="top:714px; width:650px; height:100px;">
+<!--             <div class="abs bg_base" style="top:714px; width:650px; height:100px;">
                 <label class="abs txt_32 txt_w2" style="width:650px; height:100px; line-height:100px;" data-lang="main.联系信息"></label>
                 <div id="id_mine_contact" class="abs" style="left:620px; top:35px;"><img src="./img/btn_back3.png"></div>
-            </div>
-            <div class="abs bg_base" style="top:816px; width:650px; height:100px;">
+            </div> -->
+            <div class="abs bg_base" style="top:714px; width:650px; height:100px;">
                 <label class="abs txt_32 txt_w2" style="width:650px; height:100px; line-height:100px;" data-lang="main.问答"></label>
                 <div id="id_mine_qa" class="abs" style="left:620px; top:35px;"><img src="./img/btn_back3.png"></div>
             </div>
@@ -104,7 +104,7 @@ function init() {
     $('#id_mine_pwd').click({myType:"id_mine_pwd"}, btnClickHandler);
     $('#id_mine_pwd2').click({myType:"id_mine_pwd2"}, btnClickHandler);
     $('#id_mine_addr').click({myType:"id_mine_addr"}, btnClickHandler);
-    $('#id_mine_timeout').click({myType:"id_mine_timeout"}, btnClickHandler);
+    $('#id_mine_ci').click({myType:"id_mine_ci"}, btnClickHandler);
     $('#id_mine_comment').click({myType:"id_mine_comment"}, btnClickHandler);
     $('#id_mine_contact').click({myType:"id_mine_contact"}, btnClickHandler);
     $('#id_mine_qa').click({myType:"id_mine_qa"}, btnClickHandler);
@@ -147,9 +147,9 @@ function btnClickHandler(p_obj_event){
             c_m_waiting.init("id_tips");
             common.gotoWebSite('setAddr.html')
             break;
-        case "id_mine_timeout":
+        case "id_mine_ci":
             c_m_waiting.init("id_tips");
-            common.gotoWebSite('setTimeoutUser.html')
+            common.gotoWebSite('setCollectionInformation.html')
             break;
         case "id_mine_comment":
             c_m_waiting.init("id_tips");

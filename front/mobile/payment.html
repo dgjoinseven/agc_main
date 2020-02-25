@@ -55,7 +55,7 @@
                     <img id="id_img_default" class="abs" style="left:10px; top:10px; width:200px; height:200px;" src="./img/upload_img.png">
                 </div>
                 <div id="id_btn_upload" class="abs btn_b btn_b_orange" style="left:230px; top:240px; width:180px; height:50px;" data-lang="main.上传图片"></div>
-                <input id="id_mine_rn_img_click" type="file" class="abs bg_red" style="left:280px; top:360px; width:180px; height:50px; cursor:pointer; opacity:0;">
+                <input id="id_mine_rn_img_click" type="file" class="abs bg_red" style="left:230px; top:240px; width:180px; height:50px; cursor:pointer; opacity:0;">
                 <div class="abs txt_28" style="left:0px; top:350px;">
                     <label class="abs txt_r" style="width:200px; top:0px;" data-lang="main.银行名称"></label><label id="id_txt_bank_name" class="abs details_txt" style="top:0px;"></label>
                     <label class="abs txt_r" style="width:200px; top:60px;" data-lang="main.银行账号"></label><label id="id_txt_bank_account" class="abs details_txt" style="top:60px;"></label>
@@ -68,19 +68,30 @@
 
             <!-- AGC支付 -->
             <div id="id_details_agc" class="abs txt_28" style="left:0px; top:120px; display:none;">
-                <label class="abs txt_r" style="width:200px; top:150px;" data-lang="main.交易ID"></label><label id="id_txt_agc_tran" class="abs details_txt cl_blue" style="top:150px;"></label>
+                <label class="abs txt_r" style="width:200px; top:150px;" data-lang="main.交易ID"></label>
+                <textarea id="id_input_agc_tran" class="abs txt_28" style="left:220px; top:150px; width:400px; height:80px; line-height:40px; display:none;" data-placeholder="ph.请输入内容"></textarea>
+                <div id="id_btn_agc_tran" class="abs btn_b btn_b_orange" style="left:480px; top:260px; width:150px; height:50px; line-height:50px; display:none;" data-lang="main.确认"></div>
+                <label id="id_txt_agc_tran" class="abs details_txt cl_blue" style="top:150px; display:none;"></label>
+
                 <label class="abs txt_r" style="width:200px; top:350px;" data-lang="main.AGC地址"></label><label id="id_txt_agc_addr" class="abs details_txt textCanSelect" style="top:350px;"></label>
-                <div id="id_txt_agc_copy" class="abs btn_b btn_b_orange" style="left:220px; top:450px; width:150px; height:50px; line-height:50px;" data-clipboard-action="copy" data-clipboard-target="#id_txt_agc_addr" data-lang="main.复制"></div>
+                <div id="id_txt_agc_copy" class="abs btn_b btn_b_orange" style="left:480px; top:420px; width:150px; height:50px; line-height:50px;" data-clipboard-action="copy" data-clipboard-target="#id_txt_agc_addr" data-lang="main.复制"></div>
             </div>
 
             <!-- 拒绝 -->
             <div id="id_details_refuse" class="abs txt_28" style="left:0px; top:600px; display:inline;">
-<!--                 <div id="id_btn_refuse" class="abs btn_b btn_b_yellow" style="left:530px; top:260px; width:180px; height:80px; line-height:80px;" data-lang="main.拒绝"></div>
-                <label id="id_txt_refuse" class="abs cl_red txt_32" style="left:530px; top:260px; width:180px; height:80px; line-height:80px; display:none;" data-lang="main.被拒绝"></label> -->
-                <textarea id="id_textarea_refuse" class="abs" style="font-size:28px; left:100px; top:260px; width:400px; height:80px; line-height:40px;" onKeyUp="if(this.value.length > 30) this.value=this.value.substr(0,30)" data-placeholder="ph.最多输入30个字"></textarea>
+                <div id="id_refuse_btn" class="abs btn_b btn_b_red" style="left:530px; top:260px; width:180px; height:80px; line-height:80px; display:none;" data-lang="main.拒绝"></div>
+                <textarea id="id_refuse_textarea" class="abs" style="font-size:28px; left:100px; top:260px; width:400px; height:80px; line-height:40px;" onKeyUp="if(this.value.length > 30) this.value=this.value.substr(0,30)" data-placeholder="ph.最多输入30个字"></textarea>
+                <label id="id_refuse_title" class="abs txt_28" style="color:#f00; left:100px; top:260px; width:180px;" data-lang="main.拒绝"></label>
+                <label id="id_refuse_txt" class="abs txt_24" style="color:#840000; left:100px; top:290px; width:600px; height:60px; line-height:30px; "></label>
             </div>
 
             <!-- 申诉 -->
+            <div id="id_details_appeal" class="abs txt_28" style="left:0px; top:700px; display:inline;">
+                <div id="id_appeal_btn" class="abs btn_b btn_b_green" style="left:530px; top:260px; width:180px; height:80px; line-height:80px; display:none;" data-lang="main.申诉"></div>
+                <textarea id="id_appeal_textarea" class="abs" style="font-size:28px; left:100px; top:260px; width:400px; height:80px; line-height:40px;" onKeyUp="if(this.value.length > 30) this.value=this.value.substr(0,30)" data-placeholder="ph.最多输入30个字"></textarea>
+                <label id="id_appeal_title" class="abs txt_28" style="color:#169e00; left:100px; top:260px; width:180px;" data-lang="main.申诉"></label>
+                <label id="id_appeal_txt" class="abs txt_24" style="color:#3a7a2f; left:100px; top:290px; width:600px; height:60px; line-height:30px; "></label>
+            </div>
         </div>
     </div>
 
@@ -138,9 +149,13 @@ function init() {
     $('#id_btn_details_close').click({myType:"id_btn_details_close"}, btnClickHandler);
     $('#id_btn_img_close').click({myType:"id_btn_img_close"}, btnClickHandler);
     $('#id_img_small_container').click({myType:"id_img_small_container"}, btnClickHandler);
+    $('#id_refuse_btn').click({myType:"id_refuse_btn"}, btnClickHandler);
+    $('#id_appeal_btn').click({myType:"id_appeal_btn"}, btnClickHandler);
     $('#id_txt_agc_tran').click({myType:"id_txt_agc_tran"}, btnClickHandler);
+    $('#id_btn_agc_tran').click({myType:"id_btn_agc_tran"}, btnClickHandler);
     $('#id_mine_rn_img_click').on("change", api_uploadImg);
 
+    
     windowResize();
 
     api_userInfo();
@@ -169,7 +184,7 @@ function btnClickHandler(p_obj_event){
             break;
         case "id_btn_log":
             c_m_waiting.init("id_tips");
-            common.gotoWebSite('log.html');
+            common.gotoWebSite('serGroupBonus.html');
             break;
         case "id_btn_invite_friends":
             c_m_waiting.init("id_tips");
@@ -188,14 +203,22 @@ function btnClickHandler(p_obj_event){
             $('#id_big_img').hide();
             break;
         case "id_txt_agc_tran":
-            console.log(selectedInfo);
             var zUrl = "https://etherscan.io/tx/"+selectedInfo.agcTran;
             window.open(zUrl, '_blank');
+            break;
+        case "id_btn_agc_tran":
+            api_orderSetInfo(selectedInfo.order_id, $('#id_input_agc_tran').val());
             break;
         case "id_img_small_container":
             var zImgUrlInfo = {};
             zImgUrlInfo.img_url = $('#id_img_small').attr("src");
             onImgClickHander(zImgUrlInfo);
+            break;
+        case "id_refuse_btn":
+            orderEdit(selectedInfo.order_id, 3, $('#id_refuse_textarea').val());
+            break;
+        case "id_appeal_btn":
+            orderEdit(selectedInfo.order_id, 4, $('#id_appeal_textarea').val());
             break;
     }
 }
@@ -276,7 +299,7 @@ function updateTable(){
     for(var i=0; i<myInfoList.length; i++){
         zTop = i*210;
         var zInfo = myInfoList[i];
-        var zOrderType = parseInt(zInfo.order_type);//订单类型（1.天使轮打款  2.公排boss1打款  3.公排boss2打款  4.公排销毁打款  5.公排公共账号打款  6.大转盘收款  7.回馈收款  8.动态奖收款）
+        var zOrderType = parseInt(zInfo.order_type);//订单类型（1.天使轮打款  2.公排boss1打款  3.公排boss2打款  4.公排销毁打款【lock】  5.公排公共账号打款【sys】  6.大转盘收款【sys】  7.排单收款  8.动态奖收款【sys】）
         var zOrderStr = 'data-lang="main.order_type_'+zOrderType+'"';
         var zRounds = zInfo.rounds;
         var zStatus = parseInt(zInfo.status);
@@ -310,28 +333,37 @@ function updateTable(){
         var zAddrType = "";
         var zMoneyGetType = 0; // 1打钱  2收钱
         var zAcount = "";
-        var zClickInfo = {};
-        zClickInfo.id = zInfo.id;
-        zClickInfo.from_id = zFromId;
-        zClickInfo.to_id = zToId;
         var zClickTxt = "";
         var zImgName = "";
         var zTimeDisplay="";
         var zTel = "";
         var zClickDetailInfo = {};
+        zClickDetailInfo.rounds = zInfo.rounds;
+        zClickDetailInfo.from_id = zFromId;
+        zClickDetailInfo.to_id = zToId;
         zClickDetailInfo.img_url = zInfo.img_url;
         zClickDetailInfo.img_sum = zInfo.img_sum;
         zClickDetailInfo.order_id = zInfo.id;
         zClickDetailInfo.is_rmb = zInfo.is_rmb;
+        zClickDetailInfo.status = zStatus;
+        zClickDetailInfo.reason_refuse = zInfo.reason_refuse;
+        zClickDetailInfo.reason_appeal = zInfo.reason_appeal;
+        zClickDetailInfo.tel = zInfo.to_tel;
         var zClickDetailTxt = "";
         var zClickImgInfo = {};
         zClickImgInfo.img_url = zInfo.img_url;
         var zClickImgTxt = "";
         if(parseInt(zFromId)==parseInt(userInfo.id)){//付钱
             zMoneyGetType = 1;
-            zClickInfo.moneyGetType = zMoneyGetType;
-            // zAddrType = zAddrTypeList[parseInt(zToType)] + " : ";
-            zAddrTxt =  zToAddr;
+            
+            if(zOrderType==4){ //打给锁币账号
+                zAddrTxt = zInfo.lock_addr;
+            }else if(zOrderType==5){ //打给公共账号
+                zAddrTxt = zInfo.sys_addr;
+            }else{
+                zAddrTxt =  zToAddr;
+            }
+
             zAcount = zInfo.to_name;
             zClickDetailInfo.bank = zToBank;
             zClickDetailInfo.alipay = zToAlipay;
@@ -346,23 +378,30 @@ function updateTable(){
             zPayState = "main.付款者";
             zPayStateColor = "#3da200";
             if(parseInt(zStatus)==0){
-                zClickTxt = " onClick='onListClickHander("+JSON.stringify(zClickInfo)+")' ";
+                zClickTxt = " onClick='onListClickHander("+JSON.stringify(zClickDetailInfo)+")' ";
             }
             zImgName = "./img/head/head_"+zInfo.to_img_id+".jpg";
             if(zInfo.to_id==0){
-                zRounds = 99;
                 zAcount = "";
                 zImgName = "./img/head/sys_get.jpg";
             }else if(zInfo.to_id==-1){
-                zRounds = 99;
                 zAcount = "";
                 zImgName = "./img/head/sys_lock.jpg";
+            }else if(zInfo.to_id==-99){
+                zAcount = "";
+                zImgName = "./img/head/sys_what.jpg";
             }
         }else{//收钱
             zMoneyGetType = 2;
-            zClickInfo.moneyGetType = zMoneyGetType;
-            // zAddrType = zAddrTypeList[parseInt(zFromType)] + " : ";
-            zAddrTxt = zFromAddr;
+            
+            if(zOrderType==6){ //大转盘打过来
+                zAddrTxt = zInfo.sys_addr;
+            }else if(zOrderType==8){ //动态奖打过来
+                zAddrTxt = zInfo.sys_addr;
+            }else{
+                zAddrTxt = zFromAddr;
+            }
+
             zClickDetailInfo.bank = zFromBank;
             zClickDetailInfo.alipay = zFromAlipay;
             zClickDetailInfo.moneyGetType = zMoneyGetType;
@@ -372,8 +411,8 @@ function updateTable(){
             zClickImgTxt = " onClick='onImgClickHander("+JSON.stringify(zClickImgInfo)+")' ";
             zAcount = zInfo.from_name;
             zTel = zInfo.from_tel;
-            //如果时6，7，8三种公共平台给用户打款的情况，status为1即公共平台已打款情况，自动判断为status=2已完成
-            if(zOrderType>=6 && zStatus==1){
+            //如果时6，8两种公共平台给用户打款的情况，status为1即公共平台已打款情况，自动判断为status=2已完成
+            if((zOrderType==6 || zOrderType==8) && zStatus==1){
                 zStatus = 2;
             }
             zBtnClass="btn_payment_"+zStatus+"2";
@@ -381,26 +420,33 @@ function updateTable(){
             zPayState = "main.收款者";
             zPayStateColor = "#FC7E2A";
             if(parseInt(zStatus)==1){
-                zClickTxt = " onClick='onListClickHander("+JSON.stringify(zClickInfo)+")' ";
+                zClickTxt = " onClick='onListClickHander("+JSON.stringify(zClickDetailInfo)+")' ";
             }
             zImgName = "./img/head/head_"+zInfo.from_img_id+".jpg";
             if(zInfo.from_id==0){
-                zRounds = 99;
                 zAcount = "";
                 zImgName = "./img/head/sys_get.jpg";
             }else if(zInfo.from_id==-1){
-                zRounds = 99;
                 zAcount = "";
                 zImgName = "./img/head/sys_lock.jpg";
+            }else if(zInfo.from_id==-99){
+                zAcount = "";
+                zImgName = "./img/head/sys_what.jpg";
             }
         }
 
+        //已完成，拒绝，申诉，申诉结束的单子不显示时间
         if(zStatus>=2){
             zTimeDisplay = "diplay:none;"
         }
+
         var zStr = '\
             <div class="abs bg_white" style="top:'+zTop+'px; width:650px; height:210px; background-color:rgba(0,0,0,0); border:0px solid #eee; border-bottom:2px solid #eee;">\
                 <div class="abs" style="transform:scale(0.6,0.6); top:30px;"><img class="abs" style="-webkit-mask:url(./img/mask_r_200.png);" src="'+zImgName+'"></div>\
+                <div class="abs txt_28 cl_grey" style="left:0px; top:170px;">\
+                    <label>No.</label>\
+                    <label>'+zInfo.id+'</label>\
+                </div>\
                 <div class="abs" style="left:140px; top:30px;">\
                     <label class="txt_36" style="color:'+zPayStateColor+';" data-lang="'+zPayState+'"></label>\
                     <label class="txt_36 txt_r txt_w1" style="color:'+zPayStateColor+'; margin-left:10px;">'+zMoney+'</label>\
@@ -429,39 +475,13 @@ function updateTable(){
     $('#id_end').css("top", endHeight+"px");
 
     common.lang();
-
-    //复制按钮
-    // for(var j=0; j<myInfoList.length; j++){
-    //     var infoXX = myInfoList[j];
-    //     new Clipboard('#id_btn_copy_'+infoXX.id, {text: function(trigger) {
-    //         c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1", "tips.b_ok");
-    //     }});
-    // }
 }
-
-                // <div class="abs" style="left:10px; top:170px;">\
-                //     <div id="id_copy_content_'+zInfo.id+'" class="abs txt_dot txt_24 cl_grey textCanSelect" style="left:0px; width:250px;">'+zAddrTxt+'</div>\
-                //     <div id="id_btn_copy_'+zInfo.id+'" class="abs txt_dot" style="left:260px; border-radius:10px; width:25px; height:25px; line-height:25px;" data-clipboard-action="copy" data-clipboard-target="#id_copy_content_'+zInfo.id+'"><img src="./img/btn_copy.png"></div>\
-                // </div>\
 
 //按钮被点击
 function onListClickHander(pInfo){
     var zInfo = pInfo;
-    var zUserId = 0;
-    if(zInfo.moneyGetType==1){
-        zUserId = zInfo.from_id;
-    }else if(zInfo.moneyGetType==2){
-        zUserId = zInfo.to_id;
-    }else{
-        c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.-1", "tips.b_ok");
-        return;
-    }
-
-    if(!userInfo.pwd2){
-        c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "main.请设置交易密码", "tips.b_ok", function(){common.gotoWebSite('setpwd2.html')});
-        return;
-    }
-    c_m_pwd2.init("id_confirmwin", zInfo.id, zInfo.moneyGetType, zUserId);
+    selectedInfo = zInfo;
+    orderEdit(zInfo.order_id, zInfo.moneyGetType);
 }
 
 //详情按钮点击
@@ -471,12 +491,22 @@ function onDetailClickHander(pInfo){
 
     //显示人民币还是AGC
     if(parseInt(zInfo.is_rmb)==1){
-        var zBankInfo = JSON.parse(zInfo.bank);
+        var zBankInfo = {};
+        if(zInfo.bank){
+            zBankInfo = JSON.parse(zInfo.bank);
+        }else{
+            zBankInfo.bank = "";
+            zBankInfo.account = "";
+            zBankInfo.branch = "";
+            zBankInfo.name = "";
+            zInfo.tel = "";
+            zInfo.alipay = "";
+        }
         $('#id_txt_bank_name').text(zBankInfo.bank);
         $('#id_txt_bank_account').text(zBankInfo.account);
         $('#id_txt_bank_branch').text(zBankInfo.branch);
         $('#id_txt_bank_payee').text(zBankInfo.name);
-        $('#id_txt_bank_tel').text(zBankInfo.tel);
+        $('#id_txt_bank_tel').text(zInfo.tel);
         $('#id_txt_alipay').text(zInfo.alipay);
 
         $('#id_details_rmb').show();
@@ -485,28 +515,98 @@ function onDetailClickHander(pInfo){
         $('#id_txt_agc_addr').text(zInfo.agcAddr);
         $('#id_txt_agc_tran').text(zInfo.agcTran);
 
+        if(!zInfo.agcTran){
+            $('#id_input_agc_tran').show();
+            $('#id_btn_agc_tran').show();
+            $('#id_txt_agc_tran').hide();
+        }else{
+            $('#id_input_agc_tran').hide();
+            $('#id_btn_agc_tran').hide();
+            $('#id_txt_agc_tran').show();
+        }
+        
         $('#id_details_rmb').hide();
         $('#id_details_agc').show();
     }
 
+    // console.log(zInfo.moneyGetType, zInfo.status, zInfo.reason_refuse, zInfo.reason_appeal);
+
+    //拒绝/申诉
+    $('#id_refuse_txt').text(zInfo.reason_refuse);
+    $('#id_appeal_txt').text(zInfo.reason_appeal);
+
     //付钱，收钱逻辑
     if(parseInt(zInfo.moneyGetType)==1){ //付钱
         var zConf = common.getCookie("conf");
-
-        zInfo.agcAddr;
-        zInfo.bank;
-        zInfo.alipay;
-
-        if(zConf && parseInt(zInfo.img_sum)>=parseInt(JSON.parse(zConf)["upload_img_max"])){
+        if(zConf && parseInt(zInfo.img_sum)>=zConf["upload_img_max"]){
             $('#id_btn_upload').hide();
             $('#id_mine_rn_img_click').hide();
         }else{
             $('#id_btn_upload').show();
             $('#id_mine_rn_img_click').show();
         }
+
+        //拒绝显示逻辑
+        if(parseInt(zInfo.status)==3 || parseInt(zInfo.status)==4){
+            $('#id_details_refuse').show();
+            $('#id_refuse_btn').hide();
+            $('#id_refuse_textarea').hide();
+            $('#id_refuse_title').show();
+            $('#id_refuse_txt').show();
+        }else{
+            $('#id_details_refuse').hide();
+        }
+
+        //申诉显示逻辑
+        if(parseInt(zInfo.status)==3 || parseInt(zInfo.status)==4){
+            $('#id_details_appeal').show();
+            if(zInfo.reason_appeal){
+                $('#id_appeal_btn').hide();
+                $('#id_appeal_textarea').hide();
+                $('#id_appeal_title').show();
+                $('#id_appeal_txt').show();
+            }else{
+                $('#id_appeal_btn').show();
+                $('#id_appeal_textarea').show();
+                $('#id_appeal_title').hide();
+                $('#id_appeal_txt').hide();
+            }
+        }else{
+            $('#id_details_appeal').hide();
+        }
     }else{ //收钱
         $('#id_btn_upload').hide();
         $('#id_mine_rn_img_click').hide();
+
+        //拒绝显示逻辑
+        if(parseInt(zInfo.status)==1 || parseInt(zInfo.status)==3 || parseInt(zInfo.status)==4){
+            $('#id_details_refuse').show();
+            //如果拒绝过，则显示拒绝信息；如果没有拒绝过，则显示拒绝按钮和输入框
+            if(zInfo.reason_refuse){
+                $('#id_refuse_btn').hide();
+                $('#id_refuse_textarea').hide();
+                $('#id_refuse_title').show();
+                $('#id_refuse_txt').show();
+            }else{
+                $('#id_refuse_btn').show();
+                $('#id_refuse_textarea').show();
+                $('#id_refuse_title').hide();
+                $('#id_refuse_txt').hide();
+            }
+        }else{
+            $('#id_details_refuse').hide();
+        }
+
+        //申诉显示逻辑
+        if(parseInt(zInfo.status)==4){
+            $('#id_details_appeal').show();
+            $('#id_appeal_btn').hide();
+            $('#id_appeal_textarea').hide();
+            $('#id_appeal_title').show();
+            $('#id_appeal_txt').show();
+        }else{
+            $('#id_details_appeal').hide();
+        }
     }
 
     //图片
@@ -518,7 +618,7 @@ function onDetailClickHander(pInfo){
         $('#id_img_default').show();
         $('#id_img_small').hide();
     }
-    
+
     //总显示
     $('#id_table_detail').show();
 }
@@ -537,7 +637,7 @@ function onImgClickHander(pInfo){
 function timeRum(){
     const zTime = parseInt(Date.now()/1000);
     if(myInfoList && myInfoList.length>0){
-        var zConf = JSON.parse(common.getCookie("conf"));
+        var zConf = common.getCookie("conf");
         var zPayMaxTime = parseInt(zConf["pay_time"])*3600;//时间限制
         var zConfirmMaxTime = parseInt(zConf["confirm_time"])*3600;
 
@@ -564,6 +664,39 @@ function timeRum(){
             }
         }
     }
+}
+
+
+//控制订单（1支付 2确定 3拒绝 4申诉）
+//@pOrderId  订单ID
+//@pType     订单类型（1支付 2确定 3拒绝 4申诉）
+//@pReason   原因（订单类型为3/4时使用）
+function orderEdit(pOrderId, pType, pReason){
+    if(!userInfo.pwd2){
+        c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "main.请设置交易密码", "tips.b_ok", function(){common.gotoWebSite('setpwd2.html')});
+        return;
+    }
+
+    //如果点击支付，则判断以下内容
+    if(pType==1){
+        if(selectedInfo.rounds==0){ //天使轮
+            if(!selectedInfo.bank || !selectedInfo.alipay){
+                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "main.请设置银行信息或支付宝账号", "tips.b_ok", function(){onDetailClickHander(selectedInfo)});
+                return;
+            }
+            if(!selectedInfo.img_url){
+                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "main.请上传打款图片", "tips.b_ok", function(){onDetailClickHander(selectedInfo)});
+                return;
+            }
+        }else{ //公排
+            if(!selectedInfo.agcTran){
+                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "main.请输入交易单号", "tips.b_ok", function(){onDetailClickHander(selectedInfo)});
+                return;
+            }
+        }
+    }
+
+    c_m_pwd2.init("id_confirmwin", pOrderId, pType, pReason);
 }
 
 //////////////////////////////////// php相关 ////////////////////////////////////
@@ -691,6 +824,38 @@ function api_uploadImg(){
     });
 }
 
+//支付/确认
+function api_orderSetInfo(pOrderId, pTranId){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("orderSetInfo"),
+        type: "post",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{id:pOrderId, tran_id:pTranId},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_orderList success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                case 10:
+                    $('#id_c_m_pwd2_container').hide();
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1", "tips.b_ok", function(){common.onRefreshFun()});
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_orderList error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
 
 </script>
 

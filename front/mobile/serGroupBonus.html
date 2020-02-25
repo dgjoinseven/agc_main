@@ -113,10 +113,11 @@ function updateGroupInfo(){
     var zTop = 0;
     var zBonus = 0; 
     var zHmlInfo = "";
-    for(var i=1; i<=19; i++){
+    var zRoundsSum = parseInt(common.getCookie("conf")["max_rounds"]);
+    for(var i=1; i<=zRoundsSum; i++){
         var zDynName = "dyn_"+i;
         var zColor = "#A8A8A8";
-        if(groupInfo[zDynName]){
+        if(groupInfo && groupInfo[zDynName]){
             zBonus = parseInt(groupInfo[zDynName]);
         }else{
             zBonus = 0;

@@ -20,6 +20,7 @@ lang_en = {
 		"更新密码":"UPDATE LOGIN PASSWORD",
 		"更改交易密码":"CHANGE TRANSACTION PASSWORD",
 		"钱包地址":"WALLET ADDRESS",
+		"收款信息":"COLLECTION INFORMSTION",
 		"超时用户":"TIMEOUT USER",
 		"评论":"COMMENT",
 		"联系信息":"CONTACT INFROMATION",
@@ -97,7 +98,11 @@ lang_en = {
 		"AGC地址":"Address:",
 		"复制":"Copy",
 		"拒绝":"Refuse",
-		"被拒绝":"Be Refused",
+		"申诉":"Appeal",
+		"注：只有一次机会，请认真填写":"Note: only one chance, please fill in carefully",
+		"请设置银行信息或支付宝账号":"Please set bank information and Alipay account number",
+		"请上传打款图片":"Please upload the print image",
+		"请输入交易单号":"Please enter transaction No",
 		"null": ""
 	},
 	"tips":{
@@ -131,10 +136,14 @@ lang_en = {
 		"1030": "The picture is too large. Please upload a picture smaller than 500K",
 		"1031": "Wrong File Type",
 		"1032": "Too many times to upload pictures",
+		"1033": "Bank cannot be set repeatedly",
+		"1034": "Alipay cannot be set repeatedly",
 		"3001": "Nickname cannot be empty",
 		"3002": "Account cannot be empty",
 		"3003": "Password cannot be empty",
 		"10001": "Please Login Again",
+		"10002": "Select one bank account and Alipay account",
+		"10003": "Phone cannot be empty",
 		"null": ""
 	},
 	"ph":{
