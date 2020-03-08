@@ -52,6 +52,24 @@ class CBaseController extends Controller {
         if(zData){this.ctx.body = zData;}else{this.ctx.body = { code:-1, msg:'error'};}
     }
 
+    //QA列表
+    async qaList() {
+        var zData = await this.ctx.service.mBase.qaList(this.ctx.query);
+        if(zData){this.ctx.body = zData ;}else{this.ctx.body = { code:-1, msg:'error'};}
+    }
+
+    //集市-加持
+    async marketJcList() {
+        var zData = await this.ctx.service.mBase.marketJcList(this.ctx.query);
+        if(zData){this.ctx.body = zData ;}else{this.ctx.body = { code:-1, msg:'error'};}
+    }
+
+    //集市-邀请挂靠点
+    async marketInvitationList() {
+        var zData = await this.ctx.service.mBase.marketInvitationList(this.ctx.query);
+        if(zData){this.ctx.body = zData ;}else{this.ctx.body = { code:-1, msg:'error'};}
+    }
+
     //用户详情
     async userDetail() {
         var zData = await this.ctx.service.mBase.userDetail(this.ctx.query);
@@ -70,6 +88,18 @@ class CBaseController extends Controller {
         if(zData){this.ctx.body = zData;}else{this.ctx.body = { code:-1, msg:'error'};}
     }
     
+    //加持列表
+    async jcList() {
+        var zData = await this.ctx.service.mBase.jcList(this.ctx.query);
+        if(zData){this.ctx.body = zData ;}else{this.ctx.body = { code:-1, msg:'error'};}
+    }
+
+    //加持谁
+    async jcWho() {
+        var zData = await this.ctx.service.mBase.jcWho(this.ctx.request.body);
+        if(zData){this.ctx.body = zData;}else{this.ctx.body = { code:-1, msg:'error'};}
+    }
+
     //订单列表
     async orderList() {
         var zData = await this.ctx.service.mBase.orderList(this.ctx.query);

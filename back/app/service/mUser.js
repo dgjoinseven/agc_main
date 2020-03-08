@@ -20,6 +20,16 @@ class UserService extends Service {
         }
     }
 
+    async getUserInfoByName(pName) {
+        try {
+            const zSql = `select * from ctw_user where name='?' `;
+            const zResult = await this.app.mysql.get('db1').query(zSql, [pName]);
+            return zResult;
+        } catch (error) {
+            throw error;
+        }
+    }
+
 
     //获取用户信息
     async getUserInfo(pId) {

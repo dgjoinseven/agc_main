@@ -139,6 +139,7 @@ lang_en = {
 		"1033": "Bank cannot be set repeatedly",
 		"1034": "Alipay cannot be set repeatedly",
 		"1035": "Insufficient number of blessing, unable to level up",
+		"1036": "You can't help yourself",
 		"3001": "Nickname cannot be empty",
 		"3002": "Account cannot be empty",
 		"3003": "Password cannot be empty",

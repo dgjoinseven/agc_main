@@ -209,7 +209,71 @@ class MBaseService extends Service {
             return { code:-1, msg:`评论添加失败`};
         }
     }
-    
+
+    /////////////////////////////////////////////// 集市 ////////////////////////////////////////////////////
+    //集市-加持
+    //@to_page
+    //@page_size
+    //@rounds   需要加持的轮数
+    async marketJcList(pParam) {
+        const { ctx } = this;
+        // const zTokenInfo = ctx.helper.verifyToken(ctx.header.authorization);// 解密获取的Tokenid
+        // const zTime = parseInt(Date.now()/1000);
+        const zToPage = pParam.to_page?pParam.to_page:1;
+        const zPageSize = pParam.page_size?pParam.page_size:10;
+        let zParamInfo = ``;
+        const zConf = await ctx.helper.getConfigDic();
+        const zConfMaxRounds = parseInt(zConf.max_rounds);
+        let zRounds = parseInt(pParam.rounds);
+        for(let i=0; i<zConfMaxRounds; i++){
+            let zIndex = i+1;
+            zParamInfo += `a.jc_${zIndex}>=${zRounds} and `;
+        }
+        zParamInfo += ` a.id>0 and b.is_showMarket=1 `;
+
+        const zSqlCount = `select count(distinct a.id) as count from ctw_jc a LEFT JOIN ctw_user b ON a.user_id=b.id where ${zParamInfo}`;
+        const zResCount = await this.app.mysql.get('db1').query(zSqlCount);
+        const zTotalPage = zPageSize > 0 ? Math.ceil(zResCount[0].count / zPageSize) : 0;
+        const zTotalCount = zResCount[0].count;
+    	const zOffset = (zToPage - 1) * zPageSize;
+
+        const zSql = ` select distinct a.id, a.*, b.name, b.tel, b.remark from ctw_jc a LEFT JOIN ctw_user b ON a.user_id=b.id where ${zParamInfo} order by a.update_time limit ?,?`;
+        const zList = await this.app.mysql.get('db1').query(zSql, [zOffset, parseInt(zPageSize)]);
+        if(zList && zList[0]){
+            return { code:1, msg:'success', data:{ cur_page:zToPage, page_size:zPageSize, total_page:zTotalPage, total_count:zTotalCount, list:zList}};
+        }else{
+            return null;
+        }
+    }
+
+    //集市-邀请挂靠点
+    //@to_page
+    //@page_size
+    async marketInvitationList(pParam) {
+        const { ctx } = this;
+        // const zTokenInfo = ctx.helper.verifyToken(ctx.header.authorization);// 解密获取的Tokenid
+        // const zTime = parseInt(Date.now()/1000);
+        const zToPage = pParam.to_page?pParam.to_page:1;
+        const zPageSize = pParam.page_size?pParam.page_size:10;
+        let zParamInfo = ``;
+        zParamInfo += ` zt_sum<3 and is_showMarket=1 `;
+
+        const zSqlCount = `select count(id) as count from ctw_user where ${zParamInfo}`;
+        const zResCount = await this.app.mysql.get('db1').query(zSqlCount);
+        const zTotalPage = zPageSize > 0 ? Math.ceil(zResCount[0].count / zPageSize) : 0;
+        const zTotalCount = zResCount[0].count;
+    	const zOffset = (zToPage - 1) * zPageSize;
+
+        const zSql = ` select name, tel, remark from ctw_user where ${zParamInfo} order by create_time desc limit ?,?`;
+        const zList = await this.app.mysql.get('db1').query(zSql, [zOffset, parseInt(zPageSize)]);
+        if(zList && zList[0]){
+            return { code:1, msg:'success', data:{ cur_page:zToPage, page_size:zPageSize, total_page:zTotalPage, total_count:zTotalCount, list:zList}};
+        }else{
+            return null;
+        }
+    }
+
+
     /////////////////////////////////////////////// 用户 ////////////////////////////////////////////////////
     //用户详情
     async userDetail(pParam) {
@@ -217,7 +281,7 @@ class MBaseService extends Service {
         const zTokenInfo = ctx.helper.verifyToken(ctx.header.authorization);// 解密获取的Tokenid
         const zTime = parseInt(Date.now()/1000);
 
-        const zSql = ` select id,name,account,img_id,boss_id,boss_id_2,boss_list,is_lv,pwd2,status,rounds,wallet_addr,bank_addr,alipay_addr,is_special,lotto_status from ctw_user where id=${zTokenInfo.id} `;
+        const zSql = ` select id,name,account,img_id,boss_id,boss_id_2,boss_list,is_lv,pwd2,status,rounds,wallet_addr,bank_addr,alipay_addr,is_special,lotto_status,tel,remark from ctw_user where id=${zTokenInfo.id} `;
         const zUserList = await this.app.mysql.get('db1').query(zSql);
         const zExchangeList = await this.app.mysql.get('db1').query(`select * from ctw_exchange order by id desc`);
         if(zUserList && zExchangeList){
@@ -528,11 +592,63 @@ class MBaseService extends Service {
     //获取加持列表
     async jcList(pParam) {
         const { ctx } = this;
+        const zTokenInfo = ctx.helper.verifyToken(ctx.header.authorization);// 解密获取的Tokenid
+        const zTime = parseInt(Date.now()/1000);
+        
+        const zSql = ` select * from ctw_jc where user_id=${zTokenInfo.id} `;
+        const zList = await this.app.mysql.get('db1').query(zSql);
+        if(zList && zList[0]){
+            return { code:1, msg:'success', data:{ list:zList[0] }};
+        }else{
+            return null;
+        }
     }
 
     //加持谁
+    //@jc_rounds    使用哪一轮的加持
+    //@jc_name      加持对象的昵称
     async jcWho(pParam) {
         const { ctx } = this;
+        const zTokenInfo = ctx.helper.verifyToken(ctx.header.authorization);// 解密获取的Tokenid
+        const zTime = parseInt(Date.now()/1000);
+        const zConf = await ctx.helper.getConfigDic();
+        const zConfMaxRounds = parseInt(zConf.max_rounds);
+        const zUserInfo = ctx.helper.getUserInfoByName(jc_name);
+        
+        if(!zUserInfo){
+            return {code:-1, msg:'加持对象不存在' };
+        }
+        if(zRounds<1 || zRounds>zConfMaxRounds){
+            return {code:-1, msg:'轮数超过范围' };
+        }
+        if(parseInt(zUserInfo.id)==parseInt(zTokenInfo.id)){
+            return {code:1036, msg:'不能加持自己' };
+        }
+
+        let zRounds = parseInt(jc_rounds);
+        let zToRounds = (zUserInfo.rounds + 1);
+
+        //验证ctw_jc的对应轮数是否有加持次数，并且加持的对象的轮数是否符合标准（大于等于加持对象的轮数）
+        let zSelectJc = await this.app.mysql.get('db1').query(`select * from ctw_jc where jc_${zRounds}>=${zToRounds} and user_id=${zTokenInfo.id}`);
+        if(!zSelectJc || !zSelectJc[0]){
+            return {code:-1, msg:`没有加持次数或者被加持者轮数太高,${zRounds},${zToRounds}` };
+        }
+
+        //扣ctw_jc的加持次数
+        await this.app.mysql.get('db1').query(`update ctw_jc set jc_${zRounds}=-1 where user_id=${zTokenInfo.id}`);
+
+        //加持对象jc_sum增加
+        let zSql = `update ctw_user set jc_sum=jc_sum+1, update_time=${zTime} where id=${zUserInfo.id} `;
+        const zResult = await this.app.mysql.get('db1').query(zSql); // 初始化事务
+        if(zResult && zResult["affectedRows"]>0){
+            //清除缓存
+            await ctx.service.mUser.delUserInfo(zUserInfo.id);
+            
+            return { code:1, msg:`success`, data:pParam};
+        }else{
+            return { code:-1, msg:`加持失败`};
+        }
+
     }
 
     /////////////////////////////////////////////// 订单 ////////////////////////////////////////////////////

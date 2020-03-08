@@ -36,11 +36,11 @@ module.exports = app => {
 
   router.get('/api/dyn_list', jwt, tc, controller.cBase.dynList);           //动态奖金列表
   router.get('/api/dyn_log_list', jwt, tc, controller.cBase.dynLogList);    //动态奖金记录列表
-  
+
   router.get('/api/jc_list', jwt, tc, controller.cBase.jcList);     //加持列表
   router.post('/api/jc_who', jwt, tc, controller.cBase.jcWho);      //加持谁
-  router.get('/api/market_jc', jwt, tc, controller.cBase.marketJc);   //集市-加持
-  router.get('/api/market_invitation', jwt, tc, controller.cBase.marketInvitation);   //集市-推荐
+  router.get('/api/market_jc_list', jwt, tc, controller.cBase.marketJcList);   //集市-加持
+  router.get('/api/market_invitation_list', jwt, tc, controller.cBase.marketInvitationList);   //集市-推荐
 
   ////////////////////// 其它 //////////////////////
   router.post('/api/upload_img', tc, controller.cBase.uploadImg); // 上传图片

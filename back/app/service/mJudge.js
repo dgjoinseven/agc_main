@@ -14,6 +14,7 @@ class MJudgeService extends Service {
     async orderOkJudge(pOrderId){
         const { ctx } = this;
         const zTime = parseInt(Date.now()/1000);
+        const zConf = await ctx.helper.getConfigDic();
         let zIsNeedJudgeOut = false;
         let zSqlOrderList = await this.app.mysql.get('db1').query(`select * from ctw_order where id=${pOrderId}`);
         if(!zSqlOrderList || !zSqlOrderList[0]){
@@ -76,6 +77,10 @@ class MJudgeService extends Service {
                     
                     //本轮的觉醒可激活之前不可见的单子
                     await ctx.service.mJudge.judgeOpenOrder(zSqlOrderInfo.from_id);
+
+                    //激活本轮的加持次数
+                    let zJcNum = zConf[`jclv_${zSqlOrderInfo.rounds}`];
+                    await this.app.mysql.get('db1').query(`update ctw_jc set jc_${zSqlOrderInfo.rounds}=${zJcNum} where user_id=${zSqlOrderInfo.from_id}`);
                 }else{
                     ctx.logger.info(`激活设置user失败！userId=${zJudgeActived.from_id}  rounds=${zSqlOrderInfo.rounds}`);
                 }

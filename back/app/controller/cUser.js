@@ -85,6 +85,7 @@ class CUserController extends Controller {
                         "wallet_type":zUserInfo.wallet_type,
                         "is_special":zUserInfo.is_special,
                         "is_lotto":zUserInfo.is_lotto,
+                        "remark":zUserInfo.remark,
                     };
 
                     //更新登录时间
