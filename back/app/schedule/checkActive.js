@@ -40,6 +40,8 @@ module.exports = app => {
             }
             //还原is_back_active=0
             await app.mysql.get('db1').query(`update ctw_user set is_back_active=0 where id=${zUserInfo.id} `);
+            //清除缓存
+            await ctx.service.mUser.delUserInfo(zUserInfo.id);
           }
         }else{
           console.log("定时任务checkActive没有要处理的东西");

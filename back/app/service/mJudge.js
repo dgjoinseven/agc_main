@@ -35,6 +35,9 @@ class MJudgeService extends Service {
                     if(zActiveOrderInfo.is_angelActived == 0){
                         let zUpdateUserResult =  await this.app.mysql.get('db1').query(`update ctw_user set status=1 where id=${zActiveOrderInfo.active_id}`);
                         if(zUpdateUserResult && zUpdateUserResult["affectedRows"]>0){
+                            //清除缓存
+                            await ctx.service.mUser.delUserInfo(zActiveOrderInfo.active_id);
+
                             await this.app.mysql.get('db1').query(`update ctw_order set is_angelActived=1 where id=${zActiveOrderInfo.id}`);
                         }else{
                             ctx.logger.info(`激活设置user失败！userId=${zJudgeActived.from_id}  rounds=${zSqlOrderInfo.rounds}`);
@@ -54,6 +57,9 @@ class MJudgeService extends Service {
             //公排
                 let zUpdateUserResult =  await this.app.mysql.get('db1').query(`update ctw_user set status=1 where id=${zJudgeActived.from_id}`);
                 if(zUpdateUserResult && zUpdateUserResult["affectedRows"]>0){
+                    //清除缓存
+                    await ctx.service.mUser.delUserInfo(zJudgeActived.from_id);
+
                     //给上司发放动态奖金
                     await ctx.service.mDyn.genDynMoney(parseInt(zSqlOrderInfo.from_id));
                     
@@ -64,6 +70,8 @@ class MJudgeService extends Service {
                     if(zSqlOrderInfo.rounds==1){
                         //启动大转盘
                         await this.app.mysql.get('db1').query(`update ctw_user set lotto_status=1 where id=${zSqlOrderInfo.from_id}`);
+                        //清除缓存
+                        await ctx.service.mUser.delUserInfo(zSqlOrderInfo.from_id);
                     }
                     
                     //本轮的觉醒可激活之前不可见的单子
@@ -89,6 +97,9 @@ class MJudgeService extends Service {
                     let zOutListInfo = zOutList[i];
                     let zUpdateOutResult =  await this.app.mysql.get('db1').query(`update ctw_user set status=2 where id=${zOutListInfo.id}`);
                     if(zUpdateOutResult && zUpdateOutResult["affectedRows"]>0){
+                        //清除缓存
+                        await ctx.service.mUser.delUserInfo(zOutListInfo.id);
+
                         ctx.logger.info(`出场设置user成功，status=2，userId=${zOutListInfo.id}`);
                         zOutFinishList.push(zOutListInfo);
                     }else{
@@ -309,6 +320,9 @@ class MJudgeService extends Service {
                 let zOutListInfo = zOutFinishList[zKey];
                 let zUpdateOutResult =  await this.app.mysql.get('db1').query(`update ctw_user set is_lv=1 where id=${zOutListInfo.id}`);
                 if(zUpdateOutResult && zUpdateOutResult["affectedRows"]>0){
+                    //清除缓存
+                    await ctx.service.mUser.delUserInfo(zOutListInfo.id);
+
                     ctx.logger.info(`晋级成功，userId=${zOutListInfo.id}, rounds=${zOutListInfo.rounds+1}`);
                 }else{
                     ctx.logger.info(`晋级失败！userId=${zOutListInfo.id}, rounds=${zOutListInfo.rounds+1}`);

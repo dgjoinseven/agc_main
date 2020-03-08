@@ -14,6 +14,10 @@ class MPDService extends Service {
         const zTime = parseInt(Date.now()/1000);
         let zOrderList = await this.app.mysql.get('db1').query(`select * from ctw_order where to_id=-99`);
         let zPdList = await this.app.mysql.get('db1').query(`select * from ctw_order_pd where sum<4 and is_special=0 order by id`);
+        let zConfigDic = await this.ctx.helper.getConfigDic();
+        const zNowTime = parseInt(Date.now()/1000);
+        let zConfPdTime = parseInt(zConfigDic.pd_time)*3600;
+        let zPdTime = zNowTime - zConfPdTime;
 
         if(zOrderList && zOrderList[0]){
             if(zPdList && zPdList[0]){
@@ -21,7 +25,7 @@ class MPDService extends Service {
                 for(let i=0; i<zOrderList.length; i++){
                     let zOrderInfo = zOrderList[i];
 
-                    let zPdList = await this.app.mysql.get('db1').query(`select * from ctw_order_pd where sum<4 and is_special=0 order by id`);
+                    let zPdList = await this.app.mysql.get('db1').query(`select * from ctw_order_pd where sum<4 and is_special=0 and create_time<${zPdTime} order by id`);
                     if(!zPdList || !zPdList[0]){
                         zPdList = await this.app.mysql.get('db1').query(`select * from ctw_order_pd where is_special=1`);
                     }

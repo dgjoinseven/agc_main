@@ -50,9 +50,6 @@ common = {
         var zScriptListB = [];
         zScriptListB.push("../lang/lang_en.js");
         zScriptListB.push("../lang/lang_zhhk.js");
-        zScriptListB.push("../lang/lang_jp.js");
-        zScriptListB.push("../lang/lang_ko.js");
-        zScriptListB.push("../lang/lang_fr.js");
         for(var j=0; j<p_cp_list.length; j++){
             var zJvalue = "./js/"+p_cp_list[j]+".js";
             if(p_cp_list[j].indexOf("/")!=-1){

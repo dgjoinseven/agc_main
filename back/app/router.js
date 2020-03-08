@@ -30,14 +30,17 @@ module.exports = app => {
   router.get('/api/user_detail', jwt, tc, controller.cBase.userDetail);     //用户详情
   router.post('/api/user_lv_up', jwt, tc, controller.cBase.userLevleUp);    //用户升级
   router.post('/api/user_edit', jwt, tc, controller.cBase.userEdit);        //用户编辑
-  router.get('/api/frozen_user_list', jwt, tc, controller.cBase.frozenUserList);     //冻结用户列表
-  router.post('/api/frozen_user_edit', jwt, tc, controller.cBase.frozenUserEdit);    //冻结用户编辑
   router.get('/api/order_list', jwt, tc, controller.cBase.orderList);       //订单列表
   router.post('/api/orderSetInfo', jwt, tc, controller.cBase.orderSetInfo);  //订单信息修改
   router.post('/api/order_edit', jwt, tc, controller.cBase.orderEdit);      //订单编辑
 
   router.get('/api/dyn_list', jwt, tc, controller.cBase.dynList);           //动态奖金列表
   router.get('/api/dyn_log_list', jwt, tc, controller.cBase.dynLogList);    //动态奖金记录列表
+  
+  router.get('/api/jc_list', jwt, tc, controller.cBase.jcList);     //加持列表
+  router.post('/api/jc_who', jwt, tc, controller.cBase.jcWho);      //加持谁
+  router.get('/api/market_jc', jwt, tc, controller.cBase.marketJc);   //集市-加持
+  router.get('/api/market_invitation', jwt, tc, controller.cBase.marketInvitation);   //集市-推荐
 
   ////////////////////// 其它 //////////////////////
   router.post('/api/upload_img', tc, controller.cBase.uploadImg); // 上传图片

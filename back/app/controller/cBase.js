@@ -69,18 +69,6 @@ class CBaseController extends Controller {
         var zData = await this.ctx.service.mBase.userEdit(this.ctx.request.body);
         if(zData){this.ctx.body = zData;}else{this.ctx.body = { code:-1, msg:'error'};}
     }
-
-    //冻结用户列表
-    async frozenUserList() {
-        var zData = await this.ctx.service.mBase.frozenUserList(this.ctx.query);
-        if(zData){this.ctx.body = zData ;}else{this.ctx.body = { code:-1, msg:'error'};}
-    }
-
-    //冻结用户编辑
-    async frozenUserEdit() {
-        var zData = await this.ctx.service.mBase.frozenUserEdit(this.ctx.request.body);
-        if(zData){this.ctx.body = zData;}else{this.ctx.body = { code:-1, msg:'error'};}
-    }
     
     //订单列表
     async orderList() {

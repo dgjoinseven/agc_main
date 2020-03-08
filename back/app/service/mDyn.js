@@ -118,7 +118,7 @@ class MDynService extends Service {
         }
     }
 
-    //结算本重天动态奖金
+    //结算本轮动态奖金
     async getDynMoney(pUserId) {
         const { ctx } = this;
         const zTime = parseInt(Date.now()/1000);

@@ -13,9 +13,9 @@
 <body class="body_css">
     <!--主页面容器-->
     <div class="main_page" id="id_main_page" style="display:none;">
-        <input id="id_input_name" class="abs input_a" style="top:210px;" data-placeholder="ph.请输入您的朋友昵称"></div>
-        <input id="id_input_account" class="abs input_a" style="top:340px;" data-placeholder="ph.请输入您朋友的邮箱"></div>
-        <input id="id_input_pwd" type="password" class="abs input_a" style="top:470px;" data-placeholder="ph.请输入您朋友的密码"></div>
+        <input id="id_input_name" class="abs input_a" style="top:210px;" data-placeholder="ph.请输入您的朋友昵称">
+        <input id="id_input_account" class="abs input_a" style="top:340px; dispaly:none;" onkeyup="value=value.replace(/[\W]/g,'') " onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\d]/g,''))" data-placeholder="ph.请输入您朋友的邮箱">
+        <input id="id_input_pwd" type="password" class="abs input_a" style="top:470px;" data-placeholder="ph.请输入您朋友的密码">
         <div id="id_btn_confirm" class="abs btn_a btn_a_yellow" style="left:50px; top:1050px; width:650px !important;" data-lang="main.确认"></div>
     </div>
 

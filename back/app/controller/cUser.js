@@ -89,7 +89,9 @@ class CUserController extends Controller {
 
                     //更新登录时间
                     const zTime = parseInt(Date.now()/1000);
-                    await this.app.mysql.get('db1').query(`update ctw_user set login_time=${zTime} where id=${zUserInfo.id}`); // 初始化事务
+                    let zParamValue = [];
+                    zParamValue.push(zTime, zUserInfo.id);
+                    await this.app.mysql.get('db1').query(`update ctw_user set login_time=? where id=?`, zParamValue); // 初始化事务
                     
                     this.ctx.body = { code: 1, msg: '登录成功', data:zData };
             } else {

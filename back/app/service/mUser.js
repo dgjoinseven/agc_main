@@ -23,13 +23,22 @@ class UserService extends Service {
 
     //获取用户信息
     async getUserInfo(pId) {
-        const zSql = `select * from ctw_user where id='${pId}' `;
-        const zResult = await this.app.mysql.get('db1').query(zSql);
-        let zUserInfo;
-        if(zResult && zResult[0]){
-            zUserInfo = zResult[0];
+        let zDataStr = await this.app.redis.get(`get_user_${pId}`);
+        if(!zDataStr){
+            const zResult = await this.app.mysql.get('db1').query(`select * from ctw_user where id='${pId}' `);
+            let zUserInfo;
+            if(zResult && zResult[0]){
+                zUserInfo = zResult[0];
+                zDataStr = JSON.stringify(zUserInfo);
+                await this.app.redis.set(`get_user_${pId}`, zDataStr, 'EX', 1);
+            }
         }
-        return zUserInfo;
+        return JSON.parse(zDataStr);
+    }
+
+    //清除用户信息缓存
+    async delUserInfo(pId) {
+        await this.app.redis.del(`get_user_${pId}`);
     }
 
     //获取公排用户信息
