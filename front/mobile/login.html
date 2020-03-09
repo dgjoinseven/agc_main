@@ -21,7 +21,8 @@
         <div id="id_btn_eye_0" class="abs" style="left:660px; top:680px; display:none;"><img src="./img/btn_eye_0.png"></div>
         <div id="id_btn_signin" class="abs btn_a btn_a_yellow" style="left:50px; top:850px; width:650px !important;" data-lang="main.登录"></div>
         <div id="id_btn_lang" class="abs txt_28 txt_c cl_white bg_black" style="left:550px; top:1000px; width:150px; height:70px; line-height:70px; border-radius:10px;"></div>
-    
+        <div id="id_btn_forget" class="abs txt_28 txt_c cl_white bg_black" style="left:50px; top:1000px; width:250px; height:70px; line-height:70px; border-radius:10px;" data-lang="main.忘记密码"></div>
+        
         <!-- 语言窗口 -->
         <div id="id_lang_win" class="abs" style="position:fixed; z-index:2000; width:100%; height:100%; display:none;">
             <div class="bg_mask" ></div>
@@ -82,6 +83,7 @@ function init() {
     $('#id_btn_eye_0').click({myType:"id_btn_eye_0"}, btnClickHandler);
     $('#id_btn_signin').click({myType:"id_btn_signin"}, btnClickHandler);
     $('#id_btn_lang').click({myType:"id_btn_lang"}, btnClickHandler);
+    $('#id_btn_forget').click({myType:"id_btn_forget"}, btnClickHandler);
     $('#id_lang_win_btn_close').click({myType:"id_lang_win_btn_close"}, btnClickHandler);
     $('#id_lang_win_en').click({myType:"id_lang_win_en"}, btnClickHandler);
     $('#id_lang_win_zh-hk').click({myType:"id_lang_win_zh-hk"}, btnClickHandler);
@@ -126,6 +128,13 @@ function btnClickHandler(p_obj_event){
             break;
         case "id_btn_lang":
             $('#id_lang_win').show();
+            break;
+        case "id_btn_forget":
+            if(!$('#id_input_account').val()){
+                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.3002", "tips.b_ok");
+                return;
+            }
+            api_forgetPwd();
             break;
         case "id_lang_win_btn_close":
             $('#id_lang_win').hide();
@@ -230,6 +239,36 @@ function api_login(){
     });
 }
 
+//忘记密码
+function api_forgetPwd(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("forget_pwd"),
+        type: "post",
+        // beforeSend: function(Request) {
+        //     Request.setRequestHeader("Authorization",common.getCookie('token'));
+        // },
+        data:{account:$('#id_input_account').val()},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_setdefault success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("php_setdefault error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
 
 </script>
 

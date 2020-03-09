@@ -33,11 +33,10 @@ class CUserController extends Controller {
         }
 
         //正式判断账号
-        const zOpt = { account:zAccount };
-        const zResult = await ctx.service.mUser.getAdminInfo(zOpt);
+        const zResult = await ctx.service.mUser.getUserInfoByAccount(zAccount);
         // console.log("zResult=1===========", zResult, zResult[0]);
-        if (zResult && zResult[0]) {
-            let zUserInfo = zResult[0];
+        if (zResult) {
+            let zUserInfo = zResult;
             // const totp = new TOTP(zResult.totpKey);
             // const totpcode = totp.genOTP();
             // if(zUserInfo.is_del==1){
@@ -85,7 +84,8 @@ class CUserController extends Controller {
                         "wallet_type":zUserInfo.wallet_type,
                         "is_special":zUserInfo.is_special,
                         "is_lotto":zUserInfo.is_lotto,
-                        "remark":zUserInfo.remark,
+                        "tel":zUserInfo.tel,
+                        "remarks":zUserInfo.remarks,
                     };
 
                     //更新登录时间

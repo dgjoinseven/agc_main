@@ -13,9 +13,12 @@
 <body class="body_css">
     <!--主页面容器-->
     <div class="main_page" id="id_main_page" style="display:none;">
-        <input id="id_input_name" class="abs input_a" style="top:210px;" data-placeholder="ph.请输入您的朋友昵称">
-        <input id="id_input_account" class="abs input_a" style="top:340px; dispaly:none;" onkeyup="value=value.replace(/[\W]/g,'') " onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\d]/g,''))" data-placeholder="ph.请输入您朋友的邮箱">
+        <input id="id_input_account" class="abs input_a" style="top:210px; dispaly:none;" onkeyup="value=value.replace(/[\W]/g,'') " onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\d]/g,''))" data-placeholder="ph.请输入您朋友的邮箱">
+        <input id="id_input_name" class="abs input_a" style="top:340px;" data-placeholder="ph.请输入您的朋友昵称">
         <input id="id_input_pwd" type="password" class="abs input_a" style="top:470px;" data-placeholder="ph.请输入您朋友的密码">
+        <input id="id_input_tel" class="abs input_a" style="top:600px;" onkeyup="value=value.replace(/[^\d]/g,'')" onblur="value=value.replace(/[^\d]/g,'')" data-placeholder="ph.请输入电话号码">
+        <input id="id_input_code" class="abs input_a" style="width:350px !important; top:730px;" data-placeholder="ph.请输入验证码">
+        <div id="id_btn_code" class="abs btn_a btn_a_orange" style="front-size:24px !important; left:450px; top:730px; width:250px !important; display:none;" data-lang="main.获得验证码"></div>
         <div id="id_btn_confirm" class="abs btn_a btn_a_yellow" style="left:50px; top:1050px; width:650px !important;" data-lang="main.确认"></div>
     </div>
 
@@ -45,6 +48,8 @@ window.onresize = windowResize;
 
 var endHeight = 3200;
 var userInfo = {};
+var timeCounter = 0;
+var maxTime = 60;
 
 //初始化
 function init() {
@@ -55,16 +60,50 @@ function init() {
     }else{
         c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
         windowResize();
-        return;
+        // return;
     }
 
     $('#id_btn_confirm').click({myType:"id_btn_confirm"}, btnClickHandler);
+    $('#id_btn_code').click({myType:"id_btn_code"}, btnClickHandler);
 
     windowResize();
 
     common.lang();
     $('#id_main_page').show();
+
+    timeCounter = common.getCookie("codeTime");
+    setInterval(timeRun, 1000);
 }
+
+//时间运行（1秒）
+function timeRun(){
+    $('#id_btn_code').show();
+
+    //恢复按钮可点击
+    if(timeCounter<=0){
+        if($('#id_btn_code').hasClass("btn_a_grey")){
+            $('#id_btn_code').removeClass("btn_a_grey");
+            $('#id_btn_code').addClass("btn_a_orange");
+            $('#id_btn_code').attr("data-lang", "main.获得验证码");
+            common.lang();
+        }
+        return;
+    }
+
+    //开始倒计时
+    if($('#id_btn_code').hasClass("btn_a_orange")){
+        $('#id_btn_code').removeClass("btn_a_orange");
+        $('#id_btn_code').addClass("btn_a_grey");
+    }
+    timeCounter --;
+    if(timeCounter<0){
+        timeCounter = 0;
+    }
+    common.setCookie("codeTime", timeCounter);
+    $('#id_btn_code').addClass("btn_a_grey");
+    $('#id_btn_code').text(timeCounter);
+}
+
 
 //按钮点击事件
 function btnClickHandler(p_obj_event){
@@ -82,7 +121,29 @@ function btnClickHandler(p_obj_event){
                 c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.3003", "tips.b_ok");
                 return;
             }
+            if(!$('#id_input_tel').val()){
+                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.3004", "tips.b_ok");
+                return;
+            }
+            if(!$('#id_input_code').val()){
+                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.3005", "tips.b_ok");
+                return;
+            }
+            smscode:$('#').val()
             api_register();
+            break;
+        case "id_btn_code":
+            if(!$('#id_input_tel').val()){
+                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.3004", "tips.b_ok");
+                return;
+            }
+            if(timeCounter>0){
+                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.3006", "tips.b_ok");
+                return;
+            }
+            timeCounter = maxTime;
+            api_smscode();
+            timeRun();
             break;
     }
 }
@@ -119,7 +180,7 @@ function api_register(){
         beforeSend: function(Request) {
             Request.setRequestHeader("Authorization",common.getCookie('token'));
         },
-        data:{type:1, name:$('#id_input_name').val(), account:$('#id_input_account').val(), pwd:$('#id_input_pwd').val()},
+        data:{type:1, name:$('#id_input_name').val(), account:$('#id_input_account').val(), pwd:$('#id_input_pwd').val(), tel:$('#id_input_tel').val(), smscode:$('#id_input_code').val()},
         dataType: "json", //指定服务器返回的数据类型
         cache:false,
         success: function (evt) {
@@ -140,6 +201,39 @@ function api_register(){
         }
     });
 }
+
+//验证码
+function api_smscode(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("sms_code"),
+        type: "post",
+        // beforeSend: function(Request) {
+        //     Request.setRequestHeader("Authorization",common.getCookie('token'));
+        // },
+        data:{tel:$('#id_input_tel').val()},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_setdefault success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    $('#id_input_code').val("");
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("php_setdefault error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
 
 
 

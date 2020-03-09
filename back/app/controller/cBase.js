@@ -130,7 +130,7 @@ class CBaseController extends Controller {
         if(zData){this.ctx.body = zData ;}else{this.ctx.body = { code:-1, msg:'error'};}
     }
 
-
+    
 
     ///////////////////////////////////// 其它 /////////////////////////////////////
     //上传图片
@@ -138,7 +138,18 @@ class CBaseController extends Controller {
         var zData = await this.ctx.service.mzUploadFile.uploadImg();
         if(zData){this.ctx.body = zData ;}else{this.ctx.body = { code:-1, msg:'error'};}
     }
-    
+
+    //获取短信验证码
+    async smsCode() {
+        var zData = await this.ctx.service.mzEmailTel.smsCode(this.ctx.request.body);
+        if(zData){this.ctx.body = zData;}else{this.ctx.body = { code:-1, msg:'error'};}
+    }
+
+    //忘记密码
+    async forgetPwd() {
+        var zData = await this.ctx.service.mzEmailTel.forgetPwd(this.ctx.request.body);
+        if(zData){this.ctx.body = zData;}else{this.ctx.body = { code:-1, msg:'error'};}
+    }
 
 }
 

@@ -1,5 +1,5 @@
 common = {
-    VER : "2.0",    //版本号
+    VER : "2.1",    //版本号
     PC_WIDTH : 1200,    //PC端的标准宽度
     MOBILE_WIDTH : 750, //mobile端的标准宽度
     JS_LOAD_COUNTER : 0,    //已经加载的js个数
@@ -121,15 +121,6 @@ common = {
             case "zh-hk":
                 zResult = "繁體中文";
                 break;
-            case "jp":
-                zResult = "日本語";
-                break;
-            case "ko":
-                zResult = "한국어";
-                break;
-            case "fr":
-                zResult = "Français";
-                break;
             default:
                 zResult = "English";
                 break;
@@ -146,15 +137,6 @@ common = {
                 break;
             case "zh-hk":
                 lang = lang_zhhk;
-                break;
-            case "jp":
-                lang = lang_jp;
-                break;
-            case "ko":
-                lang = lang_ko;
-                break;
-            case "fr":
-                lang = lang_fr;
                 break;
             default:
                 lang = lang_en;
@@ -330,6 +312,9 @@ common = {
             case "groupRounds":
                 $.cookie("groupRounds", p_all_value);
                 break;
+            case "codeTime":
+                $.cookie("codeTime", p_all_value);
+                break;
         }
     },
 
@@ -360,6 +345,9 @@ common = {
                 break;
             case "groupRounds":
                 zValue = $.cookie("groupRounds");
+                break;
+            case "codeTime":
+                zValue = $.cookie("codeTime") ? parseInt($.cookie("codeTime")) : 0;
                 break;
         }
         return zValue;

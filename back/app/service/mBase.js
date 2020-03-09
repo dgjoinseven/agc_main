@@ -237,7 +237,7 @@ class MBaseService extends Service {
         const zTotalCount = zResCount[0].count;
     	const zOffset = (zToPage - 1) * zPageSize;
 
-        const zSql = ` select distinct a.id, a.*, b.name, b.tel, b.remark from ctw_jc a LEFT JOIN ctw_user b ON a.user_id=b.id where ${zParamInfo} order by a.update_time limit ?,?`;
+        const zSql = ` select distinct a.id, a.*, b.name, b.tel, b.remarks from ctw_jc a LEFT JOIN ctw_user b ON a.user_id=b.id where ${zParamInfo} order by a.update_time limit ?,?`;
         const zList = await this.app.mysql.get('db1').query(zSql, [zOffset, parseInt(zPageSize)]);
         if(zList && zList[0]){
             return { code:1, msg:'success', data:{ cur_page:zToPage, page_size:zPageSize, total_page:zTotalPage, total_count:zTotalCount, list:zList}};
@@ -264,7 +264,7 @@ class MBaseService extends Service {
         const zTotalCount = zResCount[0].count;
     	const zOffset = (zToPage - 1) * zPageSize;
 
-        const zSql = ` select name, tel, remark from ctw_user where ${zParamInfo} order by create_time desc limit ?,?`;
+        const zSql = ` select name, tel, remarks from ctw_user where ${zParamInfo} order by create_time desc limit ?,?`;
         const zList = await this.app.mysql.get('db1').query(zSql, [zOffset, parseInt(zPageSize)]);
         if(zList && zList[0]){
             return { code:1, msg:'success', data:{ cur_page:zToPage, page_size:zPageSize, total_page:zTotalPage, total_count:zTotalCount, list:zList}};
@@ -281,7 +281,7 @@ class MBaseService extends Service {
         const zTokenInfo = ctx.helper.verifyToken(ctx.header.authorization);// 解密获取的Tokenid
         const zTime = parseInt(Date.now()/1000);
 
-        const zSql = ` select id,name,account,img_id,boss_id,boss_id_2,boss_list,is_lv,pwd2,status,rounds,wallet_addr,bank_addr,alipay_addr,is_special,lotto_status,tel,remark from ctw_user where id=${zTokenInfo.id} `;
+        const zSql = ` select id,name,account,img_id,boss_id,boss_id_2,boss_list,is_lv,pwd2,status,rounds,wallet_addr,bank_addr,alipay_addr,is_special,lotto_status,tel,remarks from ctw_user where id=${zTokenInfo.id} `;
         const zUserList = await this.app.mysql.get('db1').query(zSql);
         const zExchangeList = await this.app.mysql.get('db1').query(`select * from ctw_exchange order by id desc`);
         if(zUserList && zExchangeList){
@@ -302,20 +302,34 @@ class MBaseService extends Service {
         let zSalt = ctx.helper.generateSalt();
         let zPwd;
         const zTime = parseInt(Date.now()/1000);
+        let zCode;
         const zCK = await ctx.helper.checkIdOk("ctw_user", zTokenInfo.id);
         switch(parseInt(pParam.type)){
             case 1://增加
                 //昵称不能为空
                 if(!pParam.name){
-                    return {code:-1, msg:`昵称不能为空`};
+                    return {code:3001, msg:`昵称不能为空`};
                 }
                 //账号不能为空
                 if(!pParam.account){
-                    return {code:-1, msg:`账号不能为空`};
+                    return {code:3002, msg:`账号不能为空`};
                 }
                 //密码不能为空
                 if(!pParam.pwd){
-                    return {code:-1, msg:`密码不能为空`};
+                    return {code:3003, msg:`密码不能为空`};
+                }
+                //电话不能为空
+                if(!pParam.tel){
+                    return {code:3004, msg:`电话不能为空`};
+                }
+                //验证码不能为空
+                if(!pParam.smscode){
+                    return {code:3005, msg:`验证码不能为空`};
+                }
+                //验证码是否正确
+                zCode = await ctx.app.redis.get('code_'+pParam.tel);
+                if(!zCode || parseInt(pParam.smscode)!=parseInt(zCode)){
+                    return {code:3007, msg:`验证码不正确`};
                 }
                 //账号/昵称不能重复（这个由数据库的索引做过限制）
                 
@@ -349,48 +363,73 @@ class MBaseService extends Service {
                 }else{
                     zBossListStr = `,${zTokenInfo.id},`;
                 }
-                zParam = ` '?', '?', '?', '?', ?, ?, '?', ? `;
-                zParamValue = [pParam.name, pParam.account, zPwd, zSalt, zTokenInfo.id, zTokenInfo.boss_id, zBossListStr, zTime];
-                zSql = `insert into ctw_user (name, account, pwd, salt, boss_id, boss_id_2, boss_list, create_time) values (`+zParam+`)`;
+                zParam = ` ?, ?, ?, ?, ?, ?, ?, ?, ? `;
+                zParamValue = [pParam.name, pParam.account, zPwd, zSalt, zTokenInfo.id, zTokenInfo.boss_id, zBossListStr, pParam.tel, zTime];
+                zSql = `insert into ctw_user (name, account, pwd, salt, boss_id, boss_id_2, boss_list, tel, create_time) values (`+zParam+`)`;
                 break;
             case 2://修改
                 if(zCK){ return zCK }
                 let zEditUserInfo = await ctx.service.mUser.getUserInfo(pParam.id);
                 if(pParam.pwd){
+                    //验证码不能为空
+                    if(!pParam.smscode){
+                        return {code:3005, msg:`验证码不能为空`};
+                    }
+                    //验证码是否正确
+                    zCode = await ctx.app.redis.get('code_'+pParam.tel);
+                    if(!zCode || parseInt(pParam.smscode)!=parseInt(zCode)){
+                        return {code:3007, msg:`验证码不正确`};
+                    }
+
                     zPwd = ctx.helper.md5(pParam.pwd, zSalt);
-                    zParam += ` pwd='?' ,`;  zParamValue.push(zPwd);
-                    zParam += ` salt='?' ,`;  zParamValue.push(zSalt);
+                    zParam += ` pwd=? ,`;  zParamValue.push(zPwd);
+                    zParam += ` salt=? ,`;  zParamValue.push(zSalt);
                 }
                 if(pParam.pwd2){
+                    //验证码不能为空
+                    if(!pParam.smscode){
+                        return {code:3005, msg:`验证码不能为空`};
+                    }
+                    //验证码是否正确
+                    zCode = await ctx.app.redis.get('code_'+pParam.tel);
+                    if(!zCode || parseInt(pParam.smscode)!=parseInt(zCode)){
+                        return {code:3007, msg:`验证码不正确`};
+                    }
+
                     let zSalt2 = ctx.helper.generateSalt();
                     let zPwd2 = ctx.helper.md5(pParam.pwd2, zSalt2);
-                    zParam += ` pwd2='?' ,`;  zParamValue.push(zPwd2);
-                    zParam += ` salt2='?' ,`;  zParamValue.push(zSalt2);
+                    zParam += ` pwd2=? ,`;  zParamValue.push(zPwd2);
+                    zParam += ` salt2=? ,`;  zParamValue.push(zSalt2);
                 }
                 if(pParam.wallet_addr!=undefined){
                     if(zEditUserInfo.wallet_addr){
                         return {code:1029, msg:`地址不可重复设置`};
                     }
-                    zParam += ` wallet_addr='?', `;  zParamValue.push(pParam.wallet_addr);
+                    zParam += ` wallet_addr=?, `;  zParamValue.push(pParam.wallet_addr);
                 }
                 if(pParam.bank_addr!=undefined){
                     if(zEditUserInfo.bank_addr){
                         return {code:1033, msg:`银行信息不可重复设置`};
                     }
-                    zParam += ` bank_addr='?', `;  zParamValue.push(pParam.bank_addr);
+                    zParam += ` bank_addr=?, `;  zParamValue.push(pParam.bank_addr);
                 }
                 if(pParam.alipay_addr!=undefined){
                     if(zEditUserInfo.alipay_addr){
                         return {code:1034, msg:`支付宝不可重复设置`};
                     }
-                    zParam += ` alipay_addr='?', `;  zParamValue.push(pParam.alipay_addr);
+                    zParam += ` alipay_addr=?, `;  zParamValue.push(pParam.alipay_addr);
                 }
                 if(pParam.tel!=undefined){
-                    zParam += ` tel='?', `;  zParamValue.push(pParam.tel);
+                    zParam += ` tel=?, `;  zParamValue.push(pParam.tel);
                 }
                 if(pParam.img_id!=undefined){
-                    zParam += ` img_id='?', `;  zParamValue.push(pParam.img_id);
+                    zParam += ` img_id=?, `;  zParamValue.push(pParam.img_id);
                 }
+                if(pParam.remarks!=undefined){
+                    zParam += ` remarks=?, `;  zParamValue.push(pParam.remarks);
+                }
+                
+
                 zParam += ` update_time=? `;  zParamValue.push(zTime);
                 zParamValue.push(pParam.id);
                 zSql = `update ctw_user set ${zParam} where id=?`;
@@ -467,7 +506,7 @@ class MBaseService extends Service {
         if(zCurJcSum<zMaxJcSum){
             return { code:1035, msg:`加持数量不足，user_id=${zTokenInfo.id}`};
         }
-        
+
         let zSql = `update ctw_user set is_lv=0, rounds=${zNextRounds}, status=0, jc_sum=0, update_time=${zTime} where id=${zTokenInfo.id} and is_lv=1 `;
         const zResult = await this.app.mysql.get('db1').query(zSql); // 初始化事务
         if(zResult && zResult["affectedRows"]>0){
@@ -613,7 +652,7 @@ class MBaseService extends Service {
         const zTime = parseInt(Date.now()/1000);
         const zConf = await ctx.helper.getConfigDic();
         const zConfMaxRounds = parseInt(zConf.max_rounds);
-        const zUserInfo = ctx.helper.getUserInfoByName(jc_name);
+        const zUserInfo = ctx.helper.getUserInfoByName(pParam.jc_name);
         
         if(!zUserInfo){
             return {code:-1, msg:'加持对象不存在' };
@@ -625,7 +664,7 @@ class MBaseService extends Service {
             return {code:1036, msg:'不能加持自己' };
         }
 
-        let zRounds = parseInt(jc_rounds);
+        let zRounds = parseInt(pParam.jc_rounds);
         let zToRounds = (zUserInfo.rounds + 1);
 
         //验证ctw_jc的对应轮数是否有加持次数，并且加持的对象的轮数是否符合标准（大于等于加持对象的轮数）
@@ -688,7 +727,7 @@ class MBaseService extends Service {
         if(!pParam.id){ return {code:-1, msg:'订单id不能为空'}; }
         
         if(pParam.tran_id!=undefined){
-            zParam += ` tran_id='?' ,`;  zParamValue.push(pParam.tran_id);
+            zParam += ` tran_id=? ,`;  zParamValue.push(pParam.tran_id);
         }
         zParam += ` update_time=? `;  zParamValue.push(zTime);
         zParamValue.push(pParam.id);
@@ -741,11 +780,11 @@ class MBaseService extends Service {
                 zParamValue = [zTime, zTime, pParam.id, zTokenInfo.id];
                 break;
             case 3://拒绝
-                zSql = `update ctw_order set status=3, reason_refuse='?', refuse_time=?, update_time=? where id=? and to_id=?`;
+                zSql = `update ctw_order set status=3, reason_refuse=?, refuse_time=?, update_time=? where id=? and to_id=?`;
                 zParamValue = [pParam.reason, zTime, zTime, pParam.id, zTokenInfo.id];
                 break;
             case 4://申诉
-                zSql = `update ctw_order set status=4, reason_appeal='?', appeal_time=?, update_time=? where id=? and from_id=?`;
+                zSql = `update ctw_order set status=4, reason_appeal=?, appeal_time=?, update_time=? where id=? and from_id=?`;
                 zParamValue = [pParam.reason, zTime, zTime, pParam.id, zTokenInfo.id];
                 break;
             default:

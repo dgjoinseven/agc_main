@@ -44,6 +44,11 @@ module.exports = app => {
 
   ////////////////////// 其它 //////////////////////
   router.post('/api/upload_img', tc, controller.cBase.uploadImg); // 上传图片
+  router.post('/api/sms_code', tc, controller.cBase.smsCode); //获取短信验证码
+  router.post('/api/forget_pwd', tc, controller.cBase.forgetPwd); //忘记密码
+
+
+  
   // router.get('/getOssAuth', tc, controller.uploader.ossAuth); // 获取上传签名
   // router.post('/updateNotification', tc, controller.cSetup.uploadSingle); // 上传
   

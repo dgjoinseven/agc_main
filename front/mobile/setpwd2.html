@@ -24,8 +24,11 @@
             <input id="id_input" type="text" class="abs" style="width:690px; height:140px; opacity:0;" maxlength="6">
         </div>
 
-        <div id="id_btn_next" class="abs btn_a btn_a_yellow" style="left:50px; top:1050px; width:650px !important;" data-lang="main.下一步"></div>
-        <div id="id_btn_confirm" class="abs btn_a btn_a_yellow" style="left:50px; top:1050px; width:650px !important; display:none;" data-lang="main.确认"></div>
+        <input id="id_input_code" class="abs input_a" style="width:350px !important; top:640px;" data-placeholder="ph.请输入验证码">
+        <div id="id_btn_code" class="abs btn_a btn_a_orange" style="front-size:24px !important; left:450px; top:640px; width:250px !important; display:none;" data-lang="main.获得验证码"></div>
+
+        <!-- <div id="id_btn_next" class="abs btn_a btn_a_yellow" style="left:50px; top:1050px; width:650px !important;" data-lang="main.下一步"></div> -->
+        <div id="id_btn_confirm" class="abs btn_a btn_a_yellow" style="left:50px; top:1050px; width:650px !important;" data-lang="main.确认"></div>
     </div>
 
     <div id="id_end" class="abs" style="top:1000px; opacity:0;">.</div>
@@ -57,6 +60,8 @@ var userInfo = {};
 var enterType = 1; //1第一次输入 2第二次输入
 var pwd2_1 = "";
 var pwd2_2 = "";
+var timeCounter = 0;
+var maxTime = 60;
 
 //初始化
 function init() {
@@ -70,8 +75,9 @@ function init() {
         return;
     }
 
-    $('#id_btn_next').click({myType:"id_btn_next"}, btnClickHandler);
+    // $('#id_btn_next').click({myType:"id_btn_next"}, btnClickHandler);
     $('#id_btn_confirm').click({myType:"id_btn_confirm"}, btnClickHandler);
+    $('#id_btn_code').click({myType:"id_btn_code"}, btnClickHandler);
 
     windowResize();
 
@@ -82,35 +88,80 @@ function init() {
     $("#id_input").bind("input propertychange", function(){
         updateKey($("#id_input").val());
     });
+
+    timeCounter = common.getCookie("codeTime");
+    setInterval(timeRun, 1000);
+}
+
+//时间运行（1秒）
+function timeRun(){
+    $('#id_btn_code').show();
+
+    //恢复按钮可点击
+    if(timeCounter<=0){
+        if($('#id_btn_code').hasClass("btn_a_grey")){
+            $('#id_btn_code').removeClass("btn_a_grey");
+            $('#id_btn_code').addClass("btn_a_orange");
+            $('#id_btn_code').attr("data-lang", "main.获得验证码");
+            common.lang();
+        }
+        return;
+    }
+
+    //开始倒计时
+    if($('#id_btn_code').hasClass("btn_a_orange")){
+        $('#id_btn_code').removeClass("btn_a_orange");
+        $('#id_btn_code').addClass("btn_a_grey");
+    }
+    timeCounter --;
+    if(timeCounter<0){
+        timeCounter = 0;
+    }
+    common.setCookie("codeTime", timeCounter);
+    $('#id_btn_code').addClass("btn_a_grey");
+    $('#id_btn_code').text(timeCounter);
 }
 
 //按钮点击事件
 function btnClickHandler(p_obj_event){
     switch(p_obj_event.data.myType){
-        case "id_btn_next":
-            if($("#id_input").val()<6){
-                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1022", "tips.b_ok", function(){common.gotoWebSite("setpwd2.html")});
-                return;
-            }
-            pwd2_1 = $("#id_input").val();
-            cleanKey();
-            enterType = 2;
-            $('#id_btn_next').hide();
-            $('#id_btn_confirm').show();
+        // case "id_btn_next":
+        //     if($("#id_input").val()<6){
+        //         c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1022", "tips.b_ok", function(){common.gotoWebSite("setpwd2.html")});
+        //         return;
+        //     }
+        //     pwd2_1 = $("#id_input").val();
+        //     cleanKey();
+        //     enterType = 2;
+        //     $('#id_btn_next').hide();
+        //     $('#id_btn_confirm').show();
 
-            break;
+        //     break;
         case "id_btn_confirm":
             // console.log(pwd2_1.length, pwd2_2.length);
             if($("#id_input").val()<6){
                 c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1022", "tips.b_ok", function(){common.gotoWebSite("setpwd2.html")});
                 return;
             }
-            pwd2_2 = $("#id_input").val();
-            if(pwd2_1!=pwd2_2){
-                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1023", "tips.b_ok", function(){common.gotoWebSite("setpwd2.html")});
+            if(!$('#id_input_code').val()){
+                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.3005", "tips.b_ok");
                 return;
             }
+            // pwd2_2 = $("#id_input").val();
+            // if(pwd2_1!=pwd2_2){
+            //     c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1023", "tips.b_ok", function(){common.gotoWebSite("setpwd2.html")});
+            //     return;
+            // }
             api_setPwd2();
+            break;
+        case "id_btn_code":
+            if(timeCounter>0){
+                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.3006", "tips.b_ok");
+                return;
+            }
+            timeCounter = maxTime;
+            api_smscode();
+            timeRun();
             break;
     }
 }
@@ -169,7 +220,7 @@ function api_setPwd2(){
         beforeSend: function(Request) {
             Request.setRequestHeader("Authorization",common.getCookie('token'));
         },
-        data:{type:2, id:userInfo.id,  pwd2:$("#id_input").val()},
+        data:{type:2, id:userInfo.id,  pwd2:$("#id_input").val(), tel:userInfo.tel, smscode:$('#id_input_code').val()},
         dataType: "json", //指定服务器返回的数据类型
         cache:false,
         success: function (evt) {
@@ -198,7 +249,37 @@ function api_setPwd2(){
     });
 }
 
-
+//验证码
+function api_smscode(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("sms_code"),
+        type: "post",
+        // beforeSend: function(Request) {
+        //     Request.setRequestHeader("Authorization",common.getCookie('token'));
+        // },
+        data:{tel:userInfo.tel},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_setdefault success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    $('#id_input_code').val("");
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("php_setdefault error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
 
 </script>
 

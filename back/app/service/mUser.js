@@ -7,14 +7,15 @@ class UserService extends Service {
     constructor(ctx) {
         super(ctx);
     }
-    async getAdminInfo(param) {
+    async getUserInfoByAccount(pAccount) {
         try {
-            // console.log("getAdminInfo 1=====================",param, param.account);
-            // console.log("this.app========", this.app);
-            const zSql = `select * from ctw_user where account='${param.account}' `;
+            const zSql = `select * from ctw_user where account='${pAccount}' `;
             const zResult = await this.app.mysql.get('db1').query(zSql);
-            
-            return zResult;
+            if(zResult && zResult[0]){
+                return zResult[0];
+            }else{
+                return null;
+            }
         } catch (error) {
             throw error;
         }
@@ -22,9 +23,13 @@ class UserService extends Service {
 
     async getUserInfoByName(pName) {
         try {
-            const zSql = `select * from ctw_user where name='?' `;
+            const zSql = `select * from ctw_user where name=? `;
             const zResult = await this.app.mysql.get('db1').query(zSql, [pName]);
-            return zResult;
+            if(zResult && zResult[0]){
+                return zResult[0];
+            }else{
+                return null;
+            }
         } catch (error) {
             throw error;
         }

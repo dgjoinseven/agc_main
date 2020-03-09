@@ -18,8 +18,8 @@ module.exports = app => {
       const zConfirmTimeJudge = zNowTime - zConfirmTime;
       // const zGroupTime = parseInt(zConf.group_time)*3600;
       // const zGroupTimeJudge = zNowTime - zGroupTime;
-      let zSet = new Set();
-      
+      // let zSet = new Set();
+
       ctx.logger.info("开启定时任务 checkActive===========================");
 
       //执行RMB排单

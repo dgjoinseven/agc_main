@@ -51,13 +51,13 @@
                 <label class="abs txt_32 txt_w2" style="width:650px; height:100px; line-height:100px;" data-lang="main.评论"></label>
                 <div id="id_mine_comment" class="abs" style="left:620px; top:35px;"><img src="./img/btn_back3.png"></div>
             </div>
-<!--             <div class="abs bg_base" style="top:714px; width:650px; height:100px;">
-                <label class="abs txt_32 txt_w2" style="width:650px; height:100px; line-height:100px;" data-lang="main.联系信息"></label>
-                <div id="id_mine_contact" class="abs" style="left:620px; top:35px;"><img src="./img/btn_back3.png"></div>
-            </div> -->
             <div class="abs bg_base" style="top:714px; width:650px; height:100px;">
                 <label class="abs txt_32 txt_w2" style="width:650px; height:100px; line-height:100px;" data-lang="main.问答"></label>
                 <div id="id_mine_qa" class="abs" style="left:620px; top:35px;"><img src="./img/btn_back3.png"></div>
+            </div>
+            <div class="abs bg_base" style="top:816px; width:650px; height:100px;">
+                <label class="abs txt_32 txt_w2" style="width:650px; height:100px; line-height:100px;" data-lang="main.备注信息"></label>
+                <div id="id_mine_remarks" class="abs" style="left:620px; top:35px;"><img src="./img/btn_back3.png"></div>
             </div>
         </div>
         <div id="id_btn_logout" class="abs btn_a btn_a_red" style="left:50px; top:1150px; width:650px !important;" data-lang="main.登出"></div>
@@ -106,7 +106,7 @@ function init() {
     $('#id_mine_addr').click({myType:"id_mine_addr"}, btnClickHandler);
     $('#id_mine_ci').click({myType:"id_mine_ci"}, btnClickHandler);
     $('#id_mine_comment').click({myType:"id_mine_comment"}, btnClickHandler);
-    $('#id_mine_contact').click({myType:"id_mine_contact"}, btnClickHandler);
+    $('#id_mine_remarks').click({myType:"id_mine_remarks"}, btnClickHandler);
     $('#id_mine_qa').click({myType:"id_mine_qa"}, btnClickHandler);
 
     api_userInfo();
@@ -155,9 +155,9 @@ function btnClickHandler(p_obj_event){
             c_m_waiting.init("id_tips");
             common.gotoWebSite('setComment.html')
             break;
-        case "id_mine_contact":
+        case "id_mine_remarks":
             c_m_waiting.init("id_tips");
-            common.gotoWebSite('setContact.html')
+            common.gotoWebSite('setRemarks.html')
             break;
         case "id_mine_qa":
             c_m_waiting.init("id_tips");
