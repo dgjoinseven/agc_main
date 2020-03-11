@@ -281,7 +281,7 @@ class MBaseService extends Service {
         const zTokenInfo = ctx.helper.verifyToken(ctx.header.authorization);// 解密获取的Tokenid
         const zTime = parseInt(Date.now()/1000);
 
-        const zSql = ` select id,name,account,img_id,boss_id,boss_id_2,boss_list,is_lv,pwd2,status,rounds,wallet_addr,bank_addr,alipay_addr,is_special,lotto_status,tel,remarks from ctw_user where id=${zTokenInfo.id} `;
+        const zSql = ` select id,name,account,img_id,boss_id,boss_id_2,boss_list,is_lv,pwd2,status,rounds,wallet_addr,bank_addr,alipay_addr,is_special,lotto_status,tel,remarks,is_out,out_time from ctw_user where id=${zTokenInfo.id} `;
         const zUserList = await this.app.mysql.get('db1').query(zSql);
         const zExchangeList = await this.app.mysql.get('db1').query(`select * from ctw_exchange order by id desc`);
         if(zUserList && zExchangeList){
@@ -419,9 +419,6 @@ class MBaseService extends Service {
                     }
                     zParam += ` alipay_addr=?, `;  zParamValue.push(pParam.alipay_addr);
                 }
-                if(pParam.tel!=undefined){
-                    zParam += ` tel=?, `;  zParamValue.push(pParam.tel);
-                }
                 if(pParam.img_id!=undefined){
                     zParam += ` img_id=?, `;  zParamValue.push(pParam.img_id);
                 }
@@ -429,7 +426,6 @@ class MBaseService extends Service {
                     zParam += ` remarks=?, `;  zParamValue.push(pParam.remarks);
                 }
                 
-
                 zParam += ` update_time=? `;  zParamValue.push(zTime);
                 zParamValue.push(pParam.id);
                 zSql = `update ctw_user set ${zParam} where id=?`;

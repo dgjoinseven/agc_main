@@ -84,7 +84,7 @@
         <div id="id_top" class="abs" style="left:50px; top:50px; width:650px;">
             <div id="id_btn_back" class="abs" style="left:0px; top:0px;"><img src="./img/btn_back.png"></div>
             <div id="id_btn_log" class="abs" style="right:0px; top:0px;"><img src="./img/btn_log.png"></div>
-            <label id="txt_exchange" class="abs txt_32 txt_w1 txt_r cl_white" style="right:80px; top:0px; width:300px;">0</label>
+            <!-- <label id="txt_exchange" class="abs txt_32 txt_w1 txt_r cl_white" style="right:80px; top:0px; width:300px;">0</label> -->
             <div class="abs txt_32 txt_w1" style="left:220px; top:70px;">
                 <label id="txt_title_account" style="color:#FFF;"></label>
                 <label id="txt_title_status" style="margin-left:30px;"></label>
@@ -193,7 +193,7 @@ function btnClickHandler(p_obj_event){
             isPlayMovie = false;
             break;
         case "id_btn_lv":
-            //如果没有设置AGC地址
+            //如果没有设置币地址
             if(userInfo.wallet_addr){
                 c_m_popUpWin.init("id_popupwin", 2, "tips.t_tips", "tips.1005", "main.确认", function(){common.gotoWebSite('setAddr.html')});
                 return;
@@ -291,11 +291,11 @@ function updateMySelf(){
     $('#txt_title_rounds').text(userInfo.rounds);
     $('#txt_title_account').html(userInfo.name);
 
-    if(exchangeList && exchangeList[0]){
-        curExchangeRate = exchangeList[0].rate;
-        var zExchangeShowStr = "$1 = " + curExchangeRate + common.COIN_NAME;
-        $('#txt_exchange').text(zExchangeShowStr);
-    }
+    // if(exchangeList && exchangeList[0]){
+    //     curExchangeRate = exchangeList[0].rate;
+    //     var zExchangeShowStr = "$1 = " + curExchangeRate + common.COIN_NAME;
+        // $('#txt_exchange').text(zExchangeShowStr);
+    // }
     
     //显示晋级界面
     if(userInfo.is_lv==1){
@@ -312,7 +312,8 @@ function updateMySelf(){
         $('#id_lv').show();
         isPlayMovie = true;
     }else if(userInfo.lotto_status==1){
-        $('#id_lotto').show();
+        //暂时取消大转盘
+        // $('#id_lotto').show();
     }
     // else{
     //     //显示支付给公共地址的界面

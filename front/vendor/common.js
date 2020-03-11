@@ -5,7 +5,7 @@ common = {
     JS_LOAD_COUNTER : 0,    //已经加载的js个数
     JS_IS_LOADED : false,   //所有预加载的js是否都加载完毕
     ROOT_URL : "",          //基础路径
-    COIN_NAME : "AGC",      //币的名字
+    COIN_NAME : "USDT",      //币的名字
     server_type : 0,      //服务器状态（0本地 1测试服 2正式服，上传到不同服务器的时候记得设置zsf.json）
     PHP_URL_LOCAL : "http://127.0.0.1:7002/api/",
     PHP_URL_TEST : "http://120.25.106.197:7002/api/",

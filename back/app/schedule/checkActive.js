@@ -16,17 +16,14 @@ module.exports = app => {
       const zPayTimeJudge = zNowTime - zPayTime;
       const zConfirmTime = parseInt(zConf.confirm_time)*3600;
       const zConfirmTimeJudge = zNowTime - zConfirmTime;
-      // const zGroupTime = parseInt(zConf.group_time)*3600;
-      // const zGroupTimeJudge = zNowTime - zGroupTime;
-      // let zSet = new Set();
 
       ctx.logger.info("开启定时任务 checkActive===========================");
-
-      //执行RMB排单
-      await ctx.service.mPD.startPD();
-
-      //执行后台操作的订单（后台点确定）
+      
       try {
+        //执行RMB排单
+        await ctx.service.mPD.startPD();
+
+        //执行后台操作的订单（后台点确定）
         //后台点击的订单（公共账号确认，销毁账号确认）
         let zUserList = await app.mysql.get('db1').query(`select * from ctw_user where is_back_active=1`);
         if(zUserList && zUserList[0]){

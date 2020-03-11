@@ -18,7 +18,7 @@
         <div id="id_top" class="abs" style="left:50px; top:50px; width:650px;">
             <div id="id_btn_back" class="abs" style="left:0px; top:0px;"><img src="./img/btn_back.png"></div>
             <div id="id_btn_log" class="abs" style="right:0px; top:0px;"><img src="./img/btn_log.png"></div>
-            <label id="txt_exchange" class="abs txt_32 txt_w1 txt_r cl_white" style="right:80px; top:0px; width:300px;">0</label>
+            <!-- <label id="txt_exchange" class="abs txt_32 txt_w1 txt_r cl_white" style="right:80px; top:0px; width:300px;">0</label> -->
             <div class="abs txt_32 txt_w1" style="left:220px; top:70px;">
                 <label id="txt_title_account" style="color:#FFF;"></label>
                 <label id="txt_title_status" style="margin-left:30px;"></label>
@@ -265,13 +265,12 @@ function updateMySelf(){
     var zImgUrl =  "./img/head/head_" + userInfo.img_id + ".jpg";
     $('#id_head').attr("src", zImgUrl);
 
-    if(exchangeList && exchangeList[0]){
-        var zCurExchangeRate = exchangeList[0].rate;
-        common.setCookie("exchangeRate", zCurExchangeRate);
-
-        var zExchangeShowStr = "$1 = " + zCurExchangeRate + common.COIN_NAME;
-        $('#txt_exchange').text(zExchangeShowStr);
-    }
+    // if(exchangeList && exchangeList[0]){
+    //     var zCurExchangeRate = exchangeList[0].rate;
+    //     common.setCookie("exchangeRate", zCurExchangeRate);
+        // var zExchangeShowStr = "$1 = " + zCurExchangeRate + common.COIN_NAME;
+        // $('#txt_exchange').text(zExchangeShowStr);
+    // }
 
     $('#txt_title_status').attr("data-lang", "main.status_"+userInfo.status);
     var zColor = "#FFF";

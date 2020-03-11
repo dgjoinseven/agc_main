@@ -12,11 +12,11 @@
 
 <body class="body_css">
     <!--主页面容器-->
-    <div class="main_page" id="id_main_page" style="display:none;">
-        <div id="id_btn_tutorial" class="abs txt_44 txt_c txt_w2" style="left:50px; top:300px; width:650px;">ERC20 USDT</div>
-        <input id="id_input_addr" type="text" class="abs input_a" style="top:400px;" data-placeholder="ph.请输入您的钱包地址"></div>
-        <div id="id_btn_tutorial" class="abs txt_32 cl_blue" style="left:50px; top:650px;" data-lang="main.查看教程"></div>
-        <label class="abs txt_28 cl_red" style="left:50px; top:850px;" data-lang="main.注：只有一次机会，请认真填写"></label>
+    <div class="main_page" id="id_main_page" style="display:none; width:100%; height:100%; background-color:#F5F5F5;">
+        <div class="abs bg_white" style="width:750px; height:250px; top:132px;">
+            <textarea id="id_dd_textarea" class="abs txt_26" style="border:0px solid #000; left:50px; top:50px; width:650px; height:200px !important; resize:none;" onKeyUp="if(this.value.length > 100) this.value=this.value.substr(0,100)" data-placeholder="ph.请输入内容"></textarea>
+        </div>
+
         <div id="id_btn_confirm" class="abs btn_a btn_a_yellow" style="left:50px; top:1050px; width:650px !important;" data-lang="main.确认"></div>
     </div>
 
@@ -44,13 +44,13 @@ window.onload = function ready(){id_interval=setInterval(function(){if(common!=u
 /////////////////// 初始化基础配置相关 ///////////////////
 window.onresize = windowResize;
 
-var endHeight = 3200;
+var endHeight = 2200;
 var userInfo = {};
-var selectType = 0;
+var myInfoList = [];
 
 //初始化
 function init() {
-    c_m_header.init("id_header", "main.钱包地址");
+    c_m_header.init("id_header", "main.联系信息");
 
     if(common.getCookie("userInfo")){
         userInfo = JSON.parse(common.getCookie("userInfo"));
@@ -59,56 +59,27 @@ function init() {
         windowResize();
         return;
     }
-
+    
     $('#id_btn_confirm').click({myType:"id_btn_confirm"}, btnClickHandler);
-    $('#id_btn_tutorial').click({myType:"id_btn_tutorial"}, btnClickHandler);
-
-    // $('#id_btn_erc20').click({myType:"id_btn_erc20"}, btnClickHandler);
-    // $('#id_btn_omni').click({myType:"id_btn_omni"}, btnClickHandler);
 
     windowResize();
 
     common.lang();
     $('#id_main_page').show();
-
-    // selectBtn(1);
 }
 
 //按钮点击事件
 function btnClickHandler(p_obj_event){
     switch(p_obj_event.data.myType){
         case "id_btn_confirm":
-            if(!$('#id_input_addr').val()){
-                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1024", "tips.b_ok", function(){common.gotoWebSite("setAddr.html")});
+            if(!$('#id_dd_textarea').val()){
+                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1024", "tips.b_ok");
                 return;
             }
-            api_setAddr();
+            api_setContact();
             break;
-        case "id_btn_tutorial":
-            // window.open("http", '_blank');
-            break;
-        // case "id_btn_erc20":
-        //     selectBtn(1);
-        //     break;
-        // case "id_btn_omni":
-        //     selectBtn(2);
-        //     break;
     }
 }
-
-// function selectBtn(pIndex){
-//     selectType = pIndex;
-//     $('#id_btn_erc20').removeClass("btn_b_yellow");
-//     $('#id_btn_omni').removeClass("btn_b_yellow");
-//     switch(pIndex){
-//         case 1:
-//             $('#id_btn_erc20').addClass("btn_b_yellow");
-//             break;
-//         case 2:
-//             $('#id_btn_omni').addClass("btn_b_yellow");
-//             break;
-//     }
-// }
 
 //窗口尺寸重置
 function windowResize()
@@ -130,9 +101,63 @@ function windowResize()
     c_m_popUpWin.setSizePos(zScale);
 }
 
+//更新列表
+function updateTable(){
+    var zHmlInfo = "";
+    var zTop = 0;
+    for(var i=0; i<myInfoList.length; i++){
+        zTop = i*200;
+        var zInfo = myInfoList[i];
+        var zRounds = zInfo.rounds;
+        var zStatus = zInfo.status;
+        var zFromId = zInfo.from_id;
+        var zFromAddr = zInfo.from_addr;
+        var zFromType = zInfo.from_addr_type;
+        var zToId = zInfo.to_id;
+        var zToAddr = zInfo.to_addr;
+        var zToType = zInfo.to_addr_type;
+        var zMoney = "USD:"+zInfo.money;
+        var zAddrTxt = "";
+        var zAddrType = ["", "ERC20", "OMNI"]
+        var zMoneyGetType = 0; // 1打钱  2收钱
+        var zAcount = "";
+        if(parseInt(zFromId)==parseInt(userInfo.id)){//付钱
+            zMoneyGetType = 1;
+            zAddrTxt = zAddrType[parseInt(zToType)] + " : " + zToAddr;
+            zAcount = zInfo.to_account;
+            zMoney = "-USD:"+zInfo.money;
+        }else{//收钱
+            zMoneyGetType = 2;
+            zAddrTxt = zAddrType[parseInt(zFromType)] + " : " + zFromAddr;
+            zAcount = zInfo.from_account;
+            zMoney = "+USD:"+zInfo.money;
+        }
+        
+        if(zInfo.to_id==0){
+            zRounds = 99;
+            zAcount = "";
+        }
+        var zStr = '\
+            <div class="abs bg_white" style="top:'+zTop+'px; width:650px; height:200px; background-color:rgba(0,0,0,0); border:0px solid #eee; border-bottom:2px solid #eee;">\
+                <div class="abs" style="transform:scale(0.6,0.6); top:30px;"><img class="abs" style="-webkit-mask:url(./img/mask_r_200.png);" src="./img/ag_'+zRounds+'.jpg"></div>\
+                <label class="abs txt_32 cl_black" style="left:140px; top:80px; width:500px;">'+zAcount+'</label>\
+                <label class="abs txt_20 cl_grey" style="top:165px; width:600px;">'+zAddrTxt+'</label>\
+                <label class="abs txt_36 txt_r txt_w1 cl_black" style="right:20px; top:80px; width:650px;">'+zMoney+'</label>\
+            </div>\
+            ';
+        zHmlInfo += zStr;
+    }
+    $('#id_table_a_content').html(zHmlInfo);
+
+    endHeight = (myInfoList.length+1)*200+230;
+    $('#id_end').css("top", endHeight+"px");
+
+    common.lang();
+}
+
 //////////////////////////////////// php相关 ////////////////////////////////////
-//设置地址
-function api_setAddr(){
+//设置联系方式
+function api_setContact(){
     c_m_waiting.init("id_tips");
     $.ajax({
         url: common.getApiUrl("user_edit"),
@@ -140,11 +165,11 @@ function api_setAddr(){
         beforeSend: function(Request) {
             Request.setRequestHeader("Authorization",common.getCookie('token'));
         },
-        data:{type:2, id:userInfo.id,  wallet_addr:$('#id_input_addr').val()},
+        data:{type:2, id:userInfo.id,  remarks:$('#id_dd_textarea').val()},
         dataType: "json", //指定服务器返回的数据类型
         cache:false,
         success: function (evt) {
-            console.log("api_setAddr success:");
+            console.log("api_setContact success:");
             console.log(evt);
             switch(evt.code){
                 case 1:
@@ -159,7 +184,7 @@ function api_setAddr(){
             }
             c_m_waiting.close();
         },error: function(error){
-            console.log("api_setAddr error:"+error.msg);
+            console.log("api_setContact error:"+error.msg);
             c_m_waiting.close();
         }
     });

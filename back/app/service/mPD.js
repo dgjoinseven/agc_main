@@ -24,10 +24,11 @@ class MPDService extends Service {
                 console.log(`===startPD===== 收钱账号个数:${zPdList.length}  付钱账号:${zOrderList.length}`);
                 for(let i=0; i<zOrderList.length; i++){
                     let zOrderInfo = zOrderList[i];
-
                     let zPdList = await this.app.mysql.get('db1').query(`select * from ctw_order_pd where sum<4 and is_special=0 and create_time<${zPdTime} order by id`);
                     if(!zPdList || !zPdList[0]){
-                        zPdList = await this.app.mysql.get('db1').query(`select * from ctw_order_pd where is_special=1`);
+                        let zRmbUserList = zConfigDic["rmb_user_list"].split(",");
+                        let zGetMoneyUserId = zRmbUserList[parseInt(Math.random()*9)];
+                        zPdList = await this.app.mysql.get('db1').query(`select * from ctw_order_pd where is_special=1 and user_id=${zGetMoneyUserId}`);
                     }
 
                     //匹配总量小于4的收款账号

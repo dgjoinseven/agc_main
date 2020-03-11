@@ -86,6 +86,8 @@ class CUserController extends Controller {
                         "is_lotto":zUserInfo.is_lotto,
                         "tel":zUserInfo.tel,
                         "remarks":zUserInfo.remarks,
+                        "is_out":zUserInfo.is_out,
+                        "out_time":zUserInfo.out_time,
                     };
 
                     //更新登录时间

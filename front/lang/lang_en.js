@@ -7,6 +7,7 @@ lang_en = {
 		"确认": "CONFIRM",
 		"忘记密码": "FORGET PWD",
 		"获得验证码": "Get Code",
+		"查看教程": "<u>View Tutorial</u>",
 		"修改": "CHANGE",
 		"处理中":"PROCESSING",
 		"已完成":"FINISHED",
@@ -164,7 +165,7 @@ lang_en = {
 		"请再次输入您的密码": "Please input your password again",
 		"请输入您朋友的邮箱": "Please input your friend's account",
 		"请输入您朋友的密码": "Please input your friend's password",
-		"请输入您的钱包地址": "Please input your Wallet addres",
+		"请输入您的钱包地址": "Please input ERC20 USDT addres",
 		"请输入内容":"Please enter contents",
 		"最多输入30个字":"Enter up to 30 words",
 		"null": ""
