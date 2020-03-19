@@ -1,6 +1,6 @@
 'use strict';
 
-//日期时间统计（年月日）
+//短时间段内执行的定时任务
 module.exports = app => {
   return {
     schedule: {
@@ -17,7 +17,7 @@ module.exports = app => {
       const zConfirmTime = parseInt(zConf.confirm_time)*3600;
       const zConfirmTimeJudge = zNowTime - zConfirmTime;
 
-      ctx.logger.info("开启定时任务 checkActive===========================");
+      ctx.logger.info("开启定时任务 schedule_now ===========================");
       
       try {
         //执行RMB排单

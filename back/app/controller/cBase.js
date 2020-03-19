@@ -10,6 +10,13 @@ class CBaseController extends Controller {
         if(zData){this.ctx.body = zData ;}else{this.ctx.body = { code:-1, msg:'error'};}
     }
 
+    //分红池列表
+    async fhPooList() {
+        var zData = await this.ctx.service.mBase.fhPooList(this.ctx.query);
+        if(zData){this.ctx.body = zData ;}else{this.ctx.body = { code:-1, msg:'error'};}
+    }
+    
+
     //乐透开奖
     async lottoStart() {
         var zData = await this.ctx.service.mBase.lottoStart(this.ctx.query);

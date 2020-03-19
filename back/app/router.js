@@ -19,6 +19,7 @@ module.exports = app => {
   router.post('/api/logout', jwt, tc, controller.cUser.logout); //登出
 
   ////////////////////// 基础模块 //////////////////////
+  router.get('/api/fh_pool', jwt, tc, controller.cBase.fhPooList); //分红池列表
   router.get('/api/exchange_list', jwt, tc, controller.cBase.exchangeList); //汇率列表
   router.get('/api/lotto_start', jwt, tc, controller.cBase.lottoStart);     //乐透开奖
   router.get('/api/group_list', jwt, tc, controller.cBase.groupList);       //团队列表

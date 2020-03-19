@@ -88,6 +88,9 @@ class CUserController extends Controller {
                         "remarks":zUserInfo.remarks,
                         "is_out":zUserInfo.is_out,
                         "out_time":zUserInfo.out_time,
+                        "jc_sum":zUserInfo.jc_sum,
+                        "zt_sum":zUserInfo.zt_sum,
+                        "jc_list":zUserInfo.jc_list,
                     };
 
                     //更新登录时间

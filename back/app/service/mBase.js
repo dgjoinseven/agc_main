@@ -21,6 +21,42 @@ class MBaseService extends Service {
         }
     }
 
+    //获取分红池列表
+    async fhPooList() {
+        const { ctx } = this;
+        const zResult = ctx.helper.getCurFhPool();
+        if(zResult){
+            return { code:1, msg:'success', data:zResult};
+        }else{
+            return null;
+        }
+    }
+
+    //更新分红池
+    async fhPooUpdate() {
+        const { app, ctx } = this;
+        const zNowTime = parseInt(new Date()/1000);
+        let zDate = new Date();
+        let zYear = parseInt(zDate.getFullYear());
+        let zMonth = parseInt(zDate.getMonth()+1);
+        let zDay = parseInt(zDate.getDate());
+        let zFullDate = zYear*1000 + zMonth*100 + zDay;
+        const zConf = await ctx.helper.getConfigDic();
+        const zFConfFhPool = parseInt(zConf["fh_pool"]);
+
+        //执行出局分红
+        let zFhUserList = await app.mysql.get('db1').query(`select * from ctw_user where is_out=1`);
+        if(zFhUserList && zFhUserList[0]){
+            //参与分红的总人数
+            let zFhPeopleSum = zFhUserList.length;
+
+            //更新分红池的状态
+            await app.mysql.get('db1').query(`INSERT INTO ctw_fh_pool (id, money, people_sum, create_time, update_time) VALUES(${zFullDate}, ${zFConfFhPool}, ${zFhPeopleSum}, ${zNowTime}, ${zNowTime})  ON DUPLICATE KEY UPDATE money=${zFConfFhPool} ,people_sum=${zFhPeopleSum}, create_time=${zNowTime}, update_time=${zNowTime}`);
+            //清奖金池缓存
+            await ctx.helper.delCurFhpool();
+        }
+    }
+
     //乐透开奖
     async lottoStart() {
         const { ctx } = this;
@@ -281,7 +317,7 @@ class MBaseService extends Service {
         const zTokenInfo = ctx.helper.verifyToken(ctx.header.authorization);// 解密获取的Tokenid
         const zTime = parseInt(Date.now()/1000);
 
-        const zSql = ` select id,name,account,img_id,boss_id,boss_id_2,boss_list,is_lv,pwd2,status,rounds,wallet_addr,bank_addr,alipay_addr,is_special,lotto_status,tel,remarks,is_out,out_time from ctw_user where id=${zTokenInfo.id} `;
+        const zSql = ` select id,name,account,img_id,jc_sum,jc_list,zt_sum,boss_id,boss_id_2,boss_list,is_lv,pwd2,status,rounds,wallet_addr,bank_addr,alipay_addr,is_special,lotto_status,tel,remarks,is_out,out_time from ctw_user where id=${zTokenInfo.id} `;
         const zUserList = await this.app.mysql.get('db1').query(zSql);
         const zExchangeList = await this.app.mysql.get('db1').query(`select * from ctw_exchange order by id desc`);
         if(zUserList && zExchangeList){
@@ -489,7 +525,7 @@ class MBaseService extends Service {
             return { code:-1, msg:`获取用户失败，user_id=${zTokenInfo.id}`};
         }
 
-        let zNextRounds = zUserInfo.rounds+1;
+        let zNextRounds = parseInt(zUserInfo.rounds)+1;
 
         //判断是否特殊账号
         if(zUserInfo.is_special==1){
@@ -503,8 +539,16 @@ class MBaseService extends Service {
             return { code:1035, msg:`加持数量不足，user_id=${zTokenInfo.id}`};
         }
 
-        let zSql = `update ctw_user set is_lv=0, rounds=${zNextRounds}, status=0, jc_sum=0, update_time=${zTime} where id=${zTokenInfo.id} and is_lv=1 `;
-        const zResult = await this.app.mysql.get('db1').query(zSql); // 初始化事务
+        let zResult;
+        if(zNextRounds >= zConfMaxRounds){
+            //出局
+            zResult = await this.app.mysql.get('db1').query(`update ctw_user set status=0, jc_sum=0, jc_list='', rounds=${zNextRounds}, is_out=1, is_lv=0, update_time=${zTime}, out_time=${zTime} where id=${zTokenInfo.id} and is_out=0  and is_lv=1`);
+            //更新分红池信息(分红人数)
+            await ctx.service.fhPooUpdate();
+        }else{
+            //正常升级
+            zResult = await this.app.mysql.get('db1').query(`update ctw_user set is_lv=0, rounds=${zNextRounds}, status=0, jc_sum=0, jc_list='', update_time=${zTime} where id=${zTokenInfo.id} and is_lv=1 `); // 初始化事务
+        }
         if(zResult && zResult["affectedRows"]>0){
             //清除缓存
             await ctx.service.mUser.delUserInfo(zTokenInfo.id);
@@ -673,7 +717,7 @@ class MBaseService extends Service {
         await this.app.mysql.get('db1').query(`update ctw_jc set jc_${zRounds}=-1 where user_id=${zTokenInfo.id}`);
 
         //加持对象jc_sum增加
-        let zSql = `update ctw_user set jc_sum=jc_sum+1, update_time=${zTime} where id=${zUserInfo.id} `;
+        let zSql = `update ctw_user set jc_sum=jc_sum+1, jc_list=jc_list+',${zTokenInfo.name}', update_time=${zTime} where id=${zUserInfo.id} `;
         const zResult = await this.app.mysql.get('db1').query(zSql); // 初始化事务
         if(zResult && zResult["affectedRows"]>0){
             //清除缓存
@@ -805,7 +849,7 @@ class MBaseService extends Service {
     //生成订单
     //@pUserId      pUserId
     //@pRounds      轮数
-    //@pOrderType   订单类型（1.天使轮打款  2.公排boss1打款  3.公排boss2打款  4.公排销毁打款(暂时弃用)  5.公排公共账号打款  6.大转盘收款  7.回馈收款  8.动态奖金）
+    //@pOrderType   订单类型（1.天使轮打款  2.公排boss1打款  3.公排boss2打款  4.公排销毁打款(暂时弃用)  5.公排公共账号打款  6.大转盘收款  7.回馈收款  8.动态奖金  9.出局分红）
     //@pDynMoney    动态奖金/大转盘奖金
     //@pActiveId    天使轮打款激活的账号的id
     async genOrder(pUserId, pRounds, pOrderType, pDynMoney, pActiveId) {
@@ -871,6 +915,20 @@ class MBaseService extends Service {
             zOrderParam_dyn["is_rmb"] = 0;
             zOrderParam_dyn["is_use"] = 1;
             zOrderParamList.push(zOrderParam_dyn);
+        }else if(pOrderType==9){
+            let zOrderParam_fh = {};
+            zOrderParam_fh["order_type"] = 9;
+            zOrderParam_fh["fromId"] = 0;
+            zOrderParam_fh["toId"] = zUserInfo.id;
+            zOrderParam_fh["sys_addr"] = zGgAddr;
+            zOrderParam_fh["lock_addr"] = "";
+            zOrderParam_fh["rounds"] = zUserInfo.rounds;
+            zOrderParam_fh["money"] = pDynMoney;
+            zOrderParam_fh["money_agc"] = pDynMoney*zExchange;
+            zOrderParam_fh["active_id"] = 0;
+            zOrderParam_fh["is_rmb"] = 0;
+            zOrderParam_fh["is_use"] = 1;
+            zOrderParamList.push(zOrderParam_fh);
         }else{
             if(zCurRounds==0){ ////////////// 天使轮排
                 let zOrderParam_angle = {};

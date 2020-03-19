@@ -67,7 +67,7 @@
             </div>
         </div>
 
-        <!-- 晋级窗口 -->
+        <!-- 晋级/出场窗口 -->
         <div id="id_lv" class="abs bg_white" style="width:750px; height:1200px; display:none;">
             <img id="id_lv_img_bg" class="abs" style="left:75px; top:200px;" src="./img/bg_ag_00.jpg">
             <img id="id_lv_img" class="abs" style="left:75px; top:200px;">
@@ -75,7 +75,30 @@
                 <label id="id_lv_desc" data-lang="main.tips_content_3"></label>
                 <label id="id_lv_txt" class="cl_orange" ></label>
             </div>
-            <div id="id_btn_lv" class="abs btn_a btn_a_yellow" style="left:50px; top:1040px; width:650px !important;" data-lang="main.晋级"></div>
+            <!-- 晋级 -->
+            <div id="id_lv_lv" class="abs" style="display:none;">
+                <!-- 加持球 -->
+                <div id="id_lv_jc" class="abs" style="left:120px; top:1000px; display:none;">
+                    <div id="jc_1_1" class="abs jc_ball" style="left:0px; top:0px; display:none;"></div>
+                    <div id="jc_1_2" class="abs jc_ball" style="left:120px; top:0px; display:none;"></div>
+                    <div id="jc_1_3" class="abs jc_ball" style="left:240px; top:0px; display:none;"></div>
+                    <div id="jc_1_4" class="abs jc_ball" style="left:360px; top:0px; display:none;"></div>
+                    <div id="jc_1_5" class="abs jc_ball" style="left:480px; top:0px; display:none;"></div>
+                    <div id="jc_2_1" class="abs jc_ball" style="left:0px; top:100px; display:none;"></div>
+                    <div id="jc_2_2" class="abs jc_ball" style="left:120px; top:100px; display:none;"></div>
+                    <div id="jc_2_3" class="abs jc_ball" style="left:240px; top:100px; display:none;"></div>
+                    <div id="jc_2_4" class="abs jc_ball" style="left:360px; top:100px; display:none;"></div>
+                    <div id="jc_2_5" class="abs jc_ball" style="left:480px; top:100px; display:none;"></div>
+                </div>
+                <!-- 升级按钮 -->
+                <div id="id_btn_lv" class="abs btn_a btn_a_yellow" style="left:50px; top:1040px; width:650px !important; display:none;" data-lang="main.晋级"></div>
+            </div>
+
+            <!-- 出场 -->
+            <div id="id_lv_out" class="abs" style="display:none;">
+            </div>
+
+            <!-- 关闭按钮 -->
             <div id="id_btn_lv_close" class="abs" style="right:40px; top:250px;"><img src="./img/btn_close_1.png"></div>
         </div>
 
@@ -107,6 +130,20 @@
                 <div id="id_lotto_point" class="abs" style="transform-origin:50% 50%; left:75px; top:120px;"><img src="./img/round_point.png"></div>
                 <div id="id_lotto_btn" class="abs btn_a btn_a_yellow" style="left:50px; top:840px; width:650px !important;" data-lang="main.开始抽奖"></div>
                 <label class="abs txt_28 cl_white " style="left:80px; top:1000px; width:610px;" data-lang="main.tips_content_5"></label>
+            </div>
+        </div>
+
+        <!-- 加持信息弹窗 -->
+        <div id="id_jc_win" class="abs" style="position:fixed; z-index:2000; width:100%; height:100%; display:none;">
+            <div class="bg_mask" ></div>
+            <div id="id_jc_win_btn_close" class="abs" style="left:75px; top:550px; width:600px; height:200px; background-color:#fff; border-radius:10px;">
+                <div id="id_jc_win_0" class="abs" style="left:50px; top:80px; display:none;">
+                    <label class="txt_36" data-lang="main.加持者"></label>
+                    <label class="txt_36" id="id_jc_win_jcman"></label>
+                </div>
+                <div id="id_jc_win_1" class="abs" style="left:50px; top:80px; display:none;">
+                    <div class="txt_36" id="id_jc_win_jcman"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -157,6 +194,7 @@ var lottoType = 0; //中奖类型
 var lottoMoney = 0;//中奖金额
 var exchangeList = [];
 var curExchangeRate = 1;
+var selectJcNameIndex = 0; //选择的加持者（橙色圈圈）
 
 //初始化
 function init() {
@@ -173,7 +211,19 @@ function init() {
     $('#id_group_tui_1_2').click({myType:"id_group_tui_1_2"}, btnClickHandler);
     $('#id_group_tui_1_3').click({myType:"id_group_tui_1_3"}, btnClickHandler);
     $('#id_lotto_btn').click({myType:"id_lotto_btn"}, btnClickHandler);
+    $('#id_jc_win_btn_close').click({myType:"id_jc_win_btn_close"}, btnClickHandler);
 
+    $('#jc_1_1').click({myType:"1_1"}, jcClickHandler);
+    $('#jc_1_2').click({myType:"1_2"}, jcClickHandler);
+    $('#jc_1_3').click({myType:"1_3"}, jcClickHandler);
+    $('#jc_1_4').click({myType:"1_4"}, jcClickHandler);
+    $('#jc_1_5').click({myType:"1_5"}, jcClickHandler);
+    $('#jc_2_1').click({myType:"2_1"}, jcClickHandler);
+    $('#jc_2_2').click({myType:"2_2"}, jcClickHandler);
+    $('#jc_2_3').click({myType:"2_3"}, jcClickHandler);
+    $('#jc_2_4').click({myType:"2_4"}, jcClickHandler);
+    $('#jc_2_5').click({myType:"2_5"}, jcClickHandler);
+    
     windowResize();
 
     api_userInfo();
@@ -183,6 +233,30 @@ function init() {
 
     setInterval(timeRum, 1000);
     requestAnimationFrame(playMovie);
+}
+
+//加持点击事件
+function jcClickHandler(p_obj_event){
+    var zInfo = p_obj_event.data.myType;
+    var zList = zInfo.split("_");
+    var zIndex_v = parseInt(zList[0]);
+    var zIndex_h = parseInt(zList[1]);
+    selectJcNameIndex = (zIndex_v-1)*5 + zIndex_h;
+
+    var zJcUserListOrg = userInfo.jc_list.split(",");
+    var zJcUser = [];
+    for(var i=0; i<zJcUserListOrg.length; i++){
+        if(zJcUserListOrg[i]){
+            zJcUser.push(zJcUserListOrg[i]);
+        }
+    }
+
+    var zJcUserName = zJcUser[selectJcNameIndex-1];
+    if(zJcUserName){
+        $('#id_jc_win_jcman').text(zJcUserName);
+    }
+    $('#id_jc_win').show();
+    console.log(zList);
 }
 
 //按钮点击事件
@@ -247,6 +321,9 @@ function btnClickHandler(p_obj_event){
             // lottoPos = 195;
             // lottoIsStart = true;
             break;
+        case "id_jc_win_btn_close":
+            $('#id_jc_win').hide();
+            break;
     }
 }
 
@@ -297,17 +374,66 @@ function updateMySelf(){
         // $('#txt_exchange').text(zExchangeShowStr);
     // }
     
+    //显示出局界面
+    if(parseInt(userInfo.is_out)>=1){
+        $('#id_lv_lv').hide();
+        $('#id_lv_out').show();
+
+        if(parseInt(userInfo.is_out)==1){ //出局可发奖
+            console.log("1=--=-=-=-=-=-");
+        }else if(parseInt(userInfo.is_out)==2){ //出局不发奖
+            console.log("2=--=-=-=-=-=-");
+        }
     //显示晋级界面
-    if(userInfo.is_lv==1){
+    }else if(parseInt(userInfo.is_lv)==1){
+        $('#id_lv_lv').show();
+        $('#id_lv_out').hide();
+        
         var zLevelUpRounds = userInfo.rounds+1;
-        if(zLevelUpRounds>=5){
+        var zConf = common.getCookie("conf");
+        var zConfMaxRounds = parseInt(zConf["max_rounds"]);
+        var zConfMaxJc = parseInt(zConf["jcmax_"+zLevelUpRounds]);
+        var zCurJc = parseInt(userInfo.jc_sum);
+
+        //准备出局
+        if(parseInt(userInfo.rounds)>=zConfMaxRounds){
             $('#id_lv_desc').attr("data-lang", "main.tips_content_4");
             $('#id_lv_txt').hide();
+        //可以升下一级
         }else{
             $('#id_lv_txt').show();
             $('#id_lv_txt').text(zLevelUpRounds);
         }
         
+        //判断显示加持球球还是升级按钮
+        if(zCurJc >= zConfMaxJc){
+        //显示按钮
+            $('#id_lv_jc').hide();
+            $('#id_btn_lv').show();
+        //显示球球
+        }else{
+            for(var i=0; i<zConfMaxJc; i++){
+                var zIndex_0_v = Math.floor(i/5) + 1;
+                var zIndex_0_h = i%5 + 1;
+                $('#jc_'+zIndex_0_v+"_"+zIndex_0_h).removeClass("orange");
+                $('#jc_'+zIndex_0_v+"_"+zIndex_0_h).removeClass("sparkle");
+                $('#jc_'+zIndex_0_v+"_"+zIndex_0_h).show();
+            }
+            for(var j=0; j<zCurJc; j++){
+                var zIndex_1_v = Math.floor(j/5) + 1;
+                var zIndex_1_h = j%5 + 1;
+                $('#jc_'+zIndex_1_v+"_"+zIndex_1_h).addClass("orange");
+                $('#jc_'+zIndex_1_v+"_"+zIndex_1_h).addClass("sparkle");
+            }
+            if(Math.floor(zConfMaxJc/5) == 0){
+                var zLeft = 120 + (5-zConfMaxJc)*120/2;
+                $('#id_lv_jc').css("left", zLeft+"px");
+            }
+            $('#id_lv_jc').show();
+            $('#id_btn_lv').hide();
+        }
+        
+        //显示图片
         $('#id_lv_img').attr("src", "./img/bg_ag_01.png");
         $('#id_lv').show();
         isPlayMovie = true;

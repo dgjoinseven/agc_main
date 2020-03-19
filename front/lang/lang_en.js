@@ -42,6 +42,7 @@ lang_en = {
 		"order_type_6":"Lotto Bonus",
 		"order_type_7":"System Bonus",
 		"order_type_8":"Team Bonus",
+		"order_type_9":"Bonus",
 		"btn_payment_01":"PAY",
 		"btn_payment_02":"WAIT",
 		"btn_payment_11":"WAIT",
@@ -72,9 +73,10 @@ lang_en = {
 		"tips_content_0":"Invite 3 friends",
 		"tips_content_1":"Please enter your transaction password (Number only)",
 		"tips_content_2":"Public welfare needs your strength. <br> You can get a surprise after completing the payment",
-		"tips_content_3":"Congratulations <br> You have got the opportunity to upgrade ",
-		"tips_content_4":"Congratulations <br> please enjoy your life. ",
+		"tips_content_3":"To get enough blessings <br> upgrade to rounds ",
+		"tips_content_4":"To get enough blessings <br> won the game ",
 		"tips_content_5":"Your wallet address will receive rewards within 48 hours",
+		"tips_content_6":"Congratulations <br> you've won the game ",
 		"开始抽奖":"Start Lotto",
 		"转盘奖0":"Promotion Award",
 		"转盘奖1":"Lucky prize",
@@ -106,6 +108,7 @@ lang_en = {
 		"请设置银行信息或支付宝账号":"Please set bank information and Alipay account number",
 		"请上传打款图片":"Please upload the print image",
 		"请输入交易单号":"Please enter transaction No",
+		"加持者":"Helper : ",
 		"null": ""
 	},
 	"tips":{

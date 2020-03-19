@@ -102,16 +102,34 @@ module.exports = {
 
   //获取当前的汇率
   async getCurExchange(){
-    let zDataStr = await this.app.redis.get("exchange");
+    // let zDataStr = await this.app.redis.get("exchange");
+    // if(!zDataStr){
+    //   let zResult = await this.app.mysql.get('db1').query(`select * from ctw_exchange order by create_time desc`);
+    //   if(zResult && zResult[0]){
+    //     let zInfo = zResult[0];
+    //     zDataStr = Number(zInfo.rate).toFixed(2)
+    //     await this.app.redis.set("exchange", zDataStr, 'EX', 60);
+    //   }
+    // }
+    // return Number(zDataStr);
+    return 1;
+  },
+
+  //获取当前的分红
+  async getCurFhPool(){
+    let zDataStr = await this.app.redis.get("fh_pool");
     if(!zDataStr){
-      let zResult = await this.app.mysql.get('db1').query(`select * from ctw_exchange order by create_time desc`);
+      let zResult = await this.app.mysql.get('db1').query(`select * from ctw_fh_pool order by create_time desc`);
       if(zResult && zResult[0]){
         let zInfo = zResult[0];
-        zDataStr = Number(zInfo.rate).toFixed(2)
-        await this.app.redis.set("exchange", zDataStr, 'EX', 60);
+        zDataStr = JSON.stringify(zInfo);
+        await this.app.redis.set("fh_pool", zDataStr, 'EX', 60);
       }
     }
-    return Number(zDataStr);
+    return JSON.parse(zDataStr);
+  },
+  async delCurFhpool(){
+    await this.app.redis.del("fh_pool");
   },
 
   /**

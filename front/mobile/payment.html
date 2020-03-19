@@ -298,7 +298,7 @@ function updateTable(){
     for(var i=0; i<myInfoList.length; i++){
         zTop = i*210;
         var zInfo = myInfoList[i];
-        var zOrderType = parseInt(zInfo.order_type);//订单类型（1.天使轮打款  2.公排boss1打款  3.公排boss2打款  4.公排销毁打款【lock】  5.公排公共账号打款【sys】  6.大转盘收款【sys】  7.排单收款  8.动态奖收款【sys】）
+        var zOrderType = parseInt(zInfo.order_type);//订单类型（1.天使轮打款  2.公排boss1打款  3.公排boss2打款  4.公排销毁打款【lock】  5.公排公共账号打款【sys】  6.大转盘收款【sys】  7.排单收款  8.动态奖收款【sys】 9.出局分红【sys】）
         var zOrderStr = 'data-lang="main.order_type_'+zOrderType+'"';
         var zRounds = zInfo.rounds;
         var zStatus = parseInt(zInfo.status);
