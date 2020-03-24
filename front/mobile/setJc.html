@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Angel City</title> 
+    <meta name="viewport" content="width=device-width,user-scalable=no, initial-scale=1">
+    <link rel='icon' href='./img/logo_16.ico' type='image/x-ico' />
+    <script type="text/javascript" src="../vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../vendor/jquery/jquery.cookie.js"></script>
+</head>
+
+
+<body class="body_css">
+    <!--主页面容器-->
+    <div class="main_page" id="id_main_page" style="display:none; width:100%; height:100%; background-color:#FFF;">
+        <div id="id_lv_jc" class="abs" style="left:120px; top:300px;">
+            <div id="jc_1_1" class="abs jc_ball" style="left:0px; top:0px; display:none;" onClick='fnBallClickHandler(1)'></div>
+            <div id="jc_1_2" class="abs jc_ball" style="left:120px; top:0px; display:none;" onClick='fnBallClickHandler(2)'></div>
+            <div id="jc_1_3" class="abs jc_ball" style="left:240px; top:0px; display:none;" onClick='fnBallClickHandler(3)'></div>
+            <div id="jc_1_4" class="abs jc_ball" style="left:360px; top:0px; display:none;" onClick='fnBallClickHandler(4)'></div>
+            <div id="jc_1_5" class="abs jc_ball" style="left:480px; top:0px; display:none;" onClick='fnBallClickHandler(5)'></div>
+        </div>
+    </div>
+
+    <!-- 弹窗 -->
+    <div id="id_win" class="abs" style="z-index:2000; width:100%; height:100%; display:none;">
+        <div class="bg_mask" ></div>
+        <div id="id_win_close" class="abs" style="right:40px; top:40px; cursor:pointer;"><img src="./img/btn_close_2.png"></div>
+        <input id="id_input_nickName" type="text" class="abs input_a" style="top:400px;" data-placeholder="ph.请输入您的昵称">
+        <div id="id_btn_confirm" class="abs btn_a btn_a_yellow" style="left:50px; top:600px; width:650px !important;" data-lang="main.确认"></div>
+    </div>
+
+    <div id="id_end" class="abs" style="top:1000px; opacity:0;">.</div>
+
+    <div id="id_header"></div>
+    <div id="id_footer"></div>
+    <div id="id_popupwin"></div>
+    <div id="id_tips"></div>
+
+<script>
+/////////////////// 初始化基础配置相关 ///////////////////
+var zHead = document.getElementsByTagName('head')[0];
+var zScript = document.createElement('script');
+zScript.type = 'text/javascript';
+zScript.src = '../vendor/common.js?ver='+$.cookie('commonJsVer');
+zScript.onload = zScript.onreadystatechange = function() {
+    if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete" ){
+        common.init(['c_m_popUpWin', 'c_m_header', 'c_m_waiting']);
+    }
+}
+zHead.appendChild(zScript);
+var id_interval = 0;
+window.onload = function ready(){id_interval=setInterval(function(){if(common!=undefined && common.JS_IS_LOADED==true){clearInterval(id_interval); init();}}, 100);};
+/////////////////// 初始化基础配置相关 ///////////////////
+window.onresize = windowResize;
+
+var endHeight = 2200;
+var userInfo = {};
+var myInfoList = [];
+var jcRounds = 0;
+
+//初始化
+function init() {
+    c_m_header.init("id_header", "main.加持");
+
+    if(common.getCookie("userInfo")){
+        userInfo = JSON.parse(common.getCookie("userInfo"));
+    }else{
+        c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
+        windowResize();
+        return;
+    }
+
+    $('#id_win_close').click({myType:"id_win_close"}, btnClickHandler);
+    $('#id_btn_confirm').click({myType:"id_btn_confirm"}, btnClickHandler);
+
+    api_jcList();
+
+    windowResize();
+
+    common.lang();
+    $('#id_main_page').show();
+}
+
+function initBall(){
+    var zConf = common.getCookie("conf");
+    var zConfMaxRounds = parseInt(zConf["max_rounds"]);
+    var zHtml = "";
+    for(var i=0; i<zConfMaxRounds; i++){
+        var zIndex = i + 1;
+        var zJcSum = myInfoList["jc_"+zIndex];
+        var zJcSumStr = "";
+        var zA = Math.floor(i/4) + 1;
+        var zB = Math.floor(i%4) + 1;
+        var zLeft = (zB-1)*160;
+        var zTop = (zA-1)*180;
+        var zClassType = "";
+        var zClickDetailTxt = "";
+        var zTxtColor = "cl_grey";
+        if(zJcSum>0){
+            zClassType = " blue sparkle";
+            zClickDetailTxt = " onClick='fnBallClickHandler("+zIndex+", "+zJcSum+")' ";
+            zJcSumStr = "+"+zJcSum;
+            zTxtColor = "cl_blue";
+        }else if(zJcSum==-1){
+            zClassType = " grey sparkle";
+            zJcSumStr = "x";
+        }
+        zHtml += '<div id="jc_'+zA+'_'+zB+'" class="abs jc_ball '+zClassType+'" style="left:'+zLeft+'px; top:'+zTop+'px;" '+zClickDetailTxt+'><label class="abs txt_18 txt_c '+zTxtColor+'" style="left:-35px; top:35px; width:100px;">'+zJcSumStr+'</label></div>'; 
+    }
+    // myInfoList.length
+    $('#id_lv_jc').html(zHtml);
+}
+
+function fnBallClickHandler(pJcRounds, pJcSum){
+    // console.log("-=-=-=-=", pJcRounds, pJcRounds);
+    jcRounds = pJcRounds;
+    $('#id_win').show();
+}
+
+//按钮点击事件
+function btnClickHandler(p_obj_event){
+    switch(p_obj_event.data.myType){
+        case "id_btn_confirm":
+            api_jcWho();
+            break;
+        case "id_win_close":
+            $('#id_win').hide();
+            break;
+    }
+}
+
+//窗口尺寸重置
+function windowResize()
+{
+    var zScale = common.initScale(1);
+    zScale = (zScale<1) ? 1 : zScale;
+    
+    var zWinWidth = parseInt(window.screen.availWidth);
+    var zWineHeight = parseInt(window.screen.availHeight);
+    var zMyWidth = document.body.clientWidth;
+    var zObjWidth = parseInt($('#id_main_page').css("width"))*zScale;
+
+    var zMiddleWidth = (zMyWidth-zObjWidth)/2/zScale;
+    $('#id_main_page').css({"left":zMiddleWidth+"px"});
+
+    c_m_header.windowResize(zMiddleWidth);
+    // c_m_footer.windowResize(zMiddleWidth);
+    // c_m_footer.updateTop(endHeight);
+    c_m_popUpWin.setSizePos(zScale);
+}
+
+//////////////////////////////////// php相关 ////////////////////////////////////
+//加持列表
+function api_jcList(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("jc_list"),
+        type: "get",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_jcList success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    // c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok", function(){common.onBackFun();});
+                    myInfoList = evt.data.list;
+                    initBall();
+                    break;
+                case 10001:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_jcList error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+//加持
+function api_jcWho(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("jc_who"),
+        type: "post",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{jc_rounds:jcRounds, jc_name:$('#id_input_nickName').val()},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_jcWho success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                case 10:
+                    $('#id_c_m_pwd2_container').hide();
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1", "tips.b_ok", function(){common.onRefreshFun()});
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_jcWho error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+
+</script>
+
+</body>
+</html>

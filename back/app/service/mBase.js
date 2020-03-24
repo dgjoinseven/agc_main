@@ -24,7 +24,7 @@ class MBaseService extends Service {
     //获取分红池列表
     async fhPooList() {
         const { ctx } = this;
-        const zResult = ctx.helper.getCurFhPool();
+        const zResult = await ctx.helper.getCurFhPool();
         if(zResult){
             return { code:1, msg:'success', data:zResult};
         }else{
@@ -261,19 +261,25 @@ class MBaseService extends Service {
         const zConf = await ctx.helper.getConfigDic();
         const zConfMaxRounds = parseInt(zConf.max_rounds);
         let zRounds = parseInt(pParam.rounds);
+        zParamInfo += `(`;
         for(let i=0; i<zConfMaxRounds; i++){
             let zIndex = i+1;
-            zParamInfo += `a.jc_${zIndex}>=${zRounds} and `;
+            if(i==0){
+                zParamInfo += `a.jc_${zIndex}>=${zRounds} `;
+            }else{
+                zParamInfo += `or a.jc_${zIndex}>=${zRounds} `;
+            }
         }
-        zParamInfo += ` a.id>0 and b.is_showMarket=1 `;
-
+        zParamInfo += `) and `;
+        zParamInfo += ` a.id>0 and b.is_showMarket=1 and b.is_special=0`;
+        
         const zSqlCount = `select count(distinct a.id) as count from ctw_jc a LEFT JOIN ctw_user b ON a.user_id=b.id where ${zParamInfo}`;
         const zResCount = await this.app.mysql.get('db1').query(zSqlCount);
         const zTotalPage = zPageSize > 0 ? Math.ceil(zResCount[0].count / zPageSize) : 0;
         const zTotalCount = zResCount[0].count;
     	const zOffset = (zToPage - 1) * zPageSize;
 
-        const zSql = ` select distinct a.id, a.*, b.name, b.tel, b.remarks from ctw_jc a LEFT JOIN ctw_user b ON a.user_id=b.id where ${zParamInfo} order by a.update_time limit ?,?`;
+        const zSql = ` select distinct a.id, a.*, b.name, b.tel, b.img_id, b.remarks from ctw_jc a LEFT JOIN ctw_user b ON a.user_id=b.id where ${zParamInfo} order by a.update_time limit ?,?`;
         const zList = await this.app.mysql.get('db1').query(zSql, [zOffset, parseInt(zPageSize)]);
         if(zList && zList[0]){
             return { code:1, msg:'success', data:{ cur_page:zToPage, page_size:zPageSize, total_page:zTotalPage, total_count:zTotalCount, list:zList}};
@@ -300,9 +306,9 @@ class MBaseService extends Service {
         const zTotalCount = zResCount[0].count;
     	const zOffset = (zToPage - 1) * zPageSize;
 
-        const zSql = ` select name, tel, remarks from ctw_user where ${zParamInfo} order by create_time desc limit ?,?`;
+        const zSql = ` select name, tel, img_id, remarks from ctw_user where ${zParamInfo} order by create_time desc limit ?,?`;
         const zList = await this.app.mysql.get('db1').query(zSql, [zOffset, parseInt(zPageSize)]);
-        if(zList && zList[0]){
+        if(zList){
             return { code:1, msg:'success', data:{ cur_page:zToPage, page_size:zPageSize, total_page:zTotalPage, total_count:zTotalCount, list:zList}};
         }else{
             return null;
@@ -692,20 +698,21 @@ class MBaseService extends Service {
         const zTime = parseInt(Date.now()/1000);
         const zConf = await ctx.helper.getConfigDic();
         const zConfMaxRounds = parseInt(zConf.max_rounds);
-        const zUserInfo = ctx.helper.getUserInfoByName(pParam.jc_name);
+        const zUserInfo = await ctx.service.mUser.getUserInfoByName(pParam.jc_name);
         
         if(!zUserInfo){
-            return {code:-1, msg:'加持对象不存在' };
-        }
-        if(zRounds<1 || zRounds>zConfMaxRounds){
-            return {code:-1, msg:'轮数超过范围' };
-        }
-        if(parseInt(zUserInfo.id)==parseInt(zTokenInfo.id)){
-            return {code:1036, msg:'不能加持自己' };
+            return {code:1037, msg:'加持对象不存在' };
         }
 
         let zRounds = parseInt(pParam.jc_rounds);
         let zToRounds = (zUserInfo.rounds + 1);
+        if(zRounds<1 || zRounds>zConfMaxRounds){
+            return {code:1038, msg:'轮数超过范围' };
+        }
+
+        if(parseInt(zUserInfo.id)==parseInt(zTokenInfo.id)){
+            return {code:1036, msg:'不能加持自己' };
+        }
 
         //验证ctw_jc的对应轮数是否有加持次数，并且加持的对象的轮数是否符合标准（大于等于加持对象的轮数）
         let zSelectJc = await this.app.mysql.get('db1').query(`select * from ctw_jc where jc_${zRounds}>=${zToRounds} and user_id=${zTokenInfo.id}`);
@@ -717,7 +724,7 @@ class MBaseService extends Service {
         await this.app.mysql.get('db1').query(`update ctw_jc set jc_${zRounds}=-1 where user_id=${zTokenInfo.id}`);
 
         //加持对象jc_sum增加
-        let zSql = `update ctw_user set jc_sum=jc_sum+1, jc_list=jc_list+',${zTokenInfo.name}', update_time=${zTime} where id=${zUserInfo.id} `;
+        let zSql = `update ctw_user set jc_sum=jc_sum+1, jc_list=concat(jc_list, ',${zTokenInfo.name}'), update_time=${zTime} where id=${zUserInfo.id} `;
         const zResult = await this.app.mysql.get('db1').query(zSql); // 初始化事务
         if(zResult && zResult["affectedRows"]>0){
             //清除缓存

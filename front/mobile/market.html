@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Angel City</title> 
+    <meta name="viewport" content="width=device-width,user-scalable=no, initial-scale=1">
+    <link rel='icon' href='./img/logo_16.ico' type='image/x-ico' />
+    <script type="text/javascript" src="../vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../vendor/jquery/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../vendor/clipboard.min.js"></script>
+</head>
+
+
+<body class="body_css">
+    <!--主页面容器-->
+    <div class="main_page" id="id_main_page" style="display:none; width:100%; height:1000px; background-color:#F5F5F5;">
+        <label id="id_test_label" class="abs" style="left:80px; top:500px; width:590px; opacity:0;"></label>
+        <div id="id_table_a_content" class="abs" style="left:50px; top:280px; width:650px; height:1100px;"></div>
+    </div>
+
+    <div class="abs" style="left:60px; top:150px;">
+        <div id="id_btn_invitation" class="abs btn txt_28 txt_c btn_market_1" style="left:0px; top:0px;" data-lang="main.邀请集市"></div>
+        <div id="id_btn_jc" class="abs btn txt_28 txt_c btn_market_0" style="left:330px; top:0px;" data-lang="main.加持集市"></div>\
+    </div>
+
+    <div class="abs" style="left:80px; top:1300px;">
+        <div id="id_btn_pre" class="abs btn txt_28 txt_c btn_page_0" style="left:0px; top:0px;" data-lang="main.上一页"></div>
+        <label id="id_page_txt" class="txt_32 abs txt_c" style="left:200px; top:0px; width:200px; height:80px; line-height:80px;"></label>
+        <div id="id_btn_next" class="abs btn txt_28 txt_c btn_page_0" style="left:400px; top:0px;" data-lang="main.下一页"></div>\
+    </div>
+
+    <div id="id_end" class="abs" style="top:1000px; opacity:0;">.</div>
+
+    <div id="id_header"></div>
+    <div id="id_footer"></div>
+    <div id="id_popupwin"></div>
+    <div id="id_tips"></div>
+
+<script>
+/////////////////// 初始化基础配置相关 ///////////////////
+var zHead = document.getElementsByTagName('head')[0];
+var zScript = document.createElement('script');
+zScript.type = 'text/javascript';
+zScript.src = '../vendor/common.js?ver='+$.cookie('commonJsVer');
+zScript.onload = zScript.onreadystatechange = function() {
+    if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete" ){
+        common.init(['c_m_popUpWin', 'c_m_header', 'c_m_waiting']);
+    }
+}
+zHead.appendChild(zScript);
+var id_interval = 0;
+window.onload = function ready(){id_interval=setInterval(function(){if(common!=undefined && common.JS_IS_LOADED==true){clearInterval(id_interval); init();}}, 100);};
+/////////////////// 初始化基础配置相关 ///////////////////
+window.onresize = windowResize;
+
+var endHeight = 2200;
+var userInfo = {};
+var myInfoList = [];
+var myScale = 1;
+var isJc = 0;
+var curPage = 1;
+var totalPage = 1;
+var btnPreEnabled = 0;
+var btnNextEnabled = 0;
+
+//初始化
+function init() {
+    c_m_header.init("id_header", "main.集市");
+
+    if(common.getCookie("userInfo")){
+        userInfo = JSON.parse(common.getCookie("userInfo"));
+    }else{
+        c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.1003", "tips.b_ok", function(){common.gotoWebSite('login.html')});
+        windowResize();
+        return;
+    }
+
+    isJc = parseInt(common.getParam("mtype")?common.getParam("mtype"):0);
+
+    $('#id_btn_invitation').click({myType:"id_btn_invitation"}, btnClickHandler);
+    $('#id_btn_jc').click({myType:"id_btn_jc"}, btnClickHandler);
+    $('#id_btn_pre').click({myType:"id_btn_pre"}, btnClickHandler);
+    $('#id_btn_next').click({myType:"id_btn_next"}, btnClickHandler);
+
+    windowResize();
+
+    selectBtn(isJc);
+
+    common.lang();
+    $('#id_main_page').show();
+}
+
+//按钮点击事件
+function btnClickHandler(p_obj_event){
+    switch(p_obj_event.data.myType){
+        case "id_btn_invitation":
+            selectBtn(0);
+            break;
+        case "id_btn_jc":
+            selectBtn(1);
+            break;
+        case "id_btn_pre":
+            curPage --;
+            if(curPage<1){
+                curPage = 1;
+            }else{
+                if(isJc==0){
+                    api_marketInvitationList();
+                }else{
+                    api_marketJcList();
+                } 
+            }
+            break;
+        case "id_btn_next":
+            curPage ++;
+            if(curPage>totalPage){
+                curPage = totalPage;
+            }else{
+                if(isJc==0){
+                    api_marketInvitationList();
+                }else{
+                    api_marketJcList();
+                } 
+            }
+            break;
+    }
+}
+
+//选择邀请/集市
+function selectBtn(pIndex){
+    isJc = pIndex;
+    $('#id_btn_invitation').removeClass("btn_market_1");
+    $('#id_btn_jc').removeClass("btn_market_1");
+    $('#id_btn_invitation').removeClass("btn_market_0");
+    $('#id_btn_jc').removeClass("btn_market_0");
+    if(isJc==0){
+        $('#id_btn_invitation').addClass("btn_market_1");
+        $('#id_btn_jc').addClass("btn_market_0");
+        curPage = 1;
+        api_marketInvitationList();
+    }else{
+        $('#id_btn_invitation').addClass("btn_market_0");
+        $('#id_btn_jc').addClass("btn_market_1");
+        curPage = 1;
+        api_marketJcList();
+    }
+}
+
+//更新翻页按钮的显示
+function updatePageBtnShow(){
+    $('#id_btn_pre').removeClass("btn_page_1");
+    $('#id_btn_next').removeClass("btn_page_1");
+
+    if(curPage<=1){
+        btnPreEnabled = 0;
+    }else{
+        btnPreEnabled = 1;
+        $('#id_btn_pre').addClass("btn_page_1");
+    }
+
+    if(curPage>=totalPage){
+        btnNextEnabled = 0;
+    }else{
+        btnNextEnabled = 1;
+        $('#id_btn_next').addClass("btn_page_1");
+    }
+
+    $('#id_page_txt').text(curPage+" / "+totalPage);
+}
+
+//窗口尺寸重置
+function windowResize()
+{
+    var zScale = common.initScale(1);
+    myScale = zScale;
+    zScale = (zScale<1) ? 1 : zScale;
+    
+    var zWinWidth = parseInt(window.screen.availWidth);
+    var zWineHeight = parseInt(window.screen.availHeight);
+    var zMyWidth = document.body.clientWidth;
+    var zObjWidth = parseInt($('#id_main_page').css("width"))*zScale;
+
+    var zMiddleWidth = (zMyWidth-zObjWidth)/2/zScale;
+    $('#id_main_page').css({"left":zMiddleWidth+"px"});
+
+    c_m_header.windowResize(zMiddleWidth);
+    c_m_popUpWin.setSizePos(zScale);
+}
+
+//更新列表--加持
+function updateTable(){
+    var zHmlInfo = "";
+    var zTop = 0;
+    var zTotalH = 0;
+    for(var i=0; i<myInfoList.length; i++){
+        var zInfo = myInfoList[i];
+        var zName = zInfo.name;
+        var zTel = zInfo.tel;
+        var zImgName = "./img/head/head_"+zInfo.img_id+".jpg";
+        var zCreateTime = common.formatUnixtimestamp(zInfo.create_time, true);
+        var zH = 140;
+        var zStr = '\
+            <div class="abs bg_white" style="left:0px; top:'+zTotalH+'px; width:650px; height:140px !important; border:0px solid #eee; border-radius:30px;">\
+                <div class="abs" style="transform:scale(0.6,0.6); left:20px; top:10px;"><img class="abs" style="-webkit-mask:url(./img/mask_r_200.png);" src="'+zImgName+'"></div>\
+                <label class="abs txt_36 cl_black txt_w2" style="left:170px; top:30px; width:300px;">'+zName+'</label>\
+                <label class="abs txt_32 cl_grey" style="left:170px; top:80px; width:300px;">'+zTel+'</label>\
+            </div>\
+            ';
+        zHmlInfo += zStr;
+        zTotalH += (20+zH);
+    }
+    $('#id_table_a_content').html(zHmlInfo);
+
+    endHeight = zTotalH+230;
+    if(endHeight<1500){
+        endHeight = 1500;
+    }
+    $('#id_end').css("top", endHeight+"px");
+    $('#id_main_page').css("height", endHeight+"px");
+
+    updatePageBtnShow();
+    common.lang();
+}
+
+
+
+//////////////////////////////////// php相关 ////////////////////////////////////
+//获取集市列表-邀请
+function api_marketInvitationList(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("market_invitation_list"),
+        type: "get",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{to_page:curPage, page_size:6},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_marketInvitationList success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    myInfoList = evt.data.list;
+                    curPage = evt.data.cur_page;
+                    totalPage = evt.data.total_page;
+                    updateTable();
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_marketInvitationList error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+//获取集市列表-加持
+function api_marketJcList(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("market_jc_list"),
+        type: "get",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{to_page:curPage, page_size:6, rounds:userInfo.rounds},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_marketList success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    myInfoList = evt.data.list;
+                    curPage = evt.data.cur_page;
+                    totalPage = evt.data.total_page;
+                    updateTable();
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_marketList error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+
+</script>
+
+</body>
+</html>

@@ -17,7 +17,10 @@
         <img src="./img/bg_top.jpg">
         <div id="id_top" class="abs" style="left:50px; top:50px; width:650px;">
             <div id="id_btn_back" class="abs" style="left:0px; top:0px;"><img src="./img/btn_back.png"></div>
-            <div id="id_btn_log" class="abs" style="right:0px; top:0px;"><img src="./img/btn_log.png"></div>
+            <div id="id_btn_logo_dyn" class="abs" style="right:0px; top:0px;"><img src="./img/logo_dyn.png"></div>
+            <div id="id_btn_logo_market" class="abs" style="right:90px; top:0px;"><img src="./img/logo_market.png"></div>
+            <div id="id_btn_logo_jc" class="abs" style="right:180px; top:0px;"><img src="./img/logo_jc.png"></div>
+            <div id="id_btn_logo_fh" class="abs" style="right:270px; top:0px;"><img src="./img/logo_fh.png"></div>
             <!-- <label id="txt_exchange" class="abs txt_32 txt_w1 txt_r cl_white" style="right:80px; top:0px; width:300px;">0</label> -->
             <div class="abs txt_32 txt_w1" style="left:220px; top:70px;">
                 <label id="txt_title_account" style="color:#FFF;"></label>
@@ -143,7 +146,10 @@ function init() {
 
     $('#id_myHead').click({myType:"id_myHead"}, btnClickHandler);
     $('#id_btn_back').click({myType:"id_btn_back"}, btnClickHandler);
-    $('#id_btn_log').click({myType:"id_btn_log"}, btnClickHandler);
+    $('#id_btn_logo_dyn').click({myType:"id_btn_logo_dyn"}, btnClickHandler);
+    $('#id_btn_logo_market').click({myType:"id_btn_logo_market"}, btnClickHandler);
+    $('#id_btn_logo_jc').click({myType:"id_btn_logo_jc"}, btnClickHandler);
+    $('#id_btn_logo_fh').click({myType:"id_btn_logo_fh"}, btnClickHandler);
     $('#id_btn_pay_processing').click({myType:"id_btn_pay_processing"}, btnClickHandler);
     $('#id_btn_pay_finished').click({myType:"id_btn_pay_finished"}, btnClickHandler);
     $('#id_btn_details_close').click({myType:"id_btn_details_close"}, btnClickHandler);
@@ -182,9 +188,21 @@ function btnClickHandler(p_obj_event){
         case "id_btn_back":
             common.onBackFun();
             break;
-        case "id_btn_log":
+        case "id_btn_logo_dyn":
             c_m_waiting.init("id_tips");
             common.gotoWebSite('serGroupBonus.html');
+            break;
+        case "id_btn_logo_market":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('market.html');
+            break;
+        case "id_btn_logo_jc":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('setJc.html');
+            break;
+        case "id_btn_logo_fh":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('showFh.html');
             break;
         case "id_btn_invite_friends":
             c_m_waiting.init("id_tips");
@@ -294,7 +312,7 @@ function updateMySelf(){
 function updateTable(){
     var zHmlInfo = "";
     var zTop = 0;
-    var zCurExchangeRate = common.getCookie("exchangeRate");
+    // var zCurExchangeRate = common.getCookie("exchangeRate");
     for(var i=0; i<myInfoList.length; i++){
         zTop = i*210;
         var zInfo = myInfoList[i];

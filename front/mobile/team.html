@@ -68,15 +68,16 @@
         </div>
 
         <!-- 晋级/出场窗口 -->
-        <div id="id_lv" class="abs bg_white" style="width:750px; height:1200px; display:none;">
+        <div id="id_lv" class="abs bg_white" style="width:750px; height:1350px; display:none;">
             <img id="id_lv_img_bg" class="abs" style="left:75px; top:200px;" src="./img/bg_ag_00.jpg">
             <img id="id_lv_img" class="abs" style="left:75px; top:200px;">
-            <div class="abs txt_c txt_36 cl_grey" style="left:100px; top:820px; width:550px; line-height:50px;">
-                <label id="id_lv_desc" data-lang="main.tips_content_3"></label>
-                <label id="id_lv_txt" class="cl_orange" ></label>
-            </div>
+            
             <!-- 晋级 -->
             <div id="id_lv_lv" class="abs" style="display:none;">
+                <div class="abs txt_c txt_36 cl_grey" style="left:100px; top:820px; width:550px; line-height:50px;">
+                    <label id="id_lv_desc" data-lang="main.tips_content_3"></label>
+                    <label id="id_lv_txt" class="cl_orange" ></label>
+                </div>
                 <!-- 加持球 -->
                 <div id="id_lv_jc" class="abs" style="left:120px; top:1000px; display:none;">
                     <div id="jc_1_1" class="abs jc_ball" style="left:0px; top:0px; display:none;"></div>
@@ -96,6 +97,19 @@
 
             <!-- 出场 -->
             <div id="id_lv_out" class="abs" style="display:none;">
+                <div class="abs" style="left:60px; top:800px; width:600px;">
+                    <label class="txt_32 txt_w2" data-lang="main.今天分红总额"></label>
+                    <label id="id_lv_out_total" class="txt_32 cl_blue" style="margin-left:10px;" ></label>
+                </div>
+                <div class="abs" style="left:60px; top:900px; width:600px;">
+                    <label class="txt_32 txt_w2" data-lang="main.分红总人数"></label>
+                    <label id="id_lv_out_peo" class="txt_32 cl_blue" style="margin-left:10px;" ></label>
+                </div>
+                <div id="id_lv_out_get_show" class="abs" style="left:60px; top:1000px; width:600px; display:none;">
+                    <label class="txt_32 txt_w2" data-lang="main.今天你可获分红"></label>
+                    <label id="id_lv_out_get" class="txt_32 cl_blue" style="margin-left:10px;" ></label>
+                </div>
+                <div id="id_lv_out_over_show" class="abs txt_32 txt_c cl_orange" style="left:0px; top:1000px; width:750px; display:none;" data-lang="main.您的分红已经结束谢谢参与"></div>
             </div>
 
             <!-- 关闭按钮 -->
@@ -104,9 +118,12 @@
 
         <!-- 顶 -->
         <img src="./img/bg_top.jpg" class="abs">
-        <div id="id_top" class="abs" style="left:50px; top:50px; width:650px;">
+        <div id="id_top" class="abs" style="left:50px; top:30px; width:650px;">
             <div id="id_btn_back" class="abs" style="left:0px; top:0px;"><img src="./img/btn_back.png"></div>
-            <div id="id_btn_log" class="abs" style="right:0px; top:0px;"><img src="./img/btn_log.png"></div>
+            <div id="id_btn_logo_dyn" class="abs" style="right:0px; top:0px;"><img src="./img/logo_dyn.png"></div>
+            <div id="id_btn_logo_market" class="abs" style="right:90px; top:0px;"><img src="./img/logo_market.png"></div>
+            <div id="id_btn_logo_jc" class="abs" style="right:180px; top:0px;"><img src="./img/logo_jc.png"></div>
+            <div id="id_btn_logo_fh" class="abs" style="right:270px; top:0px;"><img src="./img/logo_fh.png"></div>
             <!-- <label id="txt_exchange" class="abs txt_32 txt_w1 txt_r cl_white" style="right:80px; top:0px; width:300px;">0</label> -->
             <div class="abs txt_32 txt_w1" style="left:220px; top:70px;">
                 <label id="txt_title_account" style="color:#FFF;"></label>
@@ -141,11 +158,12 @@
                     <label class="txt_36" data-lang="main.加持者"></label>
                     <label class="txt_36" id="id_jc_win_jcman"></label>
                 </div>
-                <div id="id_jc_win_1" class="abs" style="left:50px; top:80px; display:none;">
-                    <div class="txt_36" id="id_jc_win_jcman"></div>
+                <div id="id_jc_win_1" class="abs" style="left:50px; top:60px; display:none;">
+                    <label id="id_jc_win_tips" class="abs txt_36 txt_c cl_blue" style="top:20px; width:500px;" data-lang="main.请去加持集市"></label>
                 </div>
             </div>
         </div>
+
     </div>
 
     <div id="id_end" class="abs" style="top:1000px; opacity:0;">.</div>
@@ -204,7 +222,10 @@ function init() {
     $('#id_btn_lv').click({myType:"id_btn_lv"}, btnClickHandler);
     $('#id_myHead').click({myType:"id_myHead"}, btnClickHandler);
     $('#id_btn_back').click({myType:"id_btn_back"}, btnClickHandler);
-    $('#id_btn_log').click({myType:"id_btn_log"}, btnClickHandler);
+    $('#id_btn_logo_dyn').click({myType:"id_btn_logo_dyn"}, btnClickHandler);
+    $('#id_btn_logo_market').click({myType:"id_btn_logo_market"}, btnClickHandler);
+    $('#id_btn_logo_jc').click({myType:"id_btn_logo_jc"}, btnClickHandler);
+    $('#id_btn_logo_fh').click({myType:"id_btn_logo_fh"}, btnClickHandler);
     $('#id_btn_invite_friends_1').click({myType:"id_btn_invite_friends"}, btnClickHandler);
     $('#id_btn_invite_friends_2').click({myType:"id_btn_invite_friends"}, btnClickHandler);
     $('#id_group_tui_1_1').click({myType:"id_group_tui_1_1"}, btnClickHandler);
@@ -212,6 +233,7 @@ function init() {
     $('#id_group_tui_1_3').click({myType:"id_group_tui_1_3"}, btnClickHandler);
     $('#id_lotto_btn').click({myType:"id_lotto_btn"}, btnClickHandler);
     $('#id_jc_win_btn_close').click({myType:"id_jc_win_btn_close"}, btnClickHandler);
+    $('#id_jc_win_tips').click({myType:"id_jc_win_tips"}, btnClickHandler);
 
     $('#jc_1_1').click({myType:"1_1"}, jcClickHandler);
     $('#jc_1_2').click({myType:"1_2"}, jcClickHandler);
@@ -254,9 +276,13 @@ function jcClickHandler(p_obj_event){
     var zJcUserName = zJcUser[selectJcNameIndex-1];
     if(zJcUserName){
         $('#id_jc_win_jcman').text(zJcUserName);
+        $('#id_jc_win_0').show();
+        $('#id_jc_win_1').hide();
+    }else{
+        $('#id_jc_win_0').hide();
+        $('#id_jc_win_1').show();
     }
     $('#id_jc_win').show();
-    console.log(zList);
 }
 
 //按钮点击事件
@@ -281,9 +307,21 @@ function btnClickHandler(p_obj_event){
         case "id_btn_back":
             common.onBackFun();
             break;
-        case "id_btn_log":
+        case "id_btn_logo_dyn":
             c_m_waiting.init("id_tips");
             common.gotoWebSite('serGroupBonus.html');
+            break;
+        case "id_btn_logo_market":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('market.html');
+            break;
+        case "id_btn_logo_jc":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('setJc.html');
+            break;
+        case "id_btn_logo_fh":
+            c_m_waiting.init("id_tips");
+            common.gotoWebSite('showFh.html');
             break;
         case "id_btn_invite_friends":
             if(!userInfo.pwd2){
@@ -323,6 +361,10 @@ function btnClickHandler(p_obj_event){
             break;
         case "id_jc_win_btn_close":
             $('#id_jc_win').hide();
+            break;
+        case "id_jc_win_tips":
+            //跳转到加持集市
+            common.gotoWebSite('market.html?mtype=1')
             break;
     }
 }
@@ -378,12 +420,21 @@ function updateMySelf(){
     if(parseInt(userInfo.is_out)>=1){
         $('#id_lv_lv').hide();
         $('#id_lv_out').show();
+        api_fhList();
 
         if(parseInt(userInfo.is_out)==1){ //出局可发奖
-            console.log("1=--=-=-=-=-=-");
+            $('#id_lv_img').attr("src", "./img/bg_ag_02.png");
+            isPlayMovie = true;
+            $('#id_lv_out_get_show').show();
+            $('#id_lv_out_over_show').hide();
         }else if(parseInt(userInfo.is_out)==2){ //出局不发奖
-            console.log("2=--=-=-=-=-=-");
+            $('#id_lv_img').attr("src", "./img/bg_ag_03.png");
+            $('#id_lv_out_get_show').hide();
+            $('#id_lv_out_over_show').show();
         }
+        
+        $('#id_lv').show();
+
     //显示晋级界面
     }else if(parseInt(userInfo.is_lv)==1){
         $('#id_lv_lv').show();
@@ -393,7 +444,12 @@ function updateMySelf(){
         var zConf = common.getCookie("conf");
         var zConfMaxRounds = parseInt(zConf["max_rounds"]);
         var zConfMaxJc = parseInt(zConf["jcmax_"+zLevelUpRounds]);
-        var zCurJc = parseInt(userInfo.jc_sum);
+
+        var zCurJc = 0;
+        var zJcUserListOrg = userInfo.jc_list.split(",");
+        if(zJcUserListOrg.length>0){
+            zCurJc = zJcUserListOrg.length - 1;
+        }
 
         //准备出局
         if(parseInt(userInfo.rounds)>=zConfMaxRounds){
@@ -728,6 +784,45 @@ function api_orderList(pId){
             c_m_waiting.close();
         },error: function(error){
             console.log("api_orderList error:"+error.msg);
+            c_m_waiting.close();
+        }
+    });
+}
+
+//分红清单
+function api_fhList(){
+    c_m_waiting.init("id_tips");
+    $.ajax({
+        url: common.getApiUrl("fh_pool"),
+        type: "get",
+        beforeSend: function(Request) {
+            Request.setRequestHeader("Authorization",common.getCookie('token'));
+        },
+        data:{},
+        dataType: "json", //指定服务器返回的数据类型
+        cache:false,
+        success: function (evt) {
+            console.log("api_fhList success:");
+            console.log(evt);
+            switch(evt.code){
+                case 1:
+                    var zFhList = evt.data;
+                    if(zFhList){
+                        var zTotalFh = parseInt(zFhList["money"]);
+                        var zPeo = parseInt(zFhList["people_sum"]);
+                        var zMeGet = (zTotalFh/zPeo).toFixed(2);
+                        $('#id_lv_out_total').text(zTotalFh);
+                        $('#id_lv_out_peo').text(zPeo);
+                        $('#id_lv_out_get').text(zMeGet);
+                    }
+                    break;
+                default:
+                    c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
+                    break;
+            }
+            c_m_waiting.close();
+        },error: function(error){
+            console.log("api_fhList error:"+error.msg);
             c_m_waiting.close();
         }
     });

@@ -7,15 +7,26 @@
     <link rel='icon' href='./img/logo_16.ico' type='image/x-ico' />
     <script type="text/javascript" src="../vendor/jquery/jquery.min.js"></script>
     <script type="text/javascript" src="../vendor/jquery/jquery.cookie.js"></script>
-    <script type="text/javascript" src="../vendor/clipboard.min.js"></script>
+    <script type="text/javascript" src="../vendor/RequestAnimationFrame.js"></script>
 </head>
 
 
 <body class="body_css">
     <!--主页面容器-->
-    <div class="main_page" id="id_main_page" style="display:none; width:100%; height:1000px; background-color:#F5F5F5;">
-        <label id="id_test_label" class="abs" style="left:80px; top:500px; width:590px; opacity:0;"></label>
-        <div id="id_table_a_content" class="abs" style="left:50px; top:180px; width:650px; height:1100px;"></div>
+    <div class="main_page" id="id_main_page" style="display:none; width:100%; height:100%; background-color:#FFF;">
+        <img id="id_lv_img_bg" class="abs" style="left:75px; top:200px;" src="./img/bg_ag_00.jpg">
+        <img id="id_lv_img" class="abs" style="left:75px; top:200px;" src="./img/bg_ag_02.png">
+
+        <div id="id_lv_out" class="abs" style="left:60px; top:900px;">
+            <div class="abs" style="left:0px; top:0px; width:600px;">
+                <label class="txt_32 txt_w2" data-lang="main.今天分红总额"></label>
+                <label id="id_lv_out_total" class="txt_32 cl_blue" style="margin-left:10px;" ></label>
+            </div>
+            <div class="abs" style="left:0px; top:100px; width:600px;">
+                <label class="txt_32 txt_w2" data-lang="main.分红总人数"></label>
+                <label id="id_lv_out_peo" class="txt_32 cl_blue" style="margin-left:10px;" ></label>
+            </div>
+        </div>
     </div>
 
     <div id="id_end" class="abs" style="top:1000px; opacity:0;">.</div>
@@ -33,7 +44,7 @@ zScript.type = 'text/javascript';
 zScript.src = '../vendor/common.js?ver='+$.cookie('commonJsVer');
 zScript.onload = zScript.onreadystatechange = function() {
     if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete" ){
-        common.init(['c_m_popUpWin', 'c_m_header', 'c_m_footer2', 'c_m_waiting']);
+        common.init(['c_m_popUpWin', 'c_m_header', 'c_m_waiting']);
     }
 }
 zHead.appendChild(zScript);
@@ -45,12 +56,13 @@ window.onresize = windowResize;
 var endHeight = 2200;
 var userInfo = {};
 var myInfoList = [];
-var myScale = 1;
+var isPlayMovie = true;
+var movieFrameCounter = 0;
+var angle = 0; 
 
 //初始化
 function init() {
-    c_m_header.init("id_header", "main.用户评论");
-    c_m_footer2.init("id_footer", 2);
+    c_m_header.init("id_header", "main.分红");
 
     if(common.getCookie("userInfo")){
         userInfo = JSON.parse(common.getCookie("userInfo"));
@@ -61,18 +73,18 @@ function init() {
     }
 
     windowResize();
-
-    api_commentList();
-
+    api_fhList();
+    
     common.lang();
     $('#id_main_page').show();
+
+    requestAnimationFrame(playMovie);
 }
 
 //按钮点击事件
 function btnClickHandler(p_obj_event){
     // switch(p_obj_event.data.myType){
-    //     case "id_btn_back":
-    //         common.onBackFun();
+    //     case "id_btn_confirm":
     //         break;
     // }
 }
@@ -81,7 +93,6 @@ function btnClickHandler(p_obj_event){
 function windowResize()
 {
     var zScale = common.initScale(1);
-    myScale = zScale;
     zScale = (zScale<1) ? 1 : zScale;
     
     var zWinWidth = parseInt(window.screen.availWidth);
@@ -93,65 +104,53 @@ function windowResize()
     $('#id_main_page').css({"left":zMiddleWidth+"px"});
 
     c_m_header.windowResize(zMiddleWidth);
-    c_m_footer2.windowResize(zMiddleWidth);
-    c_m_footer2.updateTop(endHeight);
+    // c_m_footer.windowResize(zMiddleWidth);
+    // c_m_footer.updateTop(endHeight);
     c_m_popUpWin.setSizePos(zScale);
 }
 
-//更新列表
-function updateTable(){
-    var zHmlInfo = "";
-    var zTop = 0;
-    var zTotalH = 0;
-    for(var i=0; i<myInfoList.length; i++){
-        var zInfo = myInfoList[i];
-        var zName = zInfo.user_name;
-        var zContents = zInfo.contents;
-        var zCreateTime = common.formatUnixtimestamp(zInfo.create_time, true);
-        $('#id_test_label').text(zContents);
-        var zH = (common.getTextWHXY("id_test_label").height+90)/myScale;
-        var zStr = '\
-            <div class="abs bg_white" style="left:0px; top:'+zTotalH+'px; width:650px; height:'+zH+'px !important; border:0px solid #eee; border-radius:30px;">\
-                <label class="abs txt_32 cl_black txt_w2" style="left:30px; top:30px; width:350px;">'+zName+'</label>\
-                <label class="abs txt_24 cl_grey txt_y_hide" style="left:30px; top:80px; width:590px; line-height:30px;">'+zContents+'</label>\
-                <label class="abs txt_24 cl_grey" style="right:30px; top:30px; width:150px;">'+zCreateTime+'</label>\
-            </div>\
-            ';
-        zHmlInfo += zStr;
-        zTotalH += (40+zH);
+function playMovie(){
+    //旋转阳光背景
+    if(isPlayMovie==true){
+        movieFrameCounter ++;
+        if(movieFrameCounter>=2){
+            movieFrameCounter = 0;
+            angle += 3;
+            $('#id_lv_img_bg').css({"transform":"rotate("+angle+"deg)"});
+        }
     }
-    $('#id_table_a_content').html(zHmlInfo);
 
-    endHeight = zTotalH+230;
-    if(endHeight<1500){
-        endHeight = 1500;
-    }
-    $('#id_end').css("top", endHeight+"px");
-    $('#id_main_page').css("height", endHeight+"px");
-
-    common.lang();
+    requestAnimationFrame(playMovie);
 }
 
 //////////////////////////////////// php相关 ////////////////////////////////////
-//获取用户评论
-function api_commentList(){
+
+//分红清单
+function api_fhList(){
     c_m_waiting.init("id_tips");
     $.ajax({
-        url: common.getApiUrl("comment_list"),
+        url: common.getApiUrl("fh_pool"),
         type: "get",
         beforeSend: function(Request) {
             Request.setRequestHeader("Authorization",common.getCookie('token'));
         },
-        data:{to_page:1, page_size:100},
+        data:{},
         dataType: "json", //指定服务器返回的数据类型
         cache:false,
         success: function (evt) {
-            console.log("api_commentList success:");
+            console.log("api_fhList success:");
             console.log(evt);
             switch(evt.code){
                 case 1:
-                    myInfoList = evt.data.list;
-                    updateTable();
+                    var zFhList = evt.data;
+                    if(zFhList){
+                        var zTotalFh = parseInt(zFhList["money"]);
+                        var zPeo = parseInt(zFhList["people_sum"]);
+                        var zMeGet = (zTotalFh/zPeo).toFixed(2);
+                        $('#id_lv_out_total').text(zTotalFh);
+                        $('#id_lv_out_peo').text(zPeo);
+                        $('#id_lv_out_get').text(zMeGet);
+                    }
                     break;
                 default:
                     c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");
@@ -159,7 +158,7 @@ function api_commentList(){
             }
             c_m_waiting.close();
         },error: function(error){
-            console.log("api_commentList error:"+error.msg);
+            console.log("api_fhList error:"+error.msg);
             c_m_waiting.close();
         }
     });

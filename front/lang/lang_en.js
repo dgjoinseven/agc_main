@@ -108,7 +108,19 @@ lang_en = {
 		"请设置银行信息或支付宝账号":"Please set bank information and Alipay account number",
 		"请上传打款图片":"Please upload the print image",
 		"请输入交易单号":"Please enter transaction No",
+		"加持":"Blessing",
 		"加持者":"Helper : ",
+		"请去加持集市":"<u>Please go to Blessing Market</u>",
+		"集市":"Market",
+		"分红":"Bonus",
+		"加持集市":"Blessing Market",
+		"邀请集市":"Invitation Market",
+		"上一页":"Pre",
+		"下一页":"Next",
+		"今天分红总额":"Total Bonus Today:",
+		"分红总人数":"Total Number of Bonus:",
+		"今天你可获分红":"You Can Get Bonus Today:",
+		"您的分红已经结束谢谢参与":"Your bonus is over<br>Thank you for your participation",
 		"null": ""
 	},
 	"tips":{
@@ -146,6 +158,8 @@ lang_en = {
 		"1034": "Alipay cannot be set repeatedly",
 		"1035": "Insufficient number of blessing, unable to level up",
 		"1036": "You can't help yourself",
+		"1037": "Blessing user does not exist",
+		"1038": "Rounds out of range",
 		"3001": "Nickname cannot be empty",
 		"3002": "Account cannot be empty",
 		"3003": "Password cannot be empty",
@@ -160,6 +174,7 @@ lang_en = {
 		"null": ""
 	},
 	"ph":{
+		"请输入您的昵称": "Please input your nickname",
 		"请输入您的朋友昵称": "Please input your friend's nickname",
 		"请输入您的邮箱": "Please input your account",
 		"请输入您的密码": "Please input your password",

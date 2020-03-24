@@ -117,6 +117,7 @@ module.exports = {
 
   //获取当前的分红
   async getCurFhPool(){
+    await this.app.redis.del("fh_pool");
     let zDataStr = await this.app.redis.get("fh_pool");
     if(!zDataStr){
       let zResult = await this.app.mysql.get('db1').query(`select * from ctw_fh_pool order by create_time desc`);
