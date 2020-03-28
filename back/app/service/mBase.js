@@ -643,15 +643,16 @@ class MBaseService extends Service {
     //@pPayType  1付钱  2收钱确认
     async fronzenUser(pFrozenUserId, pResetUserId, pOrderId, pPayType) {
         const { ctx } = this;
+        const zConf = await ctx.helper.getConfigDic();
         let zUserInfo = await ctx.service.mUser.getUserInfo(pFrozenUserId);
         if(zUserInfo){
             let zParam = ``;
-            if(zUserInfo.rounds==0){ //天使轮
+            if(zUserInfo.rounds==0){ //天使轮（冻结账户，并且重新排单）
                 await ctx.service.mPD.resetPD(pFrozenUserId, pResetUserId, pOrderId, pPayType);
 
                 zParam += `is_use=0, `;
                 zParam += `update_time=${zNowTime} `;
-            }else{ //公排
+            }else{ //公排(重置账户信息，丢给客服人工处理)
                 zParam += `account='f${pFrozenUserId}', `;
                 zParam += `pwd='d7a1b9e05367224e69b4ebf70d13675e8584393e', `;
                 zParam += `salt='ptrz', `;

@@ -23,7 +23,7 @@ lang_en = {
 		"更新密码":"UPDATE LOGIN PASSWORD",
 		"更改交易密码":"UPDATE TRANSACTION PASSWORD",
 		"钱包地址":"WALLET ADDRESS",
-		"收款信息":"COLLECTION INFORMASTION",
+		"收款信息":"BANK INFORMASTION",
 		"超时用户":"TIMEOUT USER",
 		"评论":"COMMENT",
 		"备注信息":"REMARKS",

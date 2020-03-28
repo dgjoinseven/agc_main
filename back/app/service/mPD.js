@@ -25,9 +25,10 @@ class MPDService extends Service {
                 for(let i=0; i<zOrderList.length; i++){
                     let zOrderInfo = zOrderList[i];
                     let zPdList = await this.app.mysql.get('db1').query(`select * from ctw_order_pd where sum<4 and is_special=0 and create_time<${zPdTime} order by id`);
+                    //如果没有合适的收款人，则使用系统提供的收款人
                     if(!zPdList || !zPdList[0]){
                         let zRmbUserList = zConfigDic["rmb_user_list"].split(",");
-                        let zGetMoneyUserId = zRmbUserList[parseInt(Math.random()*9)];
+                        let zGetMoneyUserId = zRmbUserList[parseInt(Math.random()*zRmbUserList.length)];
                         zPdList = await this.app.mysql.get('db1').query(`select * from ctw_order_pd where is_special=1 and user_id=${zGetMoneyUserId}`);
                     }
 

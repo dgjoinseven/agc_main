@@ -59,6 +59,7 @@ var userInfo = {};
 var myInfoList = [];
 var jcRounds = 0;
 
+
 //初始化
 function init() {
     c_m_header.init("id_header", "main.加持");
@@ -80,6 +81,12 @@ function init() {
 
     common.lang();
     $('#id_main_page').show();
+
+
+    canvas = document.getElementById("canvas");
+    anim_container = document.getElementById("animation_container");
+    dom_overlay_container = document.getElementById("dom_overlay_container");
+    handleComplete();
 }
 
 function initBall(){

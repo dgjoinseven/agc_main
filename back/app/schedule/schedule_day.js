@@ -14,7 +14,6 @@ module.exports = app => {
       const zConf = await ctx.helper.getConfigDic();
       const zConfMaxRounds = zConf["max_rounds"];
       const zConfOutMaxTime = parseInt(zConf["out_max_time"])*86400;
-      const zFConfFhPool = parseInt(zConf["fh_pool"]);
       const zOutTime = zNowTime - zConfOutMaxTime;
       ctx.logger.info("开启定时任务 schedule_day ===========================");
       
@@ -32,6 +31,11 @@ module.exports = app => {
           //参与分红的总人数
           let zFhPeopleSum = zFhUserList.length;
 
+          let zFConfFhPool = 2000;
+          let zFhList = await app.mysql.get('db1').query(`select * from ctw_fh_pool order by create_time desc`);
+          if(zFhList && zFhList[0]){
+            zFConfFhPool = parseInt(zFhList[0].money);
+          }
           let zFhPoolSingle = Math.floor(zFConfFhPool / zFhPeopleSum);
           for(let i=0; i<zFhUserList.length; i++){
             let zFhUserInfo = zFhUserList[i];
