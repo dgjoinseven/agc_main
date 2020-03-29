@@ -649,7 +649,6 @@ class MBaseService extends Service {
             let zParam = ``;
             if(zUserInfo.rounds==0){ //天使轮（冻结账户，并且重新排单）
                 await ctx.service.mPD.resetPD(pFrozenUserId, pResetUserId, pOrderId, pPayType);
-
                 zParam += `is_use=0, `;
                 zParam += `update_time=${zNowTime} `;
             }else{ //公排(重置账户信息，丢给客服人工处理)
@@ -735,7 +734,6 @@ class MBaseService extends Service {
         }else{
             return { code:-1, msg:`加持失败`};
         }
-
     }
 
     /////////////////////////////////////////////// 订单 ////////////////////////////////////////////////////
