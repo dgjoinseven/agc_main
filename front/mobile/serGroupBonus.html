@@ -133,7 +133,7 @@ function updateGroupInfo(){
 
         //表
         zTop = (i-1)*90;
-        var zMoney = "$"+zBonus+"="+(zBonus*zCurExchangeRate)+common.COIN_NAME
+        var zMoney = (zBonus*zCurExchangeRate)+" "+common.COIN_NAME
         var zClickInfo = {};
         zClickInfo.id = i;
         var zClickTxt = " onClick='onListClickHander("+JSON.stringify(zClickInfo)+")' ";
@@ -151,9 +151,9 @@ function updateGroupInfo(){
     }
     $('#id_table_a_content').html(zHmlInfo);
 
-    $('#id_bonus_canGet').html("$"+zBonusCanGet+"="+(zBonusCanGet*zCurExchangeRate)+common.COIN_NAME);
-    $('#id_bonus_frozen').html("$"+zBonusFrozen+"="+(zBonusFrozen*zCurExchangeRate)+common.COIN_NAME);
-    $('#id_bonus_total').html("$"+zBonusTotal+"="+(zBonusTotal*zCurExchangeRate)+common.COIN_NAME);
+    $('#id_bonus_canGet').html((zBonusCanGet*zCurExchangeRate)+" "+common.COIN_NAME);
+    $('#id_bonus_frozen').html((zBonusFrozen*zCurExchangeRate)+" "+common.COIN_NAME);
+    $('#id_bonus_total').html((zBonusTotal*zCurExchangeRate)+" "+common.COIN_NAME);
 
     common.lang();
 }

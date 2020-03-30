@@ -824,6 +824,7 @@ function api_uploadImg(){
                     $('#id_img_default').hide();
                     $('#id_img_small').attr("src", zUrl);
                     $('#id_img_small').show();
+                    selectBtn(isFinish);
                     break;
                 case 1030:
                     c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips."+evt.code, "tips.b_ok");

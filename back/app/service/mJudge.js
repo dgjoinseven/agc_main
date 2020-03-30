@@ -151,10 +151,10 @@ class MJudgeService extends Service {
                 zSql = `select count(id) as count from ctw_order where from_id=${pOrderInfo.from_id} and to_id in(${zBossListStr}) and rounds=${pOrderInfo.rounds} and status=2`;
                 zSqlOrderList = await this.app.mysql.get('db1').query(zSql);
                 if(zSqlOrderList && zSqlOrderList[0]){
-                    if(zSqlOrderList[0].count>=4){
+                    if(zSqlOrderList[0].count>=3){
                         return {code:1, msg:`验证给2级上司+公共账号+销毁账号 打款成功，round=${pOrderInfo.rounds}, count=${zSqlOrderList[0].count}`, from_id:pOrderInfo.from_id};
                     }else{
-                        return {code:10, msg:`订单提交成功，但是2级上司+公共账号+销毁账号 打款未足！round=${pOrderInfo.rounds},  count=${zSqlOrderList[0].count}/4`};
+                        return {code:10, msg:`订单提交成功，但是2级上司+公共账号+销毁账号 打款未足！round=${pOrderInfo.rounds},  count=${zSqlOrderList[0].count}/3`};
                     }
                 }else{
                     return {code:-1, msg:`验证给2级上司+公共账号+销毁账号 打款失败，订单列表为空！round=${pOrderInfo.rounds}`};
@@ -269,7 +269,7 @@ class MJudgeService extends Service {
                     continue;
                 }
 
-                let zSlaveList_1 = await this.app.mysql.get('db1').query(`select a.user_id, b.status, b.rounds as user_rounds from ctw_rounds a LEFT JOIN ctw_user b ON a.user_id=b.id where a.boss_1_id=${zTopUserInfo.id} and a.rounds=${pOrderInfo.rounds} `);
+                let zSlaveList_1 = await this.app.mysql.get('db1').query(`select a.user_id, b.status, b.rounds as user_rounds from ctw_rounds_${pOrderInfo.rounds} a LEFT JOIN ctw_user b ON a.user_id=b.id where a.boss_1_id=${zTopUserInfo.id} `);
                 let zOutCount = 0;
                 if(zSlaveList_1){
                     for(let i=0; i<zSlaveList_1.length; i++){
@@ -284,7 +284,7 @@ class MJudgeService extends Service {
                             continue;
                         //如果1级下属不合格，则判断2级下属
                         }else{
-                            let zSlaveList_2 = await this.app.mysql.get('db1').query(`select a.user_id, b.status, b.rounds as user_rounds from ctw_rounds a LEFT JOIN ctw_user b ON a.user_id=b.id where a.boss_1_id=${zRoundsUserInfo_slave_1.user_id} and a.boss_2_id=${zTopUserInfo.id} and a.rounds=${pOrderInfo.rounds} `);
+                            let zSlaveList_2 = await this.app.mysql.get('db1').query(`select a.user_id, b.status, b.rounds as user_rounds from ctw_rounds_${pOrderInfo.rounds} a LEFT JOIN ctw_user b ON a.user_id=b.id where a.boss_1_id=${zRoundsUserInfo_slave_1.user_id} and a.boss_2_id=${zTopUserInfo.id}`);
                             if(zSlaveList_2 && zSlaveList_2[0]){
                                 if(zSlaveList_2[0].user_rounds > pOrderInfo.rounds){
                                     zOutCount += 1;

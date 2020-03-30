@@ -332,7 +332,7 @@ function btnClickHandler(p_obj_event){
                 return;
             }
             if(!userInfo.bank_addr || !userInfo.alipay_addr){
-                c_m_popUpWin.init("id_popupwin", 2, "tips.t_tips", "tips.1005", "main.确认", function(){common.gotoWebSite('setCollectionInformation.html')});
+                c_m_popUpWin.init("id_popupwin", 2, "tips.t_tips", "tips.1006", "main.确认", function(){common.gotoWebSite('setCollectionInformation.html')});
                 return;
             }
             c_m_waiting.init("id_tips");
@@ -450,8 +450,10 @@ function updateMySelf(){
 
         var zCurJc = 0;
         var zJcUserListOrg = userInfo.jc_list.split(",");
-        if(zJcUserListOrg.length>0){
-            zCurJc = zJcUserListOrg.length - 1;
+        for(var i=0; i<zJcUserListOrg.length; i++){
+            if(zJcUserListOrg[i]){
+                zCurJc ++;
+            }
         }
 
         //准备出局

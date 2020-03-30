@@ -121,6 +121,7 @@ lang_en = {
 		"分红总人数":"Total Number of Bonus:",
 		"今天你可获分红":"You Can Get Bonus Today:",
 		"您的分红已经结束谢谢参与":"Your bonus is over<br>Thank you for your participation",
+		"点击蓝点加持别人":"Click the blue dot to bless others",
 		"null": ""
 	},
 	"tips":{
@@ -136,6 +137,7 @@ lang_en = {
 		"1003": "Login timeout, please login again",
 		"1004": "Please set the transaction password",
 		"1005": "Please set wallet address",
+		"1006": "Please set bank informations",
 		"1012": "Account is frozen and cannot be used",
 		"1016": "Email name already exists",
 		"1017": "Please enter parameters",

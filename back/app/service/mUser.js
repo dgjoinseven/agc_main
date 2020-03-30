@@ -58,7 +58,7 @@ class UserService extends Service {
 
     //获取公排用户信息
     async getRoundsUserInfo(pId, pRounds) {
-        const zSql = `select * from ctw_rounds where user_id=${pId} and rounds=${pRounds} `;
+        const zSql = `select * from ctw_rounds_${pRounds} where user_id=${pId}`;
         const zResult = await this.app.mysql.get('db1').query(zSql);
         let zUserInfo;
         if(zResult && zResult[0]){

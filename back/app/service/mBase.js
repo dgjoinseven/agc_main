@@ -36,13 +36,7 @@ class MBaseService extends Service {
     async fhPooUpdate() {
         const { app, ctx } = this;
         const zNowTime = parseInt(new Date()/1000);
-        let zDate = new Date();
-        let zYear = parseInt(zDate.getFullYear());
-        let zMonth = parseInt(zDate.getMonth()+1);
-        let zDay = parseInt(zDate.getDate());
-        let zFullDate = zYear*1000 + zMonth*100 + zDay;
         const zConf = await ctx.helper.getConfigDic();
-        const zFConfFhPool = parseInt(zConf["fh_pool"]);
 
         //执行出局分红
         let zFhUserList = await app.mysql.get('db1').query(`select * from ctw_user where is_out=1`);
@@ -51,7 +45,10 @@ class MBaseService extends Service {
             let zFhPeopleSum = zFhUserList.length;
 
             //更新分红池的状态
-            await app.mysql.get('db1').query(`INSERT INTO ctw_fh_pool (id, money, people_sum, create_time, update_time) VALUES(${zFullDate}, ${zFConfFhPool}, ${zFhPeopleSum}, ${zNowTime}, ${zNowTime})  ON DUPLICATE KEY UPDATE money=${zFConfFhPool} ,people_sum=${zFhPeopleSum}, create_time=${zNowTime}, update_time=${zNowTime}`);
+            const zResult = await ctx.helper.getCurFhPool();
+            if(zResult){
+                await app.mysql.get('db1').query(`update ctw_fh_pool set people_sum=${zFhPeopleSum}, update_time=${zNowTime} where id=${zResult.id}`);
+            }
             //清奖金池缓存
             await ctx.helper.delCurFhpool();
         }
@@ -323,7 +320,7 @@ class MBaseService extends Service {
         const zTokenInfo = ctx.helper.verifyToken(ctx.header.authorization);// 解密获取的Tokenid
         const zTime = parseInt(Date.now()/1000);
 
-        const zSql = ` select id,name,account,img_id,jc_sum,jc_list,zt_sum,boss_id,boss_id_2,boss_list,is_lv,pwd2,status,rounds,wallet_addr,bank_addr,alipay_addr,is_special,lotto_status,tel,remarks,is_out,out_time from ctw_user where id=${zTokenInfo.id} `;
+        const zSql = ` select id,name,account,img_id,jc_list,zt_sum,boss_id,boss_id_2,boss_list,is_lv,pwd2,status,rounds,wallet_addr,bank_addr,alipay_addr,is_special,lotto_status,tel,remarks,is_out,out_time from ctw_user where id=${zTokenInfo.id} `;
         const zUserList = await this.app.mysql.get('db1').query(zSql);
         const zExchangeList = await this.app.mysql.get('db1').query(`select * from ctw_exchange order by id desc`);
         if(zUserList && zExchangeList){
@@ -477,12 +474,16 @@ class MBaseService extends Service {
         if(zResult && zResult["affectedRows"]>0){
             //如果是添加用户（邀请）
             if(parseInt(pParam.type)==1){
-                //创建动态奖金表
-                await this.app.mysql.get('db1').query(`insert into ctw_dyn (user_id, create_time, update_time) values (${zTokenInfo.id}, ${zTime}, ${zTime})`);
+                let zNewUserList = await this.app.mysql.get('db1').query(`select * from ctw_user where boss_id=${zTokenInfo.id} order by create_time desc`);
+                if(zNewUserList && zNewUserList[0]){
+                    let zNewUser = zNewUserList[0];
+                    //创建动态奖金表
+                    await this.app.mysql.get('db1').query(`insert into ctw_dyn (user_id, create_time, update_time) values (${zNewUser.id}, ${zTime}, ${zTime})`);
 
-                //创建加持表
-                await this.app.mysql.get('db1').query(`insert into ctw_jc (user_id, create_time, update_time) values (${zTokenInfo.id}, ${zTime}, ${zTime})`);
-
+                    //创建加持表
+                    await this.app.mysql.get('db1').query(`insert into ctw_jc (user_id, create_time, update_time) values (${zNewUser.id}, ${zTime}, ${zTime})`);
+                }
+                
                 //直推总数+1
                 await this.app.mysql.get('db1').query(`update ctw_user set zt_sum=zt_sum+1, register_time=${zTime} where id=${zTokenInfo.id}`);
                 //清除缓存
@@ -540,7 +541,13 @@ class MBaseService extends Service {
 
         //判断够不够加持数
         let zMaxJcSum = parseInt(zConfigDic[`jcmax_${zNextRounds}`]);
-        let zCurJcSum = parseInt(zUserInfo.jc_sum);
+        let zCurJcSum = 0;
+        let zJcUserListOrg = zUserInfo.jc_list.split(",");
+        for(var i=0; i<zJcUserListOrg.length; i++){
+            if(zJcUserListOrg[i]){
+                zCurJcSum ++;
+            }
+        }
         if(zCurJcSum<zMaxJcSum){
             return { code:1035, msg:`加持数量不足，user_id=${zTokenInfo.id}`};
         }
@@ -548,12 +555,12 @@ class MBaseService extends Service {
         let zResult;
         if(zNextRounds >= zConfMaxRounds){
             //出局
-            zResult = await this.app.mysql.get('db1').query(`update ctw_user set status=0, jc_sum=0, jc_list='', rounds=${zNextRounds}, is_out=1, is_lv=0, update_time=${zTime}, out_time=${zTime} where id=${zTokenInfo.id} and is_out=0  and is_lv=1`);
+            zResult = await this.app.mysql.get('db1').query(`update ctw_user set status=0, jc_list='', rounds=${zNextRounds}, is_out=1, is_lv=0, update_time=${zTime}, out_time=${zTime} where id=${zTokenInfo.id} and is_out=0  and is_lv=1`);
             //更新分红池信息(分红人数)
-            await ctx.service.fhPooUpdate();
+            await ctx.service.mBase.fhPooUpdate();
         }else{
             //正常升级
-            zResult = await this.app.mysql.get('db1').query(`update ctw_user set is_lv=0, rounds=${zNextRounds}, status=0, jc_sum=0, jc_list='', update_time=${zTime} where id=${zTokenInfo.id} and is_lv=1 `); // 初始化事务
+            zResult = await this.app.mysql.get('db1').query(`update ctw_user set is_lv=0, rounds=${zNextRounds}, status=0, jc_list='', update_time=${zTime} where id=${zTokenInfo.id} and is_lv=1 `); // 初始化事务
         }
         if(zResult && zResult["affectedRows"]>0){
             //清除缓存
@@ -615,13 +622,13 @@ class MBaseService extends Service {
 
             ////////////////////// 闲散按照从上到下，从左到右的顺序插入三角形队列 //////////////////////
             //获取将要挂靠的boss信息
-            let zBossInfoList = await this.app.mysql.get('db1').query(`select * from ctw_rounds_${zRounds} where zt_sum<2 and rounds=${zRounds} order by id`);
+            let zBossInfoList = await this.app.mysql.get('db1').query(`select * from ctw_rounds_${zRounds} where zt_sum<2 order by id`);
             if(zBossInfoList && zBossInfoList[0]){
                 zBossInfo = zBossInfoList[0];
             }else{
                 //连闲散点都没有，只能挂在第二排的第一个人下面
-                let zDaBossList = await this.app.mysql.get('db1').query(`select * from ctw_rounds_${zRounds} where rounds=${zRounds} order by id`);
-                zBossInfo = zDaBossList[1];
+                let zDaBossList = await this.app.mysql.get('db1').query(`select * from ctw_rounds_${zRounds} where id=2`);
+                zBossInfo = zDaBossList[0];
             }
         }
 
@@ -631,7 +638,7 @@ class MBaseService extends Service {
         zResult = await this.app.mysql.get('db1').query(zSql);
         if(zResult && zResult["affectedRows"]>0){
             //boss推荐人数统计+1
-            await this.app.mysql.get('db1').query(`update ctw_rounds_${zRounds} set zt_sum=zt_sum+1 where id=${zBossInfo.id} and rounds=${zRounds}`);
+            await this.app.mysql.get('db1').query(`update ctw_rounds_${zRounds} set zt_sum=zt_sum+1 where id=${zBossInfo.id}`);
             return true;
         }else{
             ctx.logger.error(`addRoundUser失败！！插入失败，zSql=${zSql}`);
@@ -723,8 +730,8 @@ class MBaseService extends Service {
         //扣ctw_jc的加持次数
         await this.app.mysql.get('db1').query(`update ctw_jc set jc_${zRounds}=-1 where user_id=${zTokenInfo.id}`);
 
-        //加持对象jc_sum增加
-        let zSql = `update ctw_user set jc_sum=jc_sum+1, jc_list=concat(jc_list, ',${zTokenInfo.name}'), update_time=${zTime} where id=${zUserInfo.id} `;
+        //加持对象增加
+        let zSql = `update ctw_user set jc_list=concat(jc_list, ',${zTokenInfo.name}'), update_time=${zTime} where id=${zUserInfo.id} `;
         const zResult = await this.app.mysql.get('db1').query(zSql); // 初始化事务
         if(zResult && zResult["affectedRows"]>0){
             //清除缓存
@@ -1022,6 +1029,11 @@ class MBaseService extends Service {
             let zTime = parseInt(Date.now()/1000);
             if(zInfo.order_type==7){
                 let zParam = ` ${zInfo.user_id}, ${zTime}, ${zTime} `;
+                let zPdSameList = await this.app.mysql.get('db1').query(`select * from ctw_order_pd where user_id=${zInfo.user_id}`);
+                if(zPdSameList && zPdSameList[0]){
+                    ctx.logger.info(`该人已经存在一个收款单子了, user_id=${zInfo.user_id}`);
+                    continue;
+                }
                 let zSql = `insert into ctw_order_pd (user_id, create_time, update_time) values (${zParam})`;
                 let zResult = await this.app.mysql.get('db1').query(zSql);
                 if(zResult && zResult["affectedRows"]>0){

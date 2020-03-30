@@ -132,7 +132,7 @@ function updateTable(){
             zDynColor = "background-color:rgba(255,229,129,0.2);";
             zDynStr = "已结算";
         }
-        var zMoney = "$"+zInfo.money+" = "+zInfo.money*zCurExchangeRate+"AGL";
+        var zMoney = zInfo.money*zCurExchangeRate+" "+common.COIN_NAME;
         var zAddrTxt = zInfo.addr;
         var zMoneyGetType = 0; // 1打钱  2收钱
         var zCreateTime = common.formatUnixtimestamp(zInfo.create_time);

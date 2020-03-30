@@ -70,6 +70,7 @@ function init() {
     // $('#id_btn_erc20').click({myType:"id_btn_erc20"}, btnClickHandler);
     // $('#id_btn_omni').click({myType:"id_btn_omni"}, btnClickHandler);
 
+    updateMyself();
     windowResize();
 
     common.lang();
@@ -88,12 +89,6 @@ function btnClickHandler(p_obj_event){
                     return;
                 }
             }
-
-            if(!$('#id_txt_bank_tel').val()){
-                c_m_popUpWin.init("id_popupwin", 1, "tips.t_tips", "tips.10003", "tips.b_ok");
-                return;
-            }
-
             api_setCI();
             break;
     }
@@ -119,6 +114,21 @@ function windowResize()
     c_m_popUpWin.setSizePos(zScale);
 }
 
+//更新自身信息
+function updateMyself(){
+    if(userInfo.bank_addr){
+        var zBankInfo = JSON.parse(userInfo.bank_addr);
+        $('#id_txt_bank_name').val(zBankInfo["bank"]);
+        $('#id_txt_bank_account').val(zBankInfo["account"]);
+        $('#id_txt_bank_branch').val(zBankInfo["branch"]);
+        $('#id_txt_bank_payee').val(zBankInfo["name"]);
+    }
+    
+    if(userInfo.bank_addr){
+        $('#id_txt_alipay').val(userInfo.alipay_addr);
+    }
+}
+
 //产生银行信息的json格式
 function genBankJsonInfo(){
     var zBankInfo = {};
@@ -126,7 +136,6 @@ function genBankJsonInfo(){
     zBankInfo["account"] = $('#id_txt_bank_account').val();
     zBankInfo["branch"] = $('#id_txt_bank_branch').val();
     zBankInfo["name"] = $('#id_txt_bank_payee').val();
-    zBankInfo["tel"] = $('#id_txt_bank_tel').val();
 
     return JSON.stringify(zBankInfo);
 }
@@ -144,7 +153,7 @@ function api_setCI(){
         beforeSend: function(Request) {
             Request.setRequestHeader("Authorization",common.getCookie('token'));
         },
-        data:{type:2, id:userInfo.id,  bank_addr:zBankInfoStr, alipay_addr:$('#id_txt_alipay').val(), tel:$('#id_txt_bank_tel').val()},
+        data:{type:2, id:userInfo.id,  bank_addr:zBankInfoStr, alipay_addr:$('#id_txt_alipay').val()},
         dataType: "json", //指定服务器返回的数据类型
         cache:false,
         success: function (evt) {

@@ -4,7 +4,7 @@
 module.exports = app => {
   return {
     schedule: {
-      interval: '600s', // 时间间隔(10分钟)
+      interval: '60s', // 时间间隔(10分钟)
       type: 'worker', // 指定所有的 worker 都需要执行
       immediate: true,
       // disable: true, // 开发环境不执行
