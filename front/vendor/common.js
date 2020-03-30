@@ -1,5 +1,6 @@
 common = {
-    VER : "2.1",    //版本号
+    //注：zsf.json是决定使用本地服、测试服、正式服的文件，需要手动上传，如果没有这个文件，则默认加载本地服
+    VER : "2.2",    //版本号
     PC_WIDTH : 1200,    //PC端的标准宽度
     MOBILE_WIDTH : 750, //mobile端的标准宽度
     JS_LOAD_COUNTER : 0,    //已经加载的js个数
@@ -371,6 +372,9 @@ common = {
                 break;
             case 2:
                 zPreUrl = common.PHP_URL_ZSF;
+                break;
+            default:
+                zPreUrl = common.PHP_URL_LOCAL;
                 break;
         }
         var zUrl = zPreUrl + p_str_name;
