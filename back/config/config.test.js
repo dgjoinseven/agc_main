@@ -12,6 +12,8 @@ module.exports = appInfo => {
     },
   };
   
+  config.img_url = `http://120.25.106.197/agc_main/back/uploadimg`;
+
   //正式环境
   config.mysql = {
     clients:{   // 单数据库信息配置
