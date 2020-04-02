@@ -109,17 +109,17 @@ class MUploadFileService extends Service {
                 let zFilename = `${zYMDHMS}-${zNickName}-${zOrderId}${zExtName}`;
                 // 上传图片的目录
                 let zWrite_img_url = path.join(zBaseDir, "./uploadimg/", zDay, zFilename);
-                zRead_img_url = `${this.ctx.app.config.img_url}/${zDay}/${zFilename}`;
+                // zRead_img_url = `${this.ctx.app.config.img_url}/${zDay}/${zFilename}`;
                 let writeStream = fs.createWriteStream(zWrite_img_url);
                 await pump(stream, writeStream);
                 
                 //往订单列表里写入图片地址
                 let zUpdateTime = parseInt(zTime/1000);
-                await this.app.mysql.get('db1').query(`update ctw_order set img_url='${zRead_img_url}', img_sum=img_sum+1, update_time=${zUpdateTime} where id=${zOrderId}`);
+                await this.app.mysql.get('db1').query(`update ctw_order set img_url='${zWrite_img_url}', img_sum=img_sum+1, update_time=${zUpdateTime} where id=${zOrderId}`);
             }
         }
         // console.log(parts.field) // 表单其他数据，可以根据需要处理
-        return {code:1, msg:'success', data:{url:zRead_img_url, fields:parts.field}};
+        return {code:1, msg:'success', data:{url:zWrite_img_url, fields:parts.field}};
     }
 
 }
