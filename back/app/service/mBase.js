@@ -278,7 +278,7 @@ class MBaseService extends Service {
 
         const zSql = ` select distinct a.id, a.*, b.name, b.tel, b.img_id, b.remarks from ctw_jc a LEFT JOIN ctw_user b ON a.user_id=b.id where ${zParamInfo} order by a.update_time limit ?,?`;
         const zList = await this.app.mysql.get('db1').query(zSql, [zOffset, parseInt(zPageSize)]);
-        if(zList && zList[0]){
+        if(zList){
             return { code:1, msg:'success', data:{ cur_page:zToPage, page_size:zPageSize, total_page:zTotalPage, total_count:zTotalCount, list:zList}};
         }else{
             return null;
