@@ -268,7 +268,7 @@ class MBaseService extends Service {
             }
         }
         zParamInfo += `) and `;
-        zParamInfo += ` a.id>0 and b.is_showMarket=1 and b.is_special=0`;
+        zParamInfo += ` a.id>0 and b.rounds>0 and b.is_showMarket=1 and b.is_special=0`;
         
         const zSqlCount = `select count(distinct a.id) as count from ctw_jc a LEFT JOIN ctw_user b ON a.user_id=b.id where ${zParamInfo}`;
         const zResCount = await this.app.mysql.get('db1').query(zSqlCount);
